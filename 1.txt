@@ -1,0 +1,69 @@
+-- Tabla Articulo
+CREATE TABLE Articulo (
+    id_articulo INT PRIMARY KEY,  -- Identificador único del artículo
+    titulo VARCHAR(255) NOT NULL,  -- Título del artículo
+    fecha_envio DATE,  -- Fecha de envío
+    resumen VARCHAR(150)  -- Resumen del artículo (máximo 150 caracteres)
+);
+
+-- Tabla Usuarios (autenticación)
+CREATE TABLE Usuario (
+    id_usuario INT AUTO_INCREMENT PRIMARY KEY,  -- ID único del usuario
+    userid VARCHAR(16) UNIQUE,  -- ID de usuario
+    password VARCHAR(255) NOT NULL  -- Contraseña cifrada
+);
+
+-- Tabla Autores
+CREATE TABLE Autor (
+    id_autor INT AUTO_INCREMENT PRIMARY KEY,  -- ID único del autor
+    rut VARCHAR(10) UNIQUE,  -- RUT del autor (único, pero no clave primaria)
+    nombre VARCHAR(255) UNIQUE,  -- Nombre del autor
+    email VARCHAR(255) UNIQUE,  -- Email del autor
+    id_usuario INT,  -- Relación con la tabla Usuario
+    FOREIGN KEY (id_usuario) REFERENCES Usuario(id_usuario)
+);
+
+-- Tabla Autor_Articulo
+CREATE TABLE Autor_Articulo (
+    id_autor INT REFERENCES Autor(id_autor),  -- Clave foránea a Autores
+    id_articulo INT REFERENCES Articulo(id_articulo),  -- Clave foránea a Artículos
+    es_contacto BIT DEFAULT 0,
+    PRIMARY KEY (id_autor, id_articulo)
+);
+
+-- Tabla Topicos
+CREATE TABLE Topico (
+    id_topico INT PRIMARY KEY,  -- Identificador único para el tópico
+    nombre_topico VARCHAR(255)  -- Nombre del tópico
+);
+
+-- Tabla Articulos_Topicos
+CREATE TABLE Articulo_Topico (
+    id_articulo INT REFERENCES Articulo(id_articulo),  -- Clave foránea a Artículos
+    id_topico INT REFERENCES Topico(id_topico),  -- Clave foránea a Tópicos
+    PRIMARY KEY (id_articulo, id_topico)  -- Relación muchos a muchos
+);
+
+-- Tabla Revisores
+CREATE TABLE Revisor (
+    id_revisor INT AUTO_INCREMENT PRIMARY KEY,  -- ID único del revisor
+    rut VARCHAR(10) UNIQUE,  -- RUT del revisor (único, pero no clave primaria)
+    nombre VARCHAR(255) UNIQUE,  -- Nombre del revisor
+    email VARCHAR(255) UNIQUE,  -- Email del revisor
+    id_usuario INT,  -- Relación con la tabla Usuario
+    FOREIGN KEY (id_usuario) REFERENCES Usuario(id_usuario)
+);
+
+-- Tabla Revisor_Topico
+CREATE TABLE Revisor_Topico (
+    id_revisor INT REFERENCES Revisor(id_revisor),  -- Clave foránea a Revisores
+    id_topico INT REFERENCES Topico(id_topico),  -- Clave foránea a Tópicos
+    PRIMARY KEY (id_revisor, id_topico)  -- Relación entre revisor y tópico
+);
+
+-- Tabla Articulo_Revisor
+CREATE TABLE Articulo_Revisor (
+    id_articulo INT REFERENCES Articulo(id_articulo),  -- Clave foránea a Artículos
+    id_revisor INT REFERENCES Revisor(id_revisor),  -- Clave foránea a Revisores
+    PRIMARY KEY (id_articulo, id_revisor)
+);

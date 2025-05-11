@@ -16,9 +16,8 @@ if (isset($_SESSION['rol'])) {
     echo "<p style='color: red;'>Error: No se encontró el rol en la sesión.</p>";
 }
 
-// Asegurarse de que el rol 'Jefe Comite de Programa' sea reconocido correctamente
+// Redirigir al dashboard si el usuario no está autorizado
 if (!isset($_SESSION['rol']) || ($_SESSION['rol'] !== 'admin' && $_SESSION['rol'] !== 'Jefe Comite de Programa')) {
-    echo "<p style='color: red;'>Acceso denegado: Usuario no autorizado.</p>";
     header("Location: ../php/dashboard.php");
     exit();
 }

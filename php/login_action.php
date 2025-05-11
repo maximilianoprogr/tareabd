@@ -38,6 +38,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             session_start();
             $_SESSION['rut'] = $user['rut'];
             $_SESSION['nombre'] = $user['nombre'];
+            $_SESSION['rol'] = $user['tipo_usuario']; // Asignar el rol del usuario a la sesión
             header("Location: ../php/index.php");
             exit();
         } else {

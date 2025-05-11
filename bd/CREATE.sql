@@ -4,16 +4,12 @@ CREATE TABLE Usuario (
     nombre VARCHAR(64) NOT NULL,
     email VARCHAR(64) NOT NULL UNIQUE,
     usuario VARCHAR(24) NOT NULL,
-    password VARCHAR(12) NOT NULL
-);
-
--- Tabla Tipo_Usuario para eliminar dependencia transitiva
-CREATE TABLE Tipo_Usuario (
+    password VARCHAR(12) NOT NULL,
     tipo ENUM(
         'Autor',
         'Revisor',
         'Jefe Comite de Programa'
-    ) PRIMARY KEY
+    ) NOT NULL
 );
 
 -- Tabla Autor (relacionada directamente por rut)

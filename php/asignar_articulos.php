@@ -9,9 +9,8 @@ if (!isset($_SESSION['rol'])) {
     echo "<p style='color: blue;'>Rol actual en la sesión: " . htmlspecialchars($_SESSION['rol']) . "</p>";
 }
 
-// Asegurarse de que el rol 'Jefe Comite de Programa' sea reconocido correctamente
+// Eliminar mensajes visibles antes de la redirección
 if (!isset($_SESSION['rol']) || ($_SESSION['rol'] !== 'admin' && $_SESSION['rol'] !== 'Jefe Comite de Programa')) {
-    echo "<p style='color: red;'>Acceso denegado: Usuario no autorizado.</p>";
     header("Location: ../php/dashboard.php");
     exit();
 }

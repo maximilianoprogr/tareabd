@@ -1,6 +1,6 @@
 <?php
 session_start();
-include('conexion.php');
+include('php/conexion.php');
 
 // Verificar si el usuario está autenticado
 if (!isset($_SESSION['user_id'])) {

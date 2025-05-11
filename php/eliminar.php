@@ -1,6 +1,6 @@
 <?php
 // Conexión a la base de datos
-include 'conexion.php';  // Asegúrate de que el archivo con la conexión esté incluido
+include 'php/conexion.php';  // Asegúrate de que el archivo con la conexión esté incluido
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $id_articulo = $_POST['id_articulo'];

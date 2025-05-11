@@ -96,7 +96,7 @@ $conn->close(); // Asegúrate de que $conn esté definido correctamente
         <?php if (!empty($message)): ?>
             <p><?php echo htmlspecialchars($message); ?></p>
         <?php endif; ?>
-        <form action="register.php" method="post">
+        <form action="php/register.php" method="post">
             <label for="rut">RUT:</label>
             <input type="text" id="rut" name="rut" required><br><br>
             <label for="nombre">Nombre:</label>
@@ -112,7 +112,7 @@ $conn->close(); // Asegúrate de que $conn esté definido correctamente
             </select><br><br>
             <input type="submit" value="Registrar">
         </form>
-        <a href="login.php" class="btn-primary">Ir al Login</a>
+        <a href="php/login.php" class="btn-primary">Ir al Login</a>
     </div>
 </body>
 </html>

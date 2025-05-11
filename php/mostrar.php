@@ -1,5 +1,5 @@
 <?php
-include('conexion.php');
+include('php/conexion.php');
 
 // Consultar todos los artículos
 $sql = "SELECT * FROM Articulo";
@@ -24,8 +24,8 @@ $articulos = $stmt->fetchAll();
         <td><?php echo $articulo['resumen']; ?></td>
         <td><?php echo $articulo['fecha_envio']; ?></td>
         <td>
-            <a href="editar.php?id=<?php echo $articulo['id_articulo']; ?>">Editar</a> |
-            <a href="eliminar.php?id=<?php echo $articulo['id_articulo']; ?>">Eliminar</a>
+            <a href="php/editar.php?id=<?php echo $articulo['id_articulo']; ?>">Editar</a> |
+            <a href="php/eliminar.php?id=<?php echo $articulo['id_articulo']; ?>">Eliminar</a>
         </td>
     </tr>
     <?php endforeach; ?>

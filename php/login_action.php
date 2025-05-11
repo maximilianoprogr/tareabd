@@ -1,5 +1,5 @@
 <?php
-include('conexion.php');
+include('php/conexion.php');
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $userid = $_POST['userid'];
@@ -19,7 +19,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Verificar si la contraseña coincide (suponiendo que la contraseña se guarda cifrada)
         if (password_verify($password, $user['password'])) {
             // Si la contraseña es correcta, se redirige al usuario a la página principal
-            header("Location: index.php");
+            header("Location: php/index.php");
             exit();
         } else {
             echo "Contraseña incorrecta";

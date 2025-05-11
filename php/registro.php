@@ -1,4 +1,4 @@
-<form action="registro_action.php" method="POST">
+<form action="php/registro_action.php" method="POST">
     <label for="userid">Usuario:</label>
     <input type="text" id="userid" name="userid" required>
     <br>

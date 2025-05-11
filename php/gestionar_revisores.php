@@ -19,17 +19,65 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nombre = $_POST['nombre'] ?? null;
     $email = $_POST['email'] ?? null;
 
+    // Validar que el RUT no exceda los 10 caracteres
+    if (strlen($rut) > 10) {
+        echo "<p style='color: red;'>El RUT no puede exceder los 10 caracteres.</p>";
+        exit();
+    }
+
+    // Validar que el email tenga un formato válido
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        echo "<p style='color: red;'>El email no tiene un formato válido.</p>";
+        exit();
+    }
+
     if ($action === 'create' && $rut && $nombre && $email) {
-        $rut = $_SESSION['rut'] ?? null; // Obtener el rut autenticado
-        if ($rut) {
-            $sql = "INSERT INTO Revisor (rut, nombre, email, rut) VALUES (?, ?, ?, ?)";
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute([$rut, $nombre, $email, $rut]);
-            echo "<script>alert('Revisor agregado exitosamente');</script>";
-        } else {
-            echo "<script>alert('Error: Usuario no autenticado');</script>";
+        // Validar que el nombre y el email no excedan los límites permitidos
+        if (strlen($nombre) > 255) {
+            echo "<p style='color: red;'>El nombre no puede exceder los 255 caracteres.</p>";
+            exit();
         }
+
+        if (strlen($email) > 255) {
+            echo "<p style='color: red;'>El email no puede exceder los 255 caracteres.</p>";
+            exit();
+        }
+
+        // Usar sentencias preparadas para evitar inyecciones SQL
+        $sql = "INSERT INTO Revisor (rut, nombre, email) VALUES (?, ?, ?)";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$rut, $nombre, $email]);
+
+        // Asignar tópicos al revisor
+        $topicos = $_POST['topicos'] ?? [];
+        // Validar que no existan tópicos duplicados al asignar a un revisor
+        if (count($topicos) !== count(array_unique($topicos))) {
+            echo "<p style='color: red;'>No se permiten tópicos duplicados para un revisor.</p>";
+            exit();
+        }
+
+        if (!empty($topicos)) {
+            $sql_topicos = "INSERT INTO Revisor_Topico (rut_revisor, id_topico) VALUES (?, ?)";
+            $stmt_topicos = $pdo->prepare($sql_topicos);
+            foreach ($topicos as $id_topico) {
+                $stmt_topicos->execute([$rut, $id_topico]);
+            }
+        } else {
+            echo "<script>alert('Debe asignar al menos un tópico al revisor');</script>";
+        }
+        echo "<script>alert('Revisor agregado exitosamente');</script>";
     } elseif ($action === 'update' && $rut && $nombre && $email) {
+        // Validar que el nombre y el email no excedan los límites permitidos
+        if (strlen($nombre) > 255) {
+            echo "<p style='color: red;'>El nombre no puede exceder los 255 caracteres.</p>";
+            exit();
+        }
+
+        if (strlen($email) > 255) {
+            echo "<p style='color: red;'>El email no puede exceder los 255 caracteres.</p>";
+            exit();
+        }
+
         $sql = "UPDATE Revisor SET nombre = ?, email = ? WHERE rut = ?";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$nombre, $email, $rut]);
@@ -41,12 +89,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $tiene_articulos = $stmt_check->fetchColumn() > 0;
 
         if ($tiene_articulos) {
-            echo "<script>alert('No se puede eliminar un revisor con artículos asignados');</script>";
+            echo "<p style='color: red;'>No se puede eliminar un revisor con artículos asignados.</p>";
         } else {
             $sql = "DELETE FROM Revisor WHERE rut = ?";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$rut]);
-            echo "<script>alert('Revisor eliminado exitosamente');</script>";
+            echo "<p style='color: green;'>Revisor eliminado exitosamente.</p>";
         }
     }
 }
@@ -93,6 +141,19 @@ try {
                     <input type="email" name="email" class="form-control" placeholder="Email" required>
                 </div>
                 <div class="col-md-3">
+                    <select name="topicos[]" class="form-control" multiple required>
+                        <!-- Opciones de tópicos -->
+                        <?php
+                        $sql_topicos = "SELECT id_topico, nombre FROM Topico";
+                        $stmt_topicos = $pdo->query($sql_topicos);
+                        $topicos = $stmt_topicos->fetchAll();
+                        foreach ($topicos as $topico) {
+                            echo "<option value='{$topico['id_topico']}'>{$topico['nombre']}</option>";
+                        }
+                        ?>
+                    </select>
+                </div>
+                <div class="col-md-3">
                     <button type="submit" class="btn btn-primary w-100">Agregar Revisor</button>
                 </div>
             </div>
@@ -103,6 +164,7 @@ try {
                     <th>RUT</th>
                     <th>Nombre</th>
                     <th>Email</th>
+                    <th>Tópicos</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -113,6 +175,17 @@ try {
                         <td><?php echo htmlspecialchars($revisor['rut']); ?></td>
                         <td><?php echo htmlspecialchars($revisor['nombre']); ?></td>
                         <td><?php echo htmlspecialchars($revisor['email']); ?></td>
+                        <td>
+                            <?php
+                            $sql_revisor_topicos = "SELECT t.nombre FROM Revisor_Topico rt JOIN Topico t ON rt.id_topico = t.id_topico WHERE rt.rut_revisor = ?";
+                            $stmt_revisor_topicos = $pdo->prepare($sql_revisor_topicos);
+                            $stmt_revisor_topicos->execute([$revisor['rut']]);
+                            $topicos_revisor = $stmt_revisor_topicos->fetchAll();
+                            foreach ($topicos_revisor as $topico) {
+                                echo htmlspecialchars($topico['nombre']) . '<br>';
+                            }
+                            ?>
+                        </td>
                         <td>
                             <form method="POST" style="display:inline;">
                                 <input type="hidden" name="action" value="update">
@@ -131,7 +204,7 @@ try {
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="4" class="text-center">No se encontraron revisores.</td>
+                        <td colspan="5" class="text-center">No se encontraron revisores.</td>
                     </tr>
                 <?php endif; ?>
             </tbody>

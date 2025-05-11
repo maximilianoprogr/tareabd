@@ -18,6 +18,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     } elseif (count($autores) !== count(array_unique($autores))) {
         echo "No se permiten autores duplicados.";
     } else {
+        // Validar que no existan duplicados en los tópicos seleccionados
+        if (count($topicos) !== count(array_unique($topicos))) {
+            echo "<p style='color: red;'>No se permiten tópicos duplicados.</p>";
+            exit();
+        }
+
+        // Validar que el título no exceda los 255 caracteres
+        if (strlen($titulo) > 255) {
+            echo "<p style='color: red;'>El título no puede exceder los 255 caracteres.</p>";
+            exit();
+        }
+
+        // Validar que el resumen no exceda los 500 caracteres
+        if (strlen($resumen) > 500) {
+            echo "<p style='color: red;'>El resumen no puede exceder los 500 caracteres.</p>";
+            exit();
+        }
+
         // Verificar si el título ya existe para algún autor
         $sql_check = "SELECT COUNT(*) FROM Articulo a
                       JOIN Autor_Articulo aa ON a.id_articulo = aa.id_articulo
@@ -27,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if ($stmt_check->fetchColumn() > 0) {
             echo "El título ya existe para uno de los autores.";
         } else {
-            // Insertar el artículo
+            // Usar sentencias preparadas para insertar el artículo
             $sql = "INSERT INTO Articulo (titulo, resumen, fecha_envio) VALUES (?, ?, ?)";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$titulo, $resumen, $fecha_envio]);

@@ -1,3 +1,12 @@
+<?php
+session_start();
+if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'admin') {
+    echo "<script>alert('Acceso denegado. Esta sección es solo para el jefe del comité.');</script>";
+    header('Location: ../php/dashboard.php');
+    exit();
+}
+?>
+
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
         <a class="navbar-brand" href="#" data-page="../php/index.php">Inicio</a> <!-- Enlace dinámico -->

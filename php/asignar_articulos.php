@@ -5,6 +5,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $id_articulo = $_POST['id_articulo'];
     $rut_revisor = $_POST['rut_revisor'];
 
+    // Validar que el ID del artículo y el RUT del revisor no estén vacíos
+    if (empty($id_articulo) || empty($rut_revisor)) {
+        echo "<p style='color: red;'>El ID del artículo y el RUT del revisor son obligatorios.</p>";
+        exit();
+    }
+
     // Verificar que el revisor no sea autor del artículo
     $sql_check = "SELECT COUNT(*) FROM Autor_Articulo WHERE id_articulo = ? AND rut_autor = ?";
     $stmt_check = $pdo->prepare($sql_check);
@@ -12,13 +18,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $es_autor = $stmt_check->fetchColumn() > 0;
 
     if ($es_autor) {
-        echo "No se puede asignar un artículo a un revisor que sea autor.";
+        echo "<p style='color: red;'>No se puede asignar un artículo a un revisor que sea autor.</p>";
     } else {
         // Llamar al procedimiento almacenado
         $sql = "CALL AsignarArticuloRevisor(?, ?)";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$id_articulo, $rut_revisor]);
-        echo "Artículo asignado exitosamente.";
+        echo "<p style='color: green;'>Artículo asignado exitosamente.</p>";
     }
 }
 

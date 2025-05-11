@@ -2,16 +2,62 @@
 include('../php/conexion.php');
 
 $query = $_GET['query'] ?? '';
+$autor = $_GET['autor'] ?? '';
+$fecha_envio = $_GET['fecha_envio'] ?? '';
+$topico = $_GET['topico'] ?? '';
+$revisor = $_GET['revisor'] ?? '';
 
-$sql = "SELECT a.titulo, a.resumen, GROUP_CONCAT(DISTINCT t.nombre_topico) AS topicos
+// Validar los filtros de búsqueda
+if (!empty($fecha_envio) && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha_envio)) {
+    echo "<p style='color: red;'>La fecha de envío debe tener el formato AAAA-MM-DD.</p>";
+    exit();
+}
+
+if (!empty($query) && strlen($query) > 255) {
+    echo "<p style='color: red;'>El título no puede exceder los 255 caracteres.</p>";
+    exit();
+}
+
+if (!empty($topico) && strlen($topico) > 255) {
+    echo "<p style='color: red;'>El tópico no puede exceder los 255 caracteres.</p>";
+    exit();
+}
+
+if (!empty($revisor) && strlen($revisor) > 255) {
+    echo "<p style='color: red;'>El nombre del revisor no puede exceder los 255 caracteres.</p>";
+    exit();
+}
+
+// Validar que los filtros no excedan los límites permitidos
+if (strlen($query) > 255 || strlen($autor) > 255 || strlen($topico) > 255 || strlen($revisor) > 255) {
+    echo "<p style='color: red;'>Los campos de búsqueda no pueden exceder los 255 caracteres.</p>";
+    exit();
+}
+
+// Usar sentencias preparadas para la consulta
+$sql = "SELECT a.titulo, a.resumen, GROUP_CONCAT(DISTINCT t.nombre) AS topicos
         FROM Articulo a
         LEFT JOIN Articulo_Topico at ON a.id_articulo = at.id_articulo
         LEFT JOIN Topico t ON at.id_topico = t.id_topico
-        WHERE a.titulo LIKE ? OR ? = ''
+        LEFT JOIN Autor_Articulo aa ON a.id_articulo = aa.id_articulo
+        LEFT JOIN Usuario u ON aa.rut_autor = u.rut
+        LEFT JOIN Articulo_Revisor ar ON a.id_articulo = ar.id_articulo
+        LEFT JOIN Usuario r ON ar.rut_revisor = r.rut
+        WHERE (a.titulo LIKE ? OR ? = '')
+          AND (u.nombre LIKE ? OR ? = '')
+          AND (a.fecha_envio = ? OR ? = '')
+          AND (t.nombre LIKE ? OR ? = '')
+          AND (r.nombre LIKE ? OR ? = '')
         GROUP BY a.id_articulo";
 
 $stmt = $pdo->prepare($sql);
-$stmt->execute(["%$query%", $query]);
+$stmt->execute([
+    "%$query%", $query,
+    "%$autor%", $autor,
+    $fecha_envio, $fecha_envio,
+    "%$topico%", $topico,
+    "%$revisor%", $revisor
+]);
 $articulos = $stmt->fetchAll();
 ?>
 
@@ -24,8 +70,21 @@ $articulos = $stmt->fetchAll();
 <body>
     <h1>Búsqueda Avanzada</h1>
     <form method="GET">
-        <label for="query">Buscar:</label>
+        <label for="query">Buscar por título:</label>
         <input type="text" id="query" name="query" value="<?php echo htmlspecialchars($query); ?>"><br>
+
+        <label for="autor">Buscar por autor:</label>
+        <input type="text" id="autor" name="autor" value="<?php echo htmlspecialchars($autor); ?>"><br>
+
+        <label for="fecha_envio">Buscar por fecha de envío:</label>
+        <input type="date" id="fecha_envio" name="fecha_envio" value="<?php echo htmlspecialchars($fecha_envio); ?>"><br>
+
+        <label for="topico">Buscar por tópico:</label>
+        <input type="text" id="topico" name="topico" value="<?php echo htmlspecialchars($topico); ?>"><br>
+
+        <label for="revisor">Buscar por revisor:</label>
+        <input type="text" id="revisor" name="revisor" value="<?php echo htmlspecialchars($revisor); ?>"><br>
+
         <input type="submit" value="Buscar">
     </form>
     <table border="1">

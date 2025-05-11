@@ -74,20 +74,30 @@ try {
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestionar Revisores</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Gestionar Revisores</h1>
-        <form method="POST">
-            <input type="hidden" name="action" value="create">
-            <input type="text" name="rut" placeholder="RUT" required>
-            <input type="text" name="nombre" placeholder="Nombre" required>
-            <input type="email" name="email" placeholder="Email" required>
-            <button type="submit" class="btn btn-primary">Agregar Revisor</button>
+    <div class="container mt-5">
+        <h1 class="text-center">Gestionar Revisores</h1>
+        <form method="POST" class="mb-4">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <input type="text" name="rut" class="form-control" placeholder="RUT" required>
+                </div>
+                <div class="col-md-3">
+                    <input type="text" name="nombre" class="form-control" placeholder="Nombre" required>
+                </div>
+                <div class="col-md-3">
+                    <input type="email" name="email" class="form-control" placeholder="Email" required>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100">Agregar Revisor</button>
+                </div>
+            </div>
         </form>
-        <table class="table">
+        <table class="table table-striped">
             <thead>
                 <tr>
                     <th>RUT</th>
@@ -121,7 +131,7 @@ try {
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="4">No se encontraron revisores.</td>
+                        <td colspan="4" class="text-center">No se encontraron revisores.</td>
                     </tr>
                 <?php endif; ?>
             </tbody>

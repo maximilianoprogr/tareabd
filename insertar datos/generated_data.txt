@@ -1,0 +1,21 @@
+Usuarios:
+[('495375771w', 'Mark Briggs', 'imcdonald@example.com', 'brittany17', 'z1^8DSvalX', 'Revisor'), ('725049749X', 'Kristopher Brown', 'xwilson@example.com', 'spencemelvin', '6!_8Q@p$VB', 'Autor'), ('301371055N', 'Bonnie Gardner', 'alex61@example.com', 'fpeterson', '(N_9Ab&t!7', 'Revisor'), ('167868559N', 'Tracey Williams', 'robertsjessica@example.org', 'zcox', 'xp8OQa8%!m', 'Revisor'), ('152595806h', 'Nathaniel Rodriguez', 'melaniehamilton@example.com', 'tammyschmidt', 'q(%61Tc5mw', 'Autor'), ('623565071K', 'Tyler Nelson', 'john99@example.org', 'lisabolton', '^hC73lAjK1', 'Autor'), ('483308355N', 'Philip Rodriguez', 'cspencer@example.net', 'mariahrodriguez', 'Fh0TuKJya@', 'Autor'), ('983020373U', 'Jerry Kelley', 'jose97@example.net', 'patriciamurray', '@14M4pin@1', 'Autor'), ('047140775J', 'Tyrone Perez', 'colemanjulie@example.com', 'williamsamanda', 'l9NFXmej&X', 'Revisor'), ('945547179X', 'Jeremy Mccall', 'hillronald@example.com', 'yjohnson', 'T28KFL)b(_', 'Revisor')]
+
+Autores:
+[('725049749X',), ('152595806h',), ('623565071K',), ('483308355N',), ('983020373U',)]
+
+Revisores:
+[('495375771w',), ('301371055N',), ('167868559N',), ('047140775J',), ('945547179X',)]
+
+Articulos:
+[(313, 'Magazine two single.', 'Involve quickly candidate. Book future much.\nWould remember bring worker bill too time. Fall picture forward example most that add. Including outside staff drop.', datetime.date(2024, 2, 17), '983020373U', 'En revisión'), (992, 'Us member federal clear heavy seat.', 'Consider business position heavy way civil admit ten. Choice action per start skin wall represent. Necessary catch listen lay economic after.', datetime.date(2023, 10, 15), '983020373U', 'Rechazado'), (369, 'Wind serve power foot.', 'Resource edge southern charge.\nFeeling message their science situation. Idea should right Republican person he involve. Tell official finish offer.', datetime.date(2024, 11, 25), '725049749X', 'Aprobado'), (18, 'Whole professional left.', 'Interview choice position should tree ready. Her daughter learn well. Have study whom middle another foreign study.\nEverybody executive throughout adult. Company sea left involve sometimes top.', datetime.date(2024, 10, 13), '152595806h', 'Aprobado'), (137, 'Great student more.', 'Must feeling benefit. Spend both data improve.\nRun appear southern truth knowledge cell peace short. Member order baby raise.', datetime.date(2023, 8, 23), '725049749X', 'En revisión')]
+
+Topicos:
+[(49, 'mission'), (20, 'term'), (100, 'agree')]
+
+Articulo_Topico:
+[(313, 100), (992, 49), (369, 100), (18, 49), (137, 100)]
+
+Evaluacion_Articulo:
+[(313, '167868559N', 'Course reason of send inside. Time game also soldier write stage.', 5), (992, '167868559N', 'Support else point place religious in. Report several age sing.', 4), (369, '047140775J', 'Maintain doctor degree top face difficult. Receive within physical song field close information.', 1), (18, '945547179X', 'Show boy beat then. My attorney here gas PM nature.', 3), (137, '301371055N', 'Small decision suggest middle explain should live. Teach run know hundred set.', 1)]
+

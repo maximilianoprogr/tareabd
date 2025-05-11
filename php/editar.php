@@ -22,9 +22,30 @@ if (isset($_GET['id'])) {
         }
 
         if ($_SERVER["REQUEST_METHOD"] == "POST") {
-            $titulo = $_POST['titulo'];
-            $fecha_envio = $_POST['fecha_envio'];
-            $resumen = $_POST['resumen'];
+            $titulo = trim($_POST['titulo']);
+            $fecha_envio = trim($_POST['fecha_envio']);
+            $resumen = trim($_POST['resumen']);
+
+            // Validaciones de entrada
+            if (empty($titulo) || empty($fecha_envio) || empty($resumen)) {
+                echo "Todos los campos son obligatorios.";
+                exit();
+            }
+
+            if (strlen($titulo) > 255) {
+                echo "El título no puede exceder los 255 caracteres.";
+                exit();
+            }
+
+            if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha_envio)) {
+                echo "La fecha de envío debe tener el formato AAAA-MM-DD.";
+                exit();
+            }
+
+            if (strlen($resumen) > 500) {
+                echo "El resumen no puede exceder los 500 caracteres.";
+                exit();
+            }
 
             // Actualizar el artículo
             $sql_update = "UPDATE Articulo SET titulo = ?, fecha_envio = ?, resumen = ? WHERE id_articulo = ?";

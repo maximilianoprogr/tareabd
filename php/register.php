@@ -1,5 +1,5 @@
 <?php
-include('php/db_connection.php'); // Asegúrate de que este archivo define correctamente la variable $conn
+include('db_connection.php'); // Asegúrate de que este archivo define correctamente la variable $conn
 
 $message = ""; // Variable para almacenar mensajes
 $showLoginButton = false; // Variable para controlar la visibilidad del botón de login

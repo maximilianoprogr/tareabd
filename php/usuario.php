@@ -1,10 +1,10 @@
 <?php
 session_start();
-include('php/conexion.php');
+include('../php/conexion.php');
 
 // Verificar si el usuario está autenticado
 if (!isset($_SESSION['user_id'])) {
-    header("Location: php/login.php");
+    header("Location: ../php/login.php");
     exit();
 }
 

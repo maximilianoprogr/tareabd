@@ -4,11 +4,11 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 session_start();
-include('php/conexion.php'); // Asegúrate de que este archivo define correctamente $pdo
+include('../php/conexion.php'); // Asegúrate de que este archivo define correctamente $pdo
 
 // Verificar permisos
 if (!isset($_SESSION['usuario']) || $_SESSION['usuario'] !== 'admin') {
-    header("Location: php/dashboard.php");
+    header("Location: ../php/dashboard.php");
     exit();
 }
 

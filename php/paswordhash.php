@@ -1,5 +1,5 @@
 <?php
-include('conexion.php');
+include('../php/conexion.php');
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $userid = $_POST['userid'];

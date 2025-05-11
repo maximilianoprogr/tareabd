@@ -1,11 +1,11 @@
 <?php
 session_start();
 if (!isset($_SESSION['user_id'])) {
-    header('Location: php/index.php');
+    header('Location: ../php/index.php');
     exit();
 }
 
-include('php/db_connection.php');
+include('../php/db_connection.php');
 
 $sql = "SELECT * FROM Usuario WHERE id_usuario = ?";
 $stmt = $conn->prepare($sql);
@@ -24,6 +24,6 @@ $user = $stmt->get_result()->fetch_assoc();
 <body>
     <h1>Welcome, <?php echo $user['userid']; ?>!</h1>
     <p>Email: <?php echo $user['email']; ?></p>
-    <a href="php/logout.php">Logout</a>
+    <a href="../php/logout.php">Logout</a>
 </body>
 </html>

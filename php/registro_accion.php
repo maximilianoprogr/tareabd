@@ -1,5 +1,5 @@
 <?php
-include('php/conexion.php');
+include('../php/conexion.php');
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $rut = $_POST['rut'];

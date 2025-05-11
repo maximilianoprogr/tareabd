@@ -1,5 +1,5 @@
 <?php
-include('php/conexion.php');
+include('../php/conexion.php');
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $id_articulo = $_POST['id_articulo'];
@@ -66,6 +66,6 @@ $revisores = $pdo->query("SELECT r.rut, u.nombre FROM Revisor r JOIN Usuario u O
 
         <input type="submit" value="Asignar">
     </form>
-    <a href="dashboard.php" class="btn-menu">Volver al Menú Principal</a>
+    <a href="../php/dashboard.php" class="btn-menu">Volver al Menú Principal</a>
 </body>
 </html>

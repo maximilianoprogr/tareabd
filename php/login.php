@@ -1,11 +1,11 @@
 <?php
 session_start();
 if (isset($_SESSION['user_id'])) {
-    header('Location: php/index.php'); // Redirigir al index si ya está autenticado
+    header('Location: ../php/index.php'); // Redirigir al index si ya está autenticado
     exit();
 }
 
-include('php/conexion.php'); // Asegúrate de que este archivo define correctamente la conexión PDO
+include('../php/conexion.php'); // Asegúrate de que este archivo define correctamente la conexión PDO
 
 $message = ""; // Variable para almacenar mensajes
 
@@ -25,7 +25,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if (password_verify($password, $user['password'])) {
                 $_SESSION['user_id'] = $user['rut']; // Guardar el ID del usuario en la sesión
                 $_SESSION['usuario'] = $user['rut']; // Guardar el nombre del usuario en la sesión
-                header("Location: php/index.php"); // Redirigir al index
+                header("Location: ../php/index.php"); // Redirigir al index
                 exit();
             } else {
                 $message = "Contraseña incorrecta.";
@@ -50,7 +50,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <?php if (!empty($message)): ?>
         <p><?php echo htmlspecialchars($message); ?></p>
     <?php endif; ?>
-    <form action="php/login.php" method="post">
+    <form action="../php/login.php" method="post">
         <label for="rut">RUT:</label>
         <input type="text" id="rut" name="rut" required><br><br>
 
@@ -60,6 +60,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <input type="submit" value="Iniciar sesión">
     </form>
     <br>
-    <p>¿No tienes una cuenta? <a href="php/register.php">Regístrate aquí</a></p>
+    <p>¿No tienes una cuenta? <a href="../php/register.php">Regístrate aquí</a></p>
 </body>
 </html>

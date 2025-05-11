@@ -1,5 +1,5 @@
 <?php
-include('php/conexion.php');
+include('../php/conexion.php');
 
 // Asignar automáticamente artículos a revisores basados en tópicos
 $sql = "INSERT INTO Articulo_Revisor (id_articulo, rut_revisor)

@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (isset($_SESSION['user_id'])) {
-    header('Location: php/dashboard.php'); // Redirigir al dashboard si ya está logueado
+    header('Location: ../php/dashboard.php'); // Redirigir al dashboard si ya está logueado
     exit();
 }
 ?>
@@ -14,12 +14,12 @@ if (isset($_SESSION['user_id'])) {
 </head>
 <body>
     <h1>Login</h1>
-    <form action="php/login_process.php" method="POST">
+    <form action="../php/login_process.php" method="POST">
         <input type="text" name="userid" placeholder="User ID" required><br><br>
         <input type="password" name="password" placeholder="Password" required><br><br>
         <input type="submit" value="Login">
     </form>
     <br>
-    <a href="php/register.php">Register</a>
+    <a href="../php/register.php">Register</a>
 </body>
 </html>

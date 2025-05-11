@@ -1,5 +1,5 @@
 <?php
-include('php/conexion.php');
+include('../php/conexion.php');
 
 $query = $_GET['query'] ?? '';
 

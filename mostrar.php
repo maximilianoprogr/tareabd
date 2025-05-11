@@ -3,7 +3,8 @@ include('conexion.php');
 
 // Consultar todos los artículos
 $sql = "SELECT * FROM Articulo";
-$stmt = $pdo->query($sql);
+$stmt = $pdo->prepare($sql);
+$stmt->execute();
 $articulos = $stmt->fetchAll();
 ?>
 

@@ -3,7 +3,8 @@ include('conexion.php');
 
 // Consultar los artículos evaluados
 $sql = "SELECT * FROM ArticulosEvaluados";
-$stmt = $pdo->query($sql);
+$stmt = $pdo->prepare($sql);
+$stmt->execute();
 $articulos = $stmt->fetchAll();
 ?>
 

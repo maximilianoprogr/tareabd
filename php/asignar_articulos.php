@@ -32,6 +32,20 @@ $revisores = $pdo->query("SELECT r.rut, u.nombre FROM Revisor r JOIN Usuario u O
 <head>
     <meta charset="UTF-8">
     <title>Asignar Artículos</title>
+    <style>
+        .btn-menu {
+            display: inline-block;
+            padding: 10px 20px;
+            color: #fff;
+            background-color: #28a745;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .btn-menu:hover {
+            background-color: #218838;
+        }
+    </style>
 </head>
 <body>
     <h1>Asignar Artículos a Revisores</h1>
@@ -52,5 +66,6 @@ $revisores = $pdo->query("SELECT r.rut, u.nombre FROM Revisor r JOIN Usuario u O
 
         <input type="submit" value="Asignar">
     </form>
+    <a href="dashboard.php" class="btn-menu">Volver al Menú Principal</a>
 </body>
 </html>

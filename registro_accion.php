@@ -2,11 +2,11 @@
 include('conexion.php');
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $userid = $_POST['userid'];
+    $rut = $_POST['rut'];
     $password = $_POST['password'];
 
     // Inserta el nuevo usuario en la base de datos
-    $sql = "INSERT INTO Usuario (userid, password) VALUES ('$userid', '$password')";
+    $sql = "INSERT INTO Usuario (rut, password) VALUES ('$rut', '$password')";
 
     if ($conn->query($sql) === TRUE) {
         echo "Usuario registrado exitosamente";

@@ -20,11 +20,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = $_POST['email'] ?? null;
 
     if ($action === 'create' && $rut && $nombre && $email) {
-        $userid = $_SESSION['usuario'] ?? null; // Obtener el usuario autenticado
-        if ($userid) {
-            $sql = "INSERT INTO Revisor (rut, nombre, email, userid) VALUES (?, ?, ?, ?)";
+        $rut = $_SESSION['rut'] ?? null; // Obtener el rut autenticado
+        if ($rut) {
+            $sql = "INSERT INTO Revisor (rut, nombre, email, rut) VALUES (?, ?, ?, ?)";
             $stmt = $pdo->prepare($sql);
-            $stmt->execute([$rut, $nombre, $email, $userid]);
+            $stmt->execute([$rut, $nombre, $email, $rut]);
             echo "<script>alert('Revisor agregado exitosamente');</script>";
         } else {
             echo "<script>alert('Error: Usuario no autenticado');</script>";

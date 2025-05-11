@@ -10,21 +10,21 @@ include('conexion.php'); // Asegúrate de que este archivo define correctamente 
 $message = ""; // Variable para almacenar mensajes
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $userid = $_POST['userid'] ?? null;
+    $rut = $_POST['rut'] ?? null;
     $password = $_POST['password'] ?? null;
 
-    if ($userid && $password) {
+    if ($rut && $password) {
         // Usar sentencia preparada para evitar inyecciones SQL
-        $sql = "SELECT * FROM Usuario WHERE userid = ?";
+        $sql = "SELECT * FROM Usuario WHERE rut = ?";
         $stmt = $pdo->prepare($sql); // Asegúrate de que $pdo esté definido correctamente
-        $stmt->execute([$userid]);
+        $stmt->execute([$rut]);
         $user = $stmt->fetch();
 
         if ($user) {
             // Verificar si la contraseña es correcta
             if (password_verify($password, $user['password'])) {
-                $_SESSION['user_id'] = $user['userid']; // Guardar el ID del usuario en la sesión
-                $_SESSION['usuario'] = $user['userid']; // Guardar el nombre del usuario en la sesión
+                $_SESSION['user_id'] = $user['rut']; // Guardar el ID del usuario en la sesión
+                $_SESSION['usuario'] = $user['rut']; // Guardar el nombre del usuario en la sesión
                 header("Location: index.php"); // Redirigir al index
                 exit();
             } else {
@@ -51,8 +51,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <p><?php echo htmlspecialchars($message); ?></p>
     <?php endif; ?>
     <form action="login.php" method="post">
-        <label for="userid">ID de Usuario:</label>
-        <input type="text" id="userid" name="userid" required><br><br>
+        <label for="rut">RUT:</label>
+        <input type="text" id="rut" name="rut" required><br><br>
 
         <label for="password">Contraseña:</label>
         <input type="password" id="password" name="password" required><br><br>

@@ -10,15 +10,17 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 
-// Consultar los artículos del usuario como autor
-$sql = "SELECT a.titulo, a.resumen, GROUP_CONCAT(t.nombre_topico) AS topicos
+// Agregar una columna para mostrar los revisores asignados
+$sql = "SELECT a.titulo, a.resumen, GROUP_CONCAT(t.nombre) AS topicos, GROUP_CONCAT(ar.rut_revisor) AS revisores
         FROM Articulo a
-        JOIN Autor_Articulo aa ON a.id_articulo = aa.id_articulo
-        JOIN Topico t ON a.id_articulo = t.id_articulo
-        WHERE aa.rut_autor = ?
+        LEFT JOIN Articulo_Topico at ON a.id_articulo = at.id_articulo
+        LEFT JOIN Topico t ON at.id_topico = t.id_topico
+        LEFT JOIN Autor_Articulo aa ON a.id_articulo = aa.id_articulo
+        LEFT JOIN Articulo_Revisor ar ON a.id_articulo = ar.id_articulo
+        WHERE aa.rut_autor = ? OR ar.rut_revisor = ?
         GROUP BY a.id_articulo";
 $stmt = $pdo->prepare($sql);
-$stmt->execute([$user_id]);
+$stmt->execute([$user_id, $user_id]);
 $articulos = $stmt->fetchAll();
 ?>
 
@@ -35,12 +37,22 @@ $articulos = $stmt->fetchAll();
             <th>Título</th>
             <th>Resumen</th>
             <th>Tópicos</th>
+            <th>Revisores</th>
         </tr>
         <?php foreach ($articulos as $articulo): ?>
         <tr>
             <td><?php echo htmlspecialchars($articulo['titulo']); ?></td>
             <td><?php echo htmlspecialchars($articulo['resumen']); ?></td>
             <td><?php echo htmlspecialchars($articulo['topicos']); ?></td>
+            <td>
+                <?php if (!empty($articulo['revisores'])): ?>
+                    <?php foreach (explode(',', $articulo['revisores']) as $revisor): ?>
+                        <button>R<?php echo htmlspecialchars($revisor); ?> Consultar</button>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    Sin revisores asignados
+                <?php endif; ?>
+            </td>
         </tr>
         <?php endforeach; ?>
     </table>

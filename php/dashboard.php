@@ -1,3 +1,11 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+</head>
+<body>
 <?php
 session_start();
 
@@ -30,3 +38,5 @@ echo "Bienvenido, " . $_SESSION['usuario']; // Muestra el nombre de usuario
 <br>
 <a href="../php/gestionar_revisores.php">Gestionar Revisores</a>
 <a href="../php/asignar_articulos.php">Asignar Artículos</a>
+</body>
+</html>

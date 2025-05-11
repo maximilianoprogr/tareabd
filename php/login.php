@@ -14,8 +14,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = $_POST['password'] ?? null;
 
     if ($rut && $password) {
-        // Usar sentencia preparada para evitar inyecciones SQL
-        $sql = "SELECT * FROM Usuario WHERE rut = ?";
+        // Actualizar la consulta para determinar el rol del usuario sin usar la columna tipo en Usuario
+        $sql = "SELECT u.*, CASE 
+                    WHEN EXISTS (SELECT 1 FROM Autor WHERE rut = u.rut) THEN 'Autor'
+                    WHEN EXISTS (SELECT 1 FROM Revisor WHERE rut = u.rut) THEN 'Revisor'
+                    ELSE 'Jefe Comite de Programa'
+                END AS rol 
+                FROM Usuario u WHERE u.rut = ?";
         $stmt = $pdo->prepare($sql); // Asegúrate de que $pdo esté definido correctamente
         $stmt->execute([$rut]);
         $user = $stmt->fetch();
@@ -25,6 +30,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if ($password === $user['password']) {
                 $_SESSION['user_id'] = $user['rut']; // Guardar el ID del usuario en la sesión
                 $_SESSION['usuario'] = $user['rut']; // Guardar el nombre del usuario en la sesión
+                // Guardar el rol del usuario en la sesión
+                $_SESSION['rol'] = $user['rol']; // Determinar el rol dinámicamente
                 header("Location: ../php/index.php"); // Redirigir al index
                 exit();
             } else {
@@ -62,5 +69,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <br>
     <p>¿No tienes una cuenta? <a href="../php/register.php">Regístrate aquí</a></p>
     <a href="dashboard.php" style="font-family: Arial, sans-serif; font-size: 14px; color: #007BFF; text-decoration: none;">Volver al inicio</a>
+
+    <?php
+    // Depuración: Verificar si el rol se está configurando correctamente
+    if (isset($_SESSION['rol'])) {
+        echo "<p style='color: green;'>Rol configurado en la sesión: " . htmlspecialchars($_SESSION['rol']) . "</p>";
+    } else {
+        echo "<p style='color: red;'>Error: El rol no se configuró en la sesión.</p>";
+    }
+    ?>
 </body>
 </html>

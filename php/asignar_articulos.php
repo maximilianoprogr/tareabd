@@ -1,8 +1,18 @@
 <?php
 // Verificar si el usuario tiene permisos de jefe del comité
 session_start();
-if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'admin') {
-    echo "<script>alert('Acceso denegado. Solo el jefe del comité puede acceder a esta sección.'); window.location.href = 'dashboard.php';</script>";
+
+// Mensaje de depuración para verificar el rol en la sesión
+if (!isset($_SESSION['rol'])) {
+    echo "<p style='color: red;'>Error: No se encontró el rol en la sesión.</p>";
+} else {
+    echo "<p style='color: blue;'>Rol actual en la sesión: " . htmlspecialchars($_SESSION['rol']) . "</p>";
+}
+
+// Asegurarse de que el rol 'Jefe Comite de Programa' sea reconocido correctamente
+if (!isset($_SESSION['rol']) || ($_SESSION['rol'] !== 'admin' && $_SESSION['rol'] !== 'Jefe Comite de Programa')) {
+    echo "<p style='color: red;'>Acceso denegado: Usuario no autorizado.</p>";
+    header("Location: ../php/dashboard.php");
     exit();
 }
 
@@ -32,11 +42,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_articulo'], $_POST
             echo "<p style='color: orange;'>Advertencia: Los tópicos del artículo no coinciden con los del revisor seleccionado.</p>";
         }
 
-        // Asignar el artículo al revisor
-        $sql_assign = "INSERT INTO Articulo_Revisor (id_articulo, rut_revisor) VALUES (?, ?)";
-        $stmt_assign = $pdo->prepare($sql_assign);
-        $stmt_assign->execute([$id_articulo, $rut_revisor]);
-        echo "<p style='color: green;'>Artículo asignado exitosamente.</p>";
+        // Verificar si ya existe la asignación antes de insertar
+        $sql_check_duplicate = "SELECT COUNT(*) FROM Articulo_Revisor WHERE id_articulo = ? AND rut_revisor = ?";
+        $stmt_check_duplicate = $pdo->prepare($sql_check_duplicate);
+        $stmt_check_duplicate->execute([$id_articulo, $rut_revisor]);
+        if ($stmt_check_duplicate->fetchColumn() > 0) {
+            echo "<p style='color: red;'>Error: El artículo ya está asignado a este revisor.</p>";
+        } else {
+            // Asignar el artículo al revisor
+            $sql_assign = "INSERT INTO Articulo_Revisor (id_articulo, rut_revisor) VALUES (?, ?)";
+            $stmt_assign = $pdo->prepare($sql_assign);
+            $stmt_assign->execute([$id_articulo, $rut_revisor]);
+            echo "<p style='color: green;'>Artículo asignado exitosamente.</p>";
+        }
     }
 }
 

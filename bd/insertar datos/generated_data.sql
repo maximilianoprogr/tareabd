@@ -1,264 +1,134 @@
--- Se corrigió el RUT duplicado para evitar conflictos con la clave primaria
+-- Actualización para cumplir con el esquema actualizado
+-- Inserciones en Tipo_Usuario
+INSERT INTO Tipo_Usuario (tipo) VALUES ('Autor');
+
+INSERT INTO Tipo_Usuario (tipo) VALUES ('Revisor');
+
+INSERT INTO Tipo_Usuario (tipo) VALUES ('Jefe Comite de Programa');
+
+-- Inserciones en Usuario (sin la columna tipo)
 INSERT INTO
     Usuario (
         rut,
         nombre,
         email,
         usuario,
-        password,
-        tipo
+        password
     )
 VALUES (
         '289402939x',
         'Sean Chase',
         'rebecca67@example.com',
         'brendamiller',
-        '1c7LdHNz%h',
-        'Autor'
-    );
-
-INSERT INTO
-    Usuario (
-        rut,
-        nombre,
-        email,
-        usuario,
-        password,
-        tipo
-    )
-VALUES (
+        '1c7LdHNz%h'
+    ),
+    (
         '219603656n',
         'Theresa Callahan',
         'ortegamichele@example.net',
         'frank11',
-        '^@%Rs2v#JO',
-        'Revisor'
-    );
-
-INSERT INTO
-    Usuario (
-        rut,
-        nombre,
-        email,
-        usuario,
-        password,
-        tipo
-    )
-VALUES (
+        '^@%Rs2v#JO'
+    ),
+    (
         '058333267r',
         'Tracy Carpenter',
         'richard64@example.com',
         'freemanlisa',
-        'B9hFcwKb@1',
-        'Autor'
-    );
-
-INSERT INTO
-    Usuario (
-        rut,
-        nombre,
-        email,
-        usuario,
-        password,
-        tipo
-    )
-VALUES (
+        'B9hFcwKb@1'
+    ),
+    (
         '878898586a',
         'Marvin Jones',
         'cphillips@example.net',
         'brianrobinson',
-        '$D5+1CIyp2',
-        'Revisor'
-    );
-
-INSERT INTO
-    Usuario (
-        rut,
-        nombre,
-        email,
-        usuario,
-        password,
-        tipo
-    )
-VALUES (
+        '$D5+1CIyp2'
+    ),
+    (
         '241359983w',
         'Donna Harris',
         'susan89@example.org',
         'schaefermichelle',
-        ')2jOremvdT',
-        'Revisor'
-    );
-
-INSERT INTO
-    Usuario (
-        rut,
-        nombre,
-        email,
-        usuario,
-        password,
-        tipo
-    )
-VALUES (
+        ')2jOremvdT'
+    ),
+    (
         '435860269z',
         'George Graves',
         'vhill@example.com',
         'keith50',
-        '*__$i4StUX',
-        'Autor'
-    );
-
-INSERT INTO
-    Usuario (
-        rut,
-        nombre,
-        email,
-        usuario,
-        password,
-        tipo
-    )
-VALUES (
+        '*__$i4StUX'
+    ),
+    (
         '986321656f',
         'Kimberly Crawford',
         'brittany95@example.org',
         'joshua65',
-        'aE4!4Tv1q*',
-        'Revisor'
-    );
-
-INSERT INTO
-    Usuario (
-        rut,
-        nombre,
-        email,
-        usuario,
-        password,
-        tipo
-    )
-VALUES (
+        'aE4!4Tv1q*'
+    ),
+    (
         '420116140C',
         'Jennifer Holt',
         'smithwilliam@example.net',
         'taylorarmstrong',
-        '(e0wS#p3T^',
-        'Revisor'
-    );
-
-INSERT INTO
-    Usuario (
-        rut,
-        nombre,
-        email,
-        usuario,
-        password,
-        tipo
-    )
-VALUES (
+        '(e0wS#p3T^'
+    ),
+    (
         '028607221m',
         'Erin Lynn',
         'jonesnatalie@example.org',
         'tsantiago',
-        '0N$x2DbC*5',
-        'Autor'
-    );
-
-INSERT INTO
-    Usuario (
-        rut,
-        nombre,
-        email,
-        usuario,
-        password,
-        tipo
-    )
-VALUES (
+        '0N$x2DbC*5'
+    ),
+    (
         '981222269i',
         'Angela Brown',
         'michaelfox@example.net',
         'aferguson',
-        'd&n7VP%gA&',
-        'Revisor'
-    );
-
-INSERT INTO
-    Usuario (
-        rut,
-        nombre,
-        email,
-        usuario,
-        password,
-        tipo
-    )
-VALUES (
+        'd&n7VP%gA&'
+    ),
+    (
         '123456789A',
         'Carlos Perez',
         'carlos@example.com',
         'carlosp',
-        'password123',
-        'Autor'
-    );
-
-INSERT INTO
-    Usuario (
-        rut,
-        nombre,
-        email,
-        usuario,
-        password,
-        tipo
-    )
-VALUES (
+        'password123'
+    ),
+    (
         '987654321B',
         'Ana Lopez',
         'ana@example.com',
         'analopez',
-        'password456',
-        'Revisor'
-    );
-
-INSERT INTO
-    Usuario (
-        rut,
-        nombre,
-        email,
-        usuario,
-        password,
-        tipo
-    )
-VALUES (
+        'password456'
+    ),
+    (
         '1111',
         'Jefe Programa',
         'jefe@example.com',
         'jefeprograma',
-        'jefe123',
-        'Jefe Comite de Programa'
+        'jefe123'
     );
 
-INSERT INTO Autor (rut) VALUES ('289402939x');
-
-INSERT INTO Autor (rut) VALUES ('058333267r');
-
-INSERT INTO Autor (rut) VALUES ('435860269z');
-
-INSERT INTO Autor (rut) VALUES ('028607221m');
-
-INSERT INTO Autor (rut) VALUES ('123456789A');
+-- Inserciones en Autor
+INSERT INTO
+    Autor (rut)
+VALUES ('289402939x'),
+    ('058333267r'),
+    ('435860269z'),
+    ('028607221m'),
+    ('123456789A');
 
 -- Se agregó el autor con rut = '987654321B' para evitar conflictos con claves foráneas
 INSERT INTO Autor (rut) VALUES ('987654321B');
 
-INSERT INTO Revisor (rut) VALUES ('219603656n');
-
-INSERT INTO Revisor (rut) VALUES ('878898586a');
-
-INSERT INTO Revisor (rut) VALUES ('241359983w');
-
-INSERT INTO Revisor (rut) VALUES ('986321656f');
-
-INSERT INTO Revisor (rut) VALUES ('420116140C');
-
-INSERT INTO Revisor (rut) VALUES ('981222269i');
-
-INSERT INTO Revisor (rut) VALUES ('987654321B');
+-- Inserciones en Revisor
+INSERT INTO
+    Revisor (rut)
+VALUES ('219603656n'),
+    ('878898586a'),
+    ('241359983w'),
+    ('986321656f'),
+    ('420116140C'),
+    ('981222269i'),
+    ('987654321B');
 
 -- Se agregó un artículo con id_articulo = 1 para evitar conflictos con claves foráneas
 INSERT INTO
@@ -524,6 +394,27 @@ VALUES (137, 57);
 INSERT INTO
     Articulo_Topico (id_articulo, id_topico)
 VALUES (604, 57);
+
+-- Inserciones en Evaluacion_Articulo
+INSERT INTO
+    Evaluacion_Articulo (
+        id_articulo,
+        rut_revisor,
+        resena,
+        calificacion
+    )
+VALUES (
+        1,
+        '219603656n',
+        'Buena calidad',
+        4
+    ),
+    (
+        2,
+        '241359983w',
+        'Excelente trabajo',
+        5
+    );
 
 INSERT INTO
     Evaluacion_Articulo (

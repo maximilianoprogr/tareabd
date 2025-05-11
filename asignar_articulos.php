@@ -24,7 +24,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 // Obtener artículos y revisores
 $articulos = $pdo->query("SELECT id_articulo, titulo FROM Articulo")->fetchAll();
-$revisores = $pdo->query("SELECT rut, nombre FROM Revisor")->fetchAll();
+$revisores = $pdo->query("SELECT r.rut, u.nombre FROM Revisor r JOIN Usuario u ON r.rut = u.rut")->fetchAll();
 ?>
 
 <!DOCTYPE html>

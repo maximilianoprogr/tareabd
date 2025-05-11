@@ -1,3 +1,12 @@
+-- Tabla Articulo_Revisor (relación entre artículos y revisores)
+CREATE TABLE Articulo_Revisor (
+    id_articulo INT NOT NULL,
+    rut_revisor VARCHAR(10) NOT NULL,
+    PRIMARY KEY (id_articulo, rut_revisor),
+    FOREIGN KEY (id_articulo) REFERENCES Articulo(id_articulo) ON DELETE CASCADE,
+    FOREIGN KEY (rut_revisor) REFERENCES Revisor(rut) ON DELETE CASCADE
+);
+
 -- Procedimiento almacenado para asignar un artículo a un revisor
 DELIMITER //
 CREATE PROCEDURE AsignarArticuloRevisor(

@@ -1,4 +1,4 @@
-import faker 
+import faker
 import random
 from datetime import datetime
 
@@ -106,3 +106,40 @@ if __name__ == "__main__":
         file.write("Evaluacion_Articulo:\n" + str(evaluaciones) + "\n\n")
 
     print("Datos generados y guardados en 'generated_data.txt'")
+
+    # Guardar sentencias SQL en un archivo
+    with open("generated_data.sql", "w", encoding="utf-8") as file:
+        # Usuarios
+        for u in usuarios:
+            file.write(
+                f"INSERT INTO Usuario (rut, nombre, email, usuario, password, tipo) VALUES ('{u[0]}', '{u[1]}', '{u[2]}', '{u[3]}', '{u[4]}', '{u[5]}');\n")
+
+        # Autores
+        for a in autores:
+            file.write(f"INSERT INTO Autor (rut) VALUES ('{a[0]}');\n")
+
+        # Revisores
+        for r in revisores:
+            file.write(f"INSERT INTO Revisor (rut) VALUES ('{r[0]}');\n")
+
+        # Articulos
+        for art in articulos:
+            file.write(
+                f"INSERT INTO Articulo (id_articulo, titulo, resumen, fecha_envio, rut_autor, estado) VALUES ({art[0]}, '{art[1]}', '{art[2]}', '{art[3]}', '{art[4]}', '{art[5]}');\n")
+
+        # Topicos
+        for t in topicos:
+            file.write(
+                f"INSERT INTO Topico (id_topico, nombre) VALUES ({t[0]}, '{t[1]}');\n")
+
+        # Articulo_Topico
+        for at in articulo_topico:
+            file.write(
+                f"INSERT INTO Articulo_Topico (id_articulo, id_topico) VALUES ({at[0]}, {at[1]});\n")
+
+        # Evaluacion_Articulo
+        for eval in evaluaciones:
+            file.write(
+                f"INSERT INTO Evaluacion_Articulo (id_articulo, rut_revisor, resena, calificacion) VALUES ({eval[0]}, '{eval[1]}', '{eval[2]}', {eval[3]});\n")
+
+    print("Sentencias SQL generadas y guardadas en 'generated_data.sql'")

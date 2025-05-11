@@ -1,1 +1,12 @@
 Este archivo debe contener los pasos detallados para la normalización a 3FN. Por favor, documenta los pasos manualmente o utiliza herramientas digitales para generarlo.
+
+1. Identificar las dependencias funcionales en cada relación.
+2. Eliminar dependencias parciales para alcanzar la 2FN.
+3. Eliminar dependencias transitivas para alcanzar la 3FN.
+4. Verificar que todas las relaciones cumplen con las reglas de la 3FN.
+
+Ejemplo:
+- Relación inicial: Artículo(id_articulo, titulo, id_autor, nombre_autor)
+- Dependencias funcionales: id_articulo -> titulo, id_autor -> nombre_autor
+- 2FN: Separar en dos relaciones: Artículo(id_articulo, titulo, id_autor) y Autor(id_autor, nombre_autor)
+- 3FN: Verificar que no hay dependencias transitivas.

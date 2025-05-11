@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php'); // Redirigir al login si no está autenticado
+    header('Location: php/login.php'); // Redirigir al login si no está autenticado
     exit();
 }
 ?>
@@ -14,11 +14,11 @@ if (!isset($_SESSION['user_id'])) {
     <link rel="stylesheet" href="css/estilos.css"> <!-- Archivo CSS -->
 </head>
 <body>
-    <?php include('navegacion.php'); ?> <!-- Incluir la barra de navegación -->
+    <?php include('php/navegacion.php'); ?> <!-- Incluir la barra de navegación -->
     <div id="content">
         <h1>Bienvenido a la Plataforma de Artículos</h1>
         <!-- Contenido inicial -->
     </div>
-    <script src="scripts.js"></script> <!-- Archivo JavaScript -->
+    <script src="js/scripts.js"></script> <!-- Archivo JavaScript -->
 </body>
 </html>

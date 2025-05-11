@@ -19,6 +19,7 @@ if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'admin') {
                 <li class="nav-item"><a class="nav-link" href="#" data-page="../php/mostrar.php">Ver Artículos</a></li>
                 <li class="nav-item"><a class="nav-link" href="#" data-page="../php/gestionar_revisores.php">Gestionar Revisores</a></li>
                 <li class="nav-item"><a class="nav-link" href="#" data-page="../php/buscar_articulos.php">Buscar Artículos</a></li>
+                <li class="nav-item"><a class="nav-link" href="#" data-page="../php/crear.php">Enviar Artículo</a></li>
             </ul>
         </div>
     </div>

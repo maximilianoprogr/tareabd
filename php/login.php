@@ -61,5 +61,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </form>
     <br>
     <p>¿No tienes una cuenta? <a href="../php/register.php">Regístrate aquí</a></p>
+    <a href="dashboard.php" style="font-family: Arial, sans-serif; font-size: 14px; color: #007BFF; text-decoration: none;">Volver al inicio</a>
 </body>
 </html>

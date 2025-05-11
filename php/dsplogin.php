@@ -25,5 +25,6 @@ $user = $stmt->get_result()->fetch_assoc();
     <h1>Welcome, <?php echo $user['userid']; ?>!</h1>
     <p>Email: <?php echo $user['email']; ?></p>
     <a href="../php/logout.php">Logout</a>
+    <a href="dashboard.php" style="font-family: Arial, sans-serif; font-size: 14px; color: #007BFF; text-decoration: none;">Volver al inicio</a>
 </body>
 </html>

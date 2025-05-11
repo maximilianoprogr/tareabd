@@ -32,5 +32,6 @@ $articulos = $stmt->fetchAll();
         </tr>
         <?php endforeach; ?>
     </table>
+    <a href="dashboard.php" style="font-family: Arial, sans-serif; font-size: 14px; color: #007BFF; text-decoration: none;">Volver al inicio</a>
 </body>
 </html>

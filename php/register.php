@@ -113,6 +113,7 @@ $conn->close(); // Asegúrate de que $conn esté definido correctamente
             <input type="submit" value="Registrar">
         </form>
         <a href="../php/login.php" class="btn-primary">Ir al Login</a>
+        <a href="dashboard.php" style="font-family: Arial, sans-serif; font-size: 14px; color: #007BFF; text-decoration: none;">Volver al inicio</a>
     </div>
 </body>
 </html>

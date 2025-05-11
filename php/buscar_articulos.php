@@ -87,6 +87,7 @@ $articulos = $stmt->fetchAll();
 
         <input type="submit" value="Buscar">
     </form>
+    <a href="dashboard.php" style="font-family: Arial, sans-serif; font-size: 14px; color: #007BFF; text-decoration: none;">Volver al inicio</a>
     <table border="1">
         <tr>
             <th>Título</th>

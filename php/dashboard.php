@@ -21,5 +21,12 @@ echo "Bienvenido, " . $_SESSION['usuario']; // Muestra el nombre de usuario
 </form>
 
 <br>
+<div class="acciones">
+    <button onclick="location.href='enviar_articulo.php'">Enviar Artículo</button>
+    <button onclick="location.href='acceso_articulo.php'">Acceso al Artículo</button>
+    <button onclick="location.href='gestionar_revisores.php'">Gestión de Revisores</button>
+    <button onclick="location.href='asignar_articulos.php'">Asignación de Artículos</button>
+</div>
+<br>
 <a href="../php/gestionar_revisores.php">Gestionar Revisores</a>
 <a href="../php/asignar_articulos.php">Asignar Artículos</a>

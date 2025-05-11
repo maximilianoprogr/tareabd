@@ -1,3 +1,12 @@
+-- Tabla Articulo_Revisor (relación entre artículos y revisores)
+CREATE TABLE Articulo_Revisor (
+    id_articulo INT NOT NULL,
+    rut_revisor VARCHAR(10) NOT NULL,
+    PRIMARY KEY (id_articulo, rut_revisor),
+    FOREIGN KEY (id_articulo) REFERENCES Articulo(id_articulo) ON DELETE CASCADE,
+    FOREIGN KEY (rut_revisor) REFERENCES Revisor(rut) ON DELETE CASCADE
+);
+
 -- Procedimiento almacenado para asignar un artículo a un revisor
 DELIMITER //
 CREATE PROCEDURE AsignarArticuloRevisor(
@@ -5,10 +14,18 @@ CREATE PROCEDURE AsignarArticuloRevisor(
     IN p_rut_revisor VARCHAR(10)
 )
 BEGIN
-    IF NOT EXISTS (
-        SELECT 1 FROM Articulo_Revisor WHERE id_articulo = p_id_articulo AND rut_revisor = p_rut_revisor
+    -- Verificar si el revisor es autor del artículo
+    IF EXISTS (
+        SELECT 1 FROM Autor_Articulo WHERE id_articulo = p_id_articulo AND rut_autor = p_rut_revisor
     ) THEN
-        INSERT INTO Articulo_Revisor (id_articulo, rut_revisor) VALUES (p_id_articulo, p_rut_revisor);
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'No se puede asignar un artículo a un revisor que sea autor.';
+    ELSE
+        -- Verificar si ya existe la asignación
+        IF NOT EXISTS (
+            SELECT 1 FROM Articulo_Revisor WHERE id_articulo = p_id_articulo AND rut_revisor = p_rut_revisor
+        ) THEN
+            INSERT INTO Articulo_Revisor (id_articulo, rut_revisor) VALUES (p_id_articulo, p_rut_revisor);
+        END IF;
     END IF;
 END;
 //
@@ -36,12 +53,12 @@ SELECT
     a.titulo,
     a.resumen,
     GROUP_CONCAT(DISTINCT t.nombre_topico) AS topicos,
-    GROUP_CONCAT(DISTINCT au.nombre) AS autores
+    GROUP_CONCAT(DISTINCT u.nombre) AS autores
 FROM Articulo a
 LEFT JOIN Articulo_Topico at ON a.id_articulo = at.id_articulo
 LEFT JOIN Topico t ON at.id_topico = t.id_topico
 LEFT JOIN Autor_Articulo aa ON a.id_articulo = aa.id_articulo
-LEFT JOIN Autor au ON aa.rut_autor = au.rut
+LEFT JOIN Usuario u ON aa.rut_autor = u.rut
 GROUP BY a.id_articulo;
 
 -- Función para verificar si un artículo tiene menos de dos revisores
@@ -62,3 +79,12 @@ DELIMITER ;
 -- Agregar columna 'rol' a la tabla 'Usuario'
 ALTER TABLE Usuario
 ADD COLUMN rol ENUM('autor', 'revisor') NOT NULL AFTER password;
+
+-- Tabla Autor_Articulo (relación entre autores y artículos)
+CREATE TABLE Autor_Articulo (
+    id_articulo INT NOT NULL,
+    rut_autor VARCHAR(10) NOT NULL,
+    PRIMARY KEY (id_articulo, rut_autor),
+    FOREIGN KEY (id_articulo) REFERENCES Articulo(id_articulo) ON DELETE CASCADE,
+    FOREIGN KEY (rut_autor) REFERENCES Usuario(rut) ON DELETE CASCADE
+);

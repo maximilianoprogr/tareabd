@@ -52,3 +52,10 @@ INSERT INTO Evaluacion_Articulo (id_articulo, rut_revisor, resena, calificacion)
 INSERT INTO Evaluacion_Articulo (id_articulo, rut_revisor, resena, calificacion) VALUES (604, '241359983w', 'Glass able physical today. With strong watch test. Small music very son appear buy.', 4);
 INSERT INTO Evaluacion_Articulo (id_articulo, rut_revisor, resena, calificacion) VALUES (101, '987654321B', 'Buena calidad', 4);
 INSERT INTO Evaluacion_Articulo (id_articulo, rut_revisor, resena, calificacion) VALUES (102, '987654321B', 'Excelente trabajo', 5);
+
+-- Datos de prueba para la tabla Autor_Articulo
+INSERT INTO Autor_Articulo (id_articulo, rut_autor) VALUES (1, '123456789A');
+INSERT INTO Autor_Articulo (id_articulo, rut_autor) VALUES (1, '987654321B');
+INSERT INTO Autor_Articulo (id_articulo, rut_autor) VALUES (2, '123456789A');
+INSERT INTO Autor_Articulo (id_articulo, rut_autor) VALUES (3, '987654321B');
+INSERT INTO Autor_Articulo (id_articulo, rut_autor) VALUES (3, '435860269Z');

@@ -28,10 +28,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($count > 0) {
             $message = "El correo electrónico ya está registrado.";
         } else {
-            // Cifrar la contraseña antes de almacenarla
-            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+{}            // Eliminar el cifrado de la contraseña
+            $hashed_password = $password; // Usar la contraseña directamente
 
-            // Insertar el nuevo usuario en la base de datos con la contraseña cifrada y el tipo
+            // Insertar el nuevo usuario en la base de datos con la contraseña sin cifrar
             $sql = "INSERT INTO Usuario (rut, nombre, email, password, tipo) VALUES (?, ?, ?, ?, ?)";
             $stmt = $conn->prepare($sql);
 

@@ -21,8 +21,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $user = $stmt->fetch();
 
         if ($user) {
-            // Verificar si la contraseña es correcta
-            if (password_verify($password, $user['password'])) {
+            // Cambiar la validación para comparar directamente las contraseñas sin usar `password_verify`
+            if ($password === $user['password']) {
                 $_SESSION['user_id'] = $user['rut']; // Guardar el ID del usuario en la sesión
                 $_SESSION['usuario'] = $user['rut']; // Guardar el nombre del usuario en la sesión
                 header("Location: ../php/index.php"); // Redirigir al index

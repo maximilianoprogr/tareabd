@@ -14,6 +14,7 @@ $stmt = $pdo->query("SELECT id_topico, nombre FROM Topico");
 $topicos = $stmt->fetchAll();
 
 $message = ""; // Variable para mostrar mensajes
+$autores = []; // Inicializar la variable para evitar errores
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Obtener los datos del formulario
@@ -110,29 +111,93 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <textarea id="resumen" name="resumen" rows="4" required></textarea>
 
             <h2>Autores</h2>
-            <div class="autores">
-                <div class="autor">
-                    <input type="text" name="autor_nombre[]" placeholder="Nombre" required>
-                    <input type="email" name="autor_email[]" placeholder="Email" required>
-                    <input type="text" name="autor_contacto[]" placeholder="Contacto" required>
+            <div class="autores" id="autores-container">
+                <?php foreach ($autores as $autor): ?>
+                    <div>
+                        <input type="checkbox" id="autor_<?php echo $autor['id_autor']; ?>" name="autores[]" value="<?php echo $autor['id_autor']; ?>">
+                        <label for="autor_<?php echo $autor['id_autor']; ?>"> <?php echo htmlspecialchars($autor['nombre']); ?> (<?php echo htmlspecialchars($autor['email']); ?>, <?php echo htmlspecialchars($autor['contacto']); ?>) </label>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+
+            <div>
+                <h3>Crear Nuevo Autor</h3>
+                <div id="nuevo-autor-template" style="display: none;">
+                    <label for="nuevo_autor_nombre">Nombre:</label>
+                    <input type="text" name="nuevo_autor_nombre[]" placeholder="Nombre">
+
+                    <label for="nuevo_autor_email">Email:</label>
+                    <input type="email" name="nuevo_autor_email[]" placeholder="Email">
+
+                    <label for="nuevo_autor_contacto">Contacto:</label>
+                    <input type="text" name="nuevo_autor_contacto[]" placeholder="Contacto">
                 </div>
-                <div class="autor">
-                    <input type="text" name="autor_nombre[]" placeholder="Nombre">
-                    <input type="email" name="autor_email[]" placeholder="Email">
-                    <input type="text" name="autor_contacto[]" placeholder="Contacto">
+                <div id="nuevo-autor-container">
+                    <div>
+                        <label for="nuevo_autor_nombre">Nombre:</label>
+                        <input type="text" name="nuevo_autor_nombre[]" placeholder="Nombre">
+
+                        <label for="nuevo_autor_email">Email:</label>
+                        <input type="email" name="nuevo_autor_email[]" placeholder="Email">
+
+                        <label for="nuevo_autor_contacto">Contacto:</label>
+                        <input type="text" name="nuevo_autor_contacto[]" placeholder="Contacto">
+                    </div>
                 </div>
+                <button type="button" id="agregar-otro-autor" onclick="agregarOtroAutor(); return false;">Agregar Otro</button>
             </div>
 
             <h2>Tópicos del Artículo</h2>
             <div class="topicos">
-                <input type="text" name="topico1" placeholder="Tópico 1" required>
-                <input type="text" name="topico2" placeholder="Tópico 2" required>
-                <input type="text" name="topico3" placeholder="Tópico 3" required>
+                <?php foreach ($topicos as $topico): ?>
+                    <div>
+                        <input type="checkbox" id="topico_<?php echo $topico['id_topico']; ?>" name="topicos[]" value="<?php echo $topico['id_topico']; ?>">
+                        <label for="topico_<?php echo $topico['id_topico']; ?>"> <?php echo htmlspecialchars($topico['nombre']); ?> </label>
+                    </div>
+                <?php endforeach; ?>
             </div>
 
             <button type="submit" class="btn">Enviar</button>
         </form>
         <a href="dashboard.php" class="back-link">Volver al inicio</a>
     </div>
+
+    <script>
+    let autorCount = 1; // Contador para los autores
+
+    function agregarOtroAutor() {
+        autorCount++;
+        const container = document.getElementById('nuevo-autor-container');
+        const template = document.getElementById('nuevo-autor-template').innerHTML;
+        const div = document.createElement('div');
+        div.innerHTML = template.replace(/Nuevo Autor/g, `Autor ${autorCount}`);
+        div.querySelectorAll('label').forEach((label) => {
+            const forAttribute = label.getAttribute('for');
+            if (forAttribute) {
+                label.setAttribute('for', `${forAttribute}_${autorCount}`);
+            }
+        });
+        div.querySelectorAll('input').forEach((input) => {
+            const idAttribute = input.getAttribute('id');
+            if (idAttribute) {
+                input.setAttribute('id', `${idAttribute}_${autorCount}`);
+            }
+        });
+        container.appendChild(div);
+    }
+
+    // Asegurar que los campos de título y resumen mantengan sus valores
+    const tituloInput = document.getElementById('titulo');
+    const resumenTextarea = document.getElementById('resumen');
+
+    document.getElementById('agregar-otro-autor').addEventListener('click', (event) => {
+        event.preventDefault();
+        agregarOtroAutor();
+
+        // Mantener los valores de título y resumen
+        tituloInput.value = tituloInput.value;
+        resumenTextarea.value = resumenTextarea.value;
+    });
+    </script>
 </body>
 </html>

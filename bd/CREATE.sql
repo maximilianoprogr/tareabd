@@ -1,4 +1,4 @@
--- Actualización para cumplir con 3FN
+
 CREATE TABLE Usuario (
     rut VARCHAR(10) PRIMARY KEY,
     nombre VARCHAR(64) NOT NULL,
@@ -65,7 +65,11 @@ CREATE TABLE Evaluacion_Articulo (
     FOREIGN KEY (rut_revisor) REFERENCES Revisor (rut) ON DELETE CASCADE
 );
 
+<<<<<<< HEAD
 -- Tabla Autor_Articulo (relación entre autores y artículos con contacto principal)
+=======
+-- Tabla Autor_Articulo (relación entre autores y artículos) (1, M)
+>>>>>>> 6b45e0f55b9f26d67022f7d69415bd5ab10c5730
 CREATE TABLE Autor_Articulo (
     id_articulo INT NOT NULL,
     rut_autor VARCHAR(10) NOT NULL,

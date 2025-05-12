@@ -1,4 +1,4 @@
--- Actualización para cumplir con 3FN
+
 CREATE TABLE Usuario (
     rut VARCHAR(10) PRIMARY KEY,
     nombre VARCHAR(64) NOT NULL,

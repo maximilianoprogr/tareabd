@@ -1,8 +1,11 @@
--- Eliminar datos de tablas dependientes
-DELETE FROM Evaluacion_Articulo;
-DELETE FROM Articulo_Topico;
-DELETE FROM Articulo;
-DELETE FROM Topico;
-DELETE FROM Revisor;
-DELETE FROM Autor;
-DELETE FROM Usuario;
+DROP TABLE IF EXISTS 
+    Evaluacion_Articulo,
+    Autor_Articulo,
+    Articulo_Topico,
+    Revisor_Topico,
+    Articulo_Revisor,
+    Articulo,
+    Topico,
+    Revisor,
+    Autor,
+    Usuario;

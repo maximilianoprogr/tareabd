@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
+    <link rel="stylesheet" href="../css/dashboard.css"> <!-- Archivo CSS externo -->
 </head>
 <body>
 <?php
@@ -12,31 +13,27 @@ session_start();
 // Verificar si el usuario está autenticado
 if (!isset($_SESSION['usuario'])) {
     // Si no hay sesión iniciada, redirige al login
-    header("Location: ../php/login.php");
+    header("Location: login.php");
     exit();
 }
 
-echo "Bienvenido, " . $_SESSION['usuario']; // Muestra el nombre de usuario
+echo "<div class='welcome'>Bienvenido, " . $_SESSION['usuario'] . "</div>"; // Muestra el nombre de usuario
 ?>
 
-<br><br>
-<a href="../php/logout.php">Cerrar sesión</a> <!-- Opción para cerrar sesión -->
+<div class="container">
+    <a href="logout.php" class="logout-btn">Cerrar sesión</a> <!-- Opción para cerrar sesión -->
 
-<br>
-<form action="../php/buscar_articulos.php" method="GET">
-    <input type="text" name="query" placeholder="Buscar artículos...">
-    <button type="submit">Buscar</button>
-</form>
+    <form action="buscar_articulos.php" method="GET" class="search-form">
+        <input type="text" name="query" placeholder="Buscar artículos..." class="search-input">
+        <button type="submit" class="search-btn">Buscar</button>
+    </form>
 
-<br>
-<div class="acciones">
-    <button onclick="location.href='enviar_articulo.php'">Enviar Artículo</button>
-    <button onclick="location.href='acceso_articulo.php'">Acceso al Artículo</button>
-    <button onclick="location.href='gestionar_revisores.php'">Gestión de Revisores</button>
-    <button onclick="location.href='asignar_articulos.php'">Asignación de Artículos</button>
+    <div class="acciones">
+        <button onclick="location.href='enviar_articulo.php'" class="action-btn">Enviar Artículo</button>
+        <button onclick="location.href='acceso_articulo.php'" class="action-btn">Acceso al Artículo</button>
+        <button onclick="location.href='gestionar_revisores.php'" class="action-btn">Gestión de Revisores</button>
+        <button onclick="location.href='asignar_articulos.php'" class="action-btn">Asignación de Artículos</button>
+    </div>
 </div>
-<br>
-<a href="../php/gestionar_revisores.php">Gestionar Revisores</a>
-<a href="../php/asignar_articulos.php">Asignar Artículos</a>
 </body>
 </html>

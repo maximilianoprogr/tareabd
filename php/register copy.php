@@ -28,12 +28,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($count > 0) {
             $message = "El correo electrónico ya está registrado.";
         } else {
+{}            // Eliminar el cifrado de la contraseña
             $hashed_password = $password; // Usar la contraseña directamente
 
-            // Insertar el nuevo usuario en la base de datos
+            // Insertar el nuevo usuario en la base de datos con la contraseña sin cifrar
             $sql = "INSERT INTO Usuario (rut, nombre, email, password, tipo) VALUES (?, ?, ?, ?, ?)";
             $stmt = $conn->prepare($sql);
 
+            // Verificar si la consulta fue preparada correctamente
             if (!$stmt) {
                 die("Error en la consulta SQL: " . $conn->error);
             }
@@ -60,39 +62,58 @@ $conn->close(); // Asegúrate de que $conn esté definido correctamente
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro</title>
-    <link rel="stylesheet" href="../css/register.css"> <!-- Archivo CSS externo -->
+    <style>
+        .btn-primary {
+            display: inline-block;
+            padding: 10px 20px;
+            color: #fff;
+            background-color: #007bff;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        .form-container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
     <div class="form-container">
         <h2>Formulario de Registro</h2>
         <?php if (!empty($message)): ?>
-            <p class="message"><?php echo htmlspecialchars($message); ?></p>
+            <p><?php echo htmlspecialchars($message); ?></p>
         <?php endif; ?>
         <form action="../php/register.php" method="post">
             <label for="rut">RUT:</label>
-            <input type="text" id="rut" name="rut" required>
-
+            <input type="text" id="rut" name="rut" required><br><br>
             <label for="nombre">Nombre:</label>
-            <input type="text" id="nombre" name="nombre" required>
-
+            <input type="text" id="nombre" name="nombre" required><br><br>
             <label for="email">Correo Electrónico:</label>
-            <input type="email" id="email" name="email" required>
-
+            <input type="email" id="email" name="email" required><br><br>
             <label for="password">Contraseña:</label>
-            <input type="password" id="password" name="password" required>
-
+            <input type="password" id="password" name="password" required><br><br>
             <label for="rol">Tipo:</label>
             <select id="rol" name="rol" required>
                 <option value="Autor">Autor</option>
                 <option value="Revisor">Revisor</option>
-            </select>
-
-            <input type="submit" value="Registrar" class="btn">
+            </select><br><br>
+            <input type="submit" value="Registrar">
         </form>
-        <a href="../php/login.php" class="btn-secondary">Ir al Login</a>
-        <a href="dashboard.php" class="btn-secondary">Volver al inicio</a>
+        <a href="../php/login.php" class="btn-primary">Ir al Login</a>
+        <a href="dashboard.php" style="font-family: Arial, sans-serif; font-size: 14px; color: #007BFF; text-decoration: none;">Volver al inicio</a>
     </div>
 </body>
 </html>

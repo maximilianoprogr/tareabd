@@ -14,7 +14,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = $_POST['password'] ?? null;
 
     if ($rut && $password) {
-        // Actualizar la consulta para determinar el rol del usuario sin usar la columna tipo en Usuario
         $sql = "SELECT u.*, CASE 
                     WHEN EXISTS (SELECT 1 FROM Autor WHERE rut = u.rut) THEN 'Autor'
                     WHEN EXISTS (SELECT 1 FROM Revisor WHERE rut = u.rut) THEN 'Revisor'
@@ -26,13 +25,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $user = $stmt->fetch();
 
         if ($user) {
-            // Cambiar la validación para comparar directamente las contraseñas sin usar `password_verify`
             if ($password === $user['password']) {
-                $_SESSION['user_id'] = $user['rut']; // Guardar el ID del usuario en la sesión
-                $_SESSION['usuario'] = $user['rut']; // Guardar el nombre del usuario en la sesión
-                // Guardar el rol del usuario en la sesión
-                $_SESSION['rol'] = $user['rol']; // Determinar el rol dinámicamente
-                header("Location: ../php/index.php"); // Redirigir al index
+                $_SESSION['user_id'] = $user['rut'];
+                $_SESSION['usuario'] = $user['rut'];
+                $_SESSION['rol'] = $user['rol'];
+                header("Location: ../php/index.php");
                 exit();
             } else {
                 $message = "Contraseña incorrecta.";
@@ -50,33 +47,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
+    <link rel="stylesheet" href="../css/login.css">
 </head>
 <body>
-    <h2>Formulario de Login</h2>
-    <?php if (!empty($message)): ?>
-        <p><?php echo htmlspecialchars($message); ?></p>
-    <?php endif; ?>
-    <form action="../php/login.php" method="post">
-        <label for="rut">RUT:</label>
-        <input type="text" id="rut" name="rut" required><br><br>
+    <div class="login-container">
+        <h2>Iniciar Sesión</h2>
+        <?php if (!empty($message)): ?>
+            <p class="message"><?php echo htmlspecialchars($message); ?></p>
+        <?php endif; ?>
+        <form action="../php/login.php" method="post">
+            <label for="rut">RUT:</label>
+            <input type="text" id="rut" name="rut" required>
 
-        <label for="password">Contraseña:</label>
-        <input type="password" id="password" name="password" required><br><br>
+            <label for="password">Contraseña:</label>
+            <input type="password" id="password" name="password" required>
 
-        <input type="submit" value="Iniciar sesión">
-    </form>
-    <br>
-    <p>¿No tienes una cuenta? <a href="../php/register.php">Regístrate aquí</a></p>
-    <a href="dashboard.php" style="font-family: Arial, sans-serif; font-size: 14px; color: #007BFF; text-decoration: none;">Volver al inicio</a>
-
-    <?php
-    // Depuración: Verificar si el rol se está configurando correctamente
-    if (isset($_SESSION['rol'])) {
-        echo "<p style='color: green;'>Rol configurado en la sesión: " . htmlspecialchars($_SESSION['rol']) . "</p>";
-    } else {
-        echo "<p style='color: red;'>Error: El rol no se configuró en la sesión.</p>";
-    }
-    ?>
+            <input type="submit" value="Iniciar sesión" class="btn">
+        </form>
+        <p>¿No tienes una cuenta? <a href="../php/register.php">Regístrate aquí</a></p>
+        <a href="dashboard.php" class="back-link">Volver al inicio</a>
+    </div>
 </body>
 </html>

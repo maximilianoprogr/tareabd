@@ -1,8 +1,4 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 include('../php/db_connection.php'); // Asegúrate de que este archivo define correctamente la variable $conn
 
 $message = ""; // Variable para almacenar mensajes

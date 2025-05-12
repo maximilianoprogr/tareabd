@@ -8,6 +8,12 @@ if (!isset($_SESSION['usuario'])) {
     exit();
 }
 
+require_once 'conexion.php';
+
+// Obtener los tópicos desde la base de datos
+$stmt = $pdo->query("SELECT id_topico, nombre FROM Topico");
+$topicos = $stmt->fetchAll();
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -36,26 +42,25 @@ if (!isset($_SESSION['usuario'])) {
             <tr>
                 <td><input type="text" name="autor_nombre[]" required></td>
                 <td><input type="email" name="autor_email[]" required></td>
-                <td><input type="text" name="autor_contacto[]" required></td>
+                <td><input type="checkbox" name="autor_contacto[]" style="width: 20px; height: 20px;"></td>
             </tr>
             <tr>
                 <td><input type="text" name="autor_nombre[]"></td>
                 <td><input type="email" name="autor_email[]"></td>
-                <td><input type="text" name="autor_contacto[]"></td>
+                <td><input type="checkbox" name="autor_contacto[]" style="width: 20px; height: 20px;"></td>
             </tr>
         </table>
 
         <h2 style="font-family: Arial, sans-serif; color: #555; margin-top: 30px;">Tópicos del Artículo</h2>
         <table style="width: 30%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12px; margin-bottom: 20px;" border="1">
             <tr>
-                <th>Tópico 1</th>
-                <th>Tópico 2</th>
-                <th>Tópico 3</th>
-            </tr>
-            <tr>
-                <td><input type="text" name="topico1" required></td>
-                <td><input type="text" name="topico2" required></td>
-                <td><input type="text" name="topico3" required></td>
+                <?php foreach ($topicos as $topico): ?>
+                    <td>
+                        <label style="display: block;">
+                            <input type="checkbox" name="topicos[]" value="<?= $topico['id_topico'] ?>"> <?= htmlspecialchars($topico['nombre']) ?>
+                        </label>
+                    </td>
+                <?php endforeach; ?>
             </tr>
         </table>
 

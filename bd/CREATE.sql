@@ -65,10 +65,11 @@ CREATE TABLE Evaluacion_Articulo (
     FOREIGN KEY (rut_revisor) REFERENCES Revisor (rut) ON DELETE CASCADE
 );
 
--- Tabla Autor_Articulo (relación entre autores y artículos)
+-- Tabla Autor_Articulo (relación entre autores y artículos con contacto principal)
 CREATE TABLE Autor_Articulo (
     id_articulo INT NOT NULL,
     rut_autor VARCHAR(10) NOT NULL,
+    es_contacto BOOLEAN NOT NULL DEFAULT FALSE,
     PRIMARY KEY (id_articulo, rut_autor),
     FOREIGN KEY (id_articulo) REFERENCES Articulo (id_articulo) ON DELETE CASCADE,
     FOREIGN KEY (rut_autor) REFERENCES Autor (rut) ON DELETE CASCADE

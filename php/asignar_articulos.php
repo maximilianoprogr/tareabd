@@ -1,4 +1,6 @@
 <?php
+ob_start(); // Iniciar el buffer de salida para evitar problemas con header()
+
 // Verificar si el usuario tiene permisos de jefe del comité
 session_start();
 
@@ -57,6 +59,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_articulo'], $_POST
     }
 }
 
+// Manejar la acción de quitar revisores
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['quitar'])) {
+    $id_articulo = $_POST['id_articulo'];
+
+    // Eliminar todos los revisores asignados al artículo
+    $sql_quitar = "DELETE FROM Articulo_Revisor WHERE id_articulo = ?";
+    $stmt_quitar = $pdo->prepare($sql_quitar);
+    $stmt_quitar->execute([$id_articulo]);
+
+    echo "<p style='color: green;'>Revisores eliminados del artículo ID: $id_articulo.</p>";
+}
+
 // Resaltar artículos con menos de dos revisores
 $sql_resaltar = "SELECT id_articulo, COUNT(rut_revisor) AS num_revisores
                  FROM Articulo_Revisor
@@ -86,6 +100,57 @@ $sql_revisores = "SELECT r.rut, u.nombre, COUNT(ar.id_articulo) AS num_articulos
                    LEFT JOIN Articulo_Revisor ar ON r.rut = ar.rut_revisor
                    GROUP BY r.rut, u.nombre";
 $revisores_carga = $pdo->query($sql_revisores)->fetchAll();
+
+// Mostrar tabla de asignación de artículos a revisores
+$sql_articulos = "SELECT a.id_articulo, a.titulo, 
+                  GROUP_CONCAT(DISTINCT CONCAT(u.nombre, ' (', u.rut, ')') SEPARATOR ', ') AS autores,
+                  GROUP_CONCAT(DISTINCT t.nombre SEPARATOR ', ') AS topicos,
+                  GROUP_CONCAT(DISTINCT r.nombre SEPARATOR ', ') AS revisores
+                  FROM Articulo a
+                  LEFT JOIN Autor_Articulo aa ON a.id_articulo = aa.id_articulo
+                  LEFT JOIN Usuario u ON aa.rut_autor = u.rut
+                  LEFT JOIN Articulo_Topico at ON a.id_articulo = at.id_articulo
+                  LEFT JOIN Topico t ON at.id_topico = t.id_topico
+                  LEFT JOIN Articulo_Revisor ar ON a.id_articulo = ar.id_articulo
+                  LEFT JOIN Usuario r ON ar.rut_revisor = r.rut
+                  GROUP BY a.id_articulo";
+$stmt_articulos = $pdo->query($sql_articulos);
+$articulos = $stmt_articulos->fetchAll();
+
+echo '<table border="1" style="width: 100%; border-collapse: collapse; text-align: center; font-family: Arial, sans-serif;">';
+echo '<tr style="background-color: #f2f2f2; font-weight: bold;">';
+echo '<th>Número</th><th>Título</th><th>Autores</th><th>Tópicos</th><th>Revisores</th><th>Acciones</th>';
+echo '</tr>';
+foreach ($articulos as $articulo) {
+    $resaltado = in_array($articulo['id_articulo'], array_column($articulos_pendientes, 'id_articulo')) ? 'style="background-color: #ffcccc;"' : '';
+    $autores = isset($articulo['autores']) ? htmlspecialchars($articulo['autores']) : 'N/A';
+    $topicos = isset($articulo['topicos']) ? htmlspecialchars($articulo['topicos']) : 'N/A';
+    $revisores = isset($articulo['revisores']) ? htmlspecialchars($articulo['revisores']) : 'N/A';
+    echo "<tr $resaltado>";
+    echo '<td>' . htmlspecialchars($articulo['id_articulo']) . '</td>';
+    echo '<td>' . htmlspecialchars($articulo['titulo']) . '</td>';
+    echo '<td>' . $autores . '</td>';
+    echo '<td>' . $topicos . '</td>';
+    echo '<td>' . $revisores . '</td>';
+    echo '<td>';
+    echo '<form method="POST" action="asignar_articulos.php" style="display:inline; margin-bottom: 5px;">';
+    echo '<input type="hidden" name="id_articulo" value="' . htmlspecialchars($articulo['id_articulo']) . '">';
+    echo '<select name="rut_revisor" style="margin-bottom: 5px;">';
+    foreach ($revisores_disponibles as $revisor) {
+        echo '<option value="' . htmlspecialchars($revisor['rut']) . '">' . htmlspecialchars($revisor['nombre']) . '</option>';
+    }
+    echo '</select><br>';
+    echo '<button type="submit" name="asignar" style="background-color: #4CAF50; color: white; border: none; padding: 5px 10px; cursor: pointer;">Asignar</button>';
+    echo '</form>';
+    echo '<form method="POST" action="asignar_articulos.php" style="display:inline;">';
+    echo '<input type="hidden" name="id_articulo" value="' . htmlspecialchars($articulo['id_articulo']) . '">';
+    echo '<button type="submit" name="quitar" style="background-color: #f44336; color: white; border: none; padding: 5px 10px; cursor: pointer;">Quitar Revisor</button>';
+    echo '</form>';
+    echo '</td>';
+    echo '</tr>';
+}
+echo '</table>';
+
 ?>
 
 <!DOCTYPE html>
@@ -161,7 +226,66 @@ $revisores_carga = $pdo->query($sql_revisores)->fetchAll();
         <?php endforeach; ?>
     </ul>
 
+    <!-- Tabla de asignación de artículos a revisores -->
+    <h2>Asignación de Artículos a Revisores</h2>
+    <table border="1" style="width: 100%; border-collapse: collapse; text-align: center; font-family: Arial, sans-serif;">
+        <tr style="background-color: #f2f2f2; font-weight: bold;">
+            <th>Número</th><th>Título</th><th>Autores</th><th>Tópicos</th><th>Revisores</th><th>Acciones</th>
+        </tr>
+        <?php
+        foreach ($articulos as $articulo) {
+            $resaltado = in_array($articulo['id_articulo'], array_column($articulos_pendientes, 'id_articulo')) ? 'style="background-color: #ffcccc;"' : '';
+            $autores = isset($articulo['autores']) ? htmlspecialchars($articulo['autores']) : 'N/A';
+            $topicos = isset($articulo['topicos']) ? htmlspecialchars($articulo['topicos']) : 'N/A';
+            $revisores = isset($articulo['revisores']) ? htmlspecialchars($articulo['revisores']) : 'N/A';
+            echo "<tr $resaltado>";
+            echo '<td>' . htmlspecialchars($articulo['id_articulo']) . '</td>';
+            echo '<td>' . htmlspecialchars($articulo['titulo']) . '</td>';
+            echo '<td>' . $autores . '</td>';
+            echo '<td>' . $topicos . '</td>';
+            echo '<td>' . $revisores . '</td>';
+            echo '<td>';
+            echo '<form method="POST" action="asignar_articulos.php" style="display:inline; margin-bottom: 5px;">';
+            echo '<input type="hidden" name="id_articulo" value="' . htmlspecialchars($articulo['id_articulo']) . '">';
+            echo '<select name="rut_revisor" style="margin-bottom: 5px;">';
+            foreach ($revisores_disponibles as $revisor) {
+                echo '<option value="' . htmlspecialchars($revisor['rut']) . '">' . htmlspecialchars($revisor['nombre']) . '</option>';
+            }
+            echo '</select><br>';
+            echo '<button type="submit" name="asignar" style="background-color: #4CAF50; color: white; border: none; padding: 5px 10px; cursor: pointer;">Asignar</button>';
+            echo '</form>';
+            echo '<form method="POST" action="asignar_articulos.php" style="display:inline;">';
+            echo '<input type="hidden" name="id_articulo" value="' . htmlspecialchars($articulo['id_articulo']) . '">';
+            echo '<button type="submit" name="quitar" style="background-color: #f44336; color: white; border: none; padding: 5px 10px; cursor: pointer;">Quitar Revisor</button>';
+            echo '</form>';
+            echo '</td>';
+            echo '</tr>';
+        }
+        ?>
+    </table>
+
     <a href="../php/dashboard.php" class="btn-menu">Volver al Menú Principal</a>
     <a href="dashboard.php" style="font-family: Arial, sans-serif; font-size: 14px; color: #007BFF; text-decoration: none;">Volver al inicio</a>
 </body>
 </html>
+
+<?php
+// Asegurarse de que no haya salida previa
+if (headers_sent()) {
+    die("Error: No se puede redirigir porque ya se ha enviado salida al navegador.");
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['asignar'])) {
+    $id_articulo = $_POST['id_articulo'];
+    $rut_revisor = $_POST['rut_revisor'];
+
+    // Asignar el revisor al artículo
+    $sql_asignar = "INSERT INTO Articulo_Revisor (id_articulo, rut_revisor) VALUES (?, ?)";
+    $stmt_asignar = $pdo->prepare($sql_asignar);
+    $stmt_asignar->execute([$id_articulo, $rut_revisor]);
+
+    // Redirigir a la nueva página con la tabla de asignaciones
+    header("Location: tabla_asignaciones.php");
+    exit();
+}
+?>

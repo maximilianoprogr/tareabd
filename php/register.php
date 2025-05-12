@@ -76,6 +76,9 @@ $conn->close(); // Asegúrate de que $conn esté definido correctamente
 
             <label for="nombre">Nombre:</label>
             <input type="text" id="nombre" name="nombre" required>
+            
+            <label for="usuario">Nombre de Usuario:</label>
+            <input type="text" id="usuario" name="usuario" required>
 
             <label for="email">Correo Electrónico:</label>
             <input type="email" id="email" name="email" required>

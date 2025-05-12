@@ -7,6 +7,9 @@ if (!isset($_SESSION['usuario'])) {
     exit();
 }
 
+// Verificar el rol del usuario
+$es_revisor = isset($_SESSION['rol']) && $_SESSION['rol'] === 'revisor';
+
 // Obtener todos los artículos enviados
 include('conexion.php');
 $sql_articulos = "SELECT id_articulo, titulo FROM Articulo";
@@ -76,70 +79,30 @@ if ($articulo_seleccionado) {
                 <p>No hay revisores asignados a este artículo.</p>
             <?php endif; ?>
         </div>
+
+        <!-- Mostrar detalles del artículo -->
+        <div style="margin-top: 20px;">
+            <h2 style="font-size: 16px; color: #555;">Detalles del Artículo</h2>
+            <p><strong>Título:</strong> <?php echo htmlspecialchars($detalles_articulo['titulo']); ?></p>
+            <p><strong>Resumen:</strong> <?php echo htmlspecialchars($detalles_articulo['resumen']); ?></p>
+
+            <?php if ($es_revisor): ?>
+                <a href="editar_articulo.php?id_articulo=<?php echo $articulo_seleccionado; ?>" style="padding: 10px 15px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px;">Editar</a>
+            <?php else: ?>
+                <a href="formulario_articulo.php?id_articulo=<?php echo $articulo_seleccionado; ?>" style="padding: 10px 15px; background-color: #007BFF; color: white; text-decoration: none; border-radius: 5px;">Ver</a>
+            <?php endif; ?>
+        </div>
     <?php endif; ?>
 
     <!-- Formulario de Evaluación se muestra solo si se accede a una revisión -->
     <?php if (isset($_GET['revision'])): ?>
-        <h2 style="font-size: 16px; color: #555;">Formulario de Evaluación</h2>
-        <form style="border: 1px solid #ccc; padding: 15px;">
-            <div style="margin-bottom: 15px;">
-                <label for="calidad_tecnica" style="font-size: 14px; display: block; margin-bottom: 5px;">Calidad Técnica:</label>
-                <input type="checkbox" id="calidad_tecnica" name="calidad_tecnica">
-            </div>
-
-            <div style="margin-bottom: 15px;">
-                <label for="originalidad" style="font-size: 14px; display: block; margin-bottom: 5px;">Originalidad:</label>
-                <input type="checkbox" id="originalidad" name="originalidad">
-            </div>
-
-            <div style="margin-bottom: 15px;">
-                <label for="valoracion_global" style="font-size: 14px; display: block; margin-bottom: 5px;">Valoración Global:</label>
-                <input type="checkbox" id="valoracion_global" name="valoracion_global">
-            </div>
-
-            <div style="margin-bottom: 15px;">
-                <label for="argumentos_valoracion" style="font-size: 14px; display: block; margin-bottom: 5px;">Argumentos de Valoración Global:</label>
-                <textarea id="argumentos_valoracion" name="argumentos_valoracion" rows="3" style="width: 100%; font-size: 12px; padding: 5px; border: 1px solid #ccc;"></textarea>
-            </div>
-
-            <div style="margin-bottom: 15px;">
-                <label for="comentarios_autores" style="font-size: 14px; display: block; margin-bottom: 5px;">Comentarios a Autores:</label>
-                <textarea id="comentarios_autores" name="comentarios_autores" rows="3" style="width: 100%; font-size: 12px; padding: 5px; border: 1px solid #ccc;"></textarea>
-            </div>
-
-            <button type="submit" style="font-size: 14px; padding: 10px 20px; background-color: #4CAF50; color: white; border: none; cursor: pointer;">Enviar Evaluación</button>
-        </form>
+        <!-- Eliminado el formulario de evaluación de esta página -->
+        <p style="font-size: 14px; color: #555;">El formulario de evaluación no está disponible en esta página.</p>
     <?php endif; ?>
 
     <!-- Formulario de Evaluación en modo consulta si los resultados han sido publicados -->
     <?php if ($resultados_publicados): ?>
-        <h2 style="font-size: 16px; color: #555;">Formulario de Evaluación (Modo Consulta)</h2>
-        <form style="border: 1px solid #ccc; padding: 15px;">
-            <div style="margin-bottom: 15px;">
-                <label for="calidad_tecnica" style="font-size: 14px; display: block; margin-bottom: 5px;">Calidad Técnica:</label>
-                <input type="checkbox" id="calidad_tecnica" name="calidad_tecnica" disabled>
-            </div>
-
-            <div style="margin-bottom: 15px;">
-                <label for="originalidad" style="font-size: 14px; display: block; margin-bottom: 5px;">Originalidad:</label>
-                <input type="checkbox" id="originalidad" name="originalidad" disabled>
-            </div>
-
-            <div style="margin-bottom: 15px;">
-                <label for="valoracion_global" style="font-size: 14px; display: block; margin-bottom: 5px;">Valoración Global:</label>
-                <input type="checkbox" id="valoracion_global" name="valoracion_global" disabled>
-            </div>
-
-            <div style="margin-bottom: 15px;">
-                <label for="argumentos_valoracion" style="font-size: 14px; display: block; margin-bottom: 5px;">Argumentos de Valoración Global:</label>
-                <textarea id="argumentos_valoracion" name="argumentos_valoracion" rows="3" style="width: 100%; font-size: 12px; padding: 5px; border: 1px solid #ccc;" readonly></textarea>
-            </div>
-
-            <div style="margin-bottom: 15px;">
-                <label for="comentarios_autores" style="font-size: 14px; display: block; margin-bottom: 5px;">Comentarios a Autores:</label>
-                <textarea id="comentarios_autores" name="comentarios_autores" rows="3" style="width: 100%; font-size: 12px; padding: 5px; border: 1px solid #ccc;" readonly></textarea>
-            </div>
-        </form>
+        <p style="font-size: 14px; color: #555;">El formulario de evaluación no está disponible en esta página.</p>
     <?php endif; ?>
 
     <a href="dashboard.php" style="font-family: Arial, sans-serif; font-size: 14px; color: #007BFF; text-decoration: none;">Volver al inicio</a>

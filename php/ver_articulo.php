@@ -1,0 +1,67 @@
+<?php
+session_start();
+
+// Verificar si el usuario está autenticado
+if (!isset($_SESSION['usuario'])) {
+    header("Location: login.php");
+    exit();
+}
+
+// Verificar si se proporcionó un ID de artículo
+if (!isset($_GET['id_articulo'])) {
+    echo "<p style='color: red;'>No se proporcionó un ID de artículo.</p>";
+    exit();
+}
+
+$id_articulo = $_GET['id_articulo'];
+
+// Aquí puedes agregar lógica para verificar si el artículo está listo
+$articulo_listo = false; // Cambiar a true si el artículo está listo
+
+if (!$articulo_listo) {
+    echo "<p style='font-size: 18px; color: #555;'>Estamos trabajando para usted. El artículo no está listo.</p>";
+}
+
+
+// Verificar si el artículo ha sido revisado
+$revisado = false; // Cambiar a true si el artículo ha sido revisado
+
+if (!$revisado) {
+    echo "<p style='font-size: 18px; color: #555;'>El artículo no ha sido revisado aún.</p>";
+}
+
+if (!$articulo_listo || !$revisado) {
+    echo '<h2 style="font-size: 16px; color: #555;">Formulario de Evaluación (Modo Consulta)</h2>';
+    echo '<form style="border: 1px solid #ccc; padding: 15px;">';
+    echo '<div style="margin-bottom: 15px;">';
+    echo '<label for="calidad_tecnica" style="font-size: 14px; display: block; margin-bottom: 5px;">Calidad Técnica:</label>';
+    echo '<input type="checkbox" id="calidad_tecnica" name="calidad_tecnica" disabled>';
+    echo '</div>';
+
+    echo '<div style="margin-bottom: 15px;">';
+    echo '<label for="originalidad" style="font-size: 14px; display: block; margin-bottom: 5px;">Originalidad:</label>';
+    echo '<input type="checkbox" id="originalidad" name="originalidad" disabled>';
+    echo '</div>';
+
+    echo '<div style="margin-bottom: 15px;">';
+    echo '<label for="valoracion_global" style="font-size: 14px; display: block; margin-bottom: 5px;">Valoración Global:</label>';
+    echo '<input type="checkbox" id="valoracion_global" name="valoracion_global" disabled>';
+    echo '</div>';
+
+    echo '<div style="margin-bottom: 15px;">';
+    echo '<label for="argumentos_valoracion" style="font-size: 14px; display: block; margin-bottom: 5px;">Argumentos de Valoración Global:</label>';
+    echo '<textarea id="argumentos_valoracion" name="argumentos_valoracion" rows="3" style="width: 100%; font-size: 12px; padding: 5px; border: 1px solid #ccc;" readonly></textarea>';
+    echo '</div>';
+
+    echo '<div style="margin-bottom: 15px;">';
+    echo '<label for="comentarios_autores" style="font-size: 14px; display: block; margin-bottom: 5px;">Comentarios a Autores:</label>';
+    echo '<textarea id="comentarios_autores" name="comentarios_autores" rows="3" style="width: 100%; font-size: 12px; padding: 5px; border: 1px solid #ccc;" readonly></textarea>';
+    echo '</div>';
+    echo '</form>';
+}
+
+// Si el artículo ha sido revisado, mostrar su contenido
+// Aquí puedes agregar la lógica para obtener y mostrar el contenido del artículo
+
+// Eliminado cualquier referencia a formularios en esta página. Solo se muestra el contenido del artículo si está listo y revisado.
+?>

@@ -7,14 +7,12 @@ if (!isset($_SESSION['usuario'])) {
     exit();
 }
 
-<<<<<<< HEAD
 require_once 'conexion.php';
 
 // Obtener los tópicos desde la base de datos
 $stmt = $pdo->query("SELECT id_topico, nombre FROM Topico");
 $topicos = $stmt->fetchAll();
 
-=======
 $message = ""; // Variable para mostrar mensajes
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -88,7 +86,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
->>>>>>> 6b45e0f55b9f26d67022f7d69415bd5ab10c5730
 ?>
 
 <!DOCTYPE html>
@@ -112,39 +109,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <label for="resumen">Resumen del artículo:</label>
             <textarea id="resumen" name="resumen" rows="4" required></textarea>
 
-<<<<<<< HEAD
-        <h2 style="font-family: Arial, sans-serif; color: #555; margin-top: 30px;">Autores</h2>
-        <table style="width: 50%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12px; margin-bottom: 20px;" border="1">
-            <tr>
-                <th>Nombre</th>
-                <th>Email</th>
-                <th>Contacto</th>
-            </tr>
-            <tr>
-                <td><input type="text" name="autor_nombre[]" required></td>
-                <td><input type="email" name="autor_email[]" required></td>
-                <td><input type="checkbox" name="autor_contacto[]" style="width: 20px; height: 20px;"></td>
-            </tr>
-            <tr>
-                <td><input type="text" name="autor_nombre[]"></td>
-                <td><input type="email" name="autor_email[]"></td>
-                <td><input type="checkbox" name="autor_contacto[]" style="width: 20px; height: 20px;"></td>
-            </tr>
-        </table>
-
-        <h2 style="font-family: Arial, sans-serif; color: #555; margin-top: 30px;">Tópicos del Artículo</h2>
-        <table style="width: 30%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12px; margin-bottom: 20px;" border="1">
-            <tr>
-                <?php foreach ($topicos as $topico): ?>
-                    <td>
-                        <label style="display: block;">
-                            <input type="checkbox" name="topicos[]" value="<?= $topico['id_topico'] ?>"> <?= htmlspecialchars($topico['nombre']) ?>
-                        </label>
-                    </td>
-                <?php endforeach; ?>
-            </tr>
-        </table>
-=======
             <h2>Autores</h2>
             <div class="autores">
                 <div class="autor">
@@ -165,7 +129,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <input type="text" name="topico2" placeholder="Tópico 2" required>
                 <input type="text" name="topico3" placeholder="Tópico 3" required>
             </div>
->>>>>>> 6b45e0f55b9f26d67022f7d69415bd5ab10c5730
 
             <button type="submit" class="btn">Enviar</button>
         </form>

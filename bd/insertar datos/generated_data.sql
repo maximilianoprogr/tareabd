@@ -1,3 +1,11 @@
+-- Actualización para cumplir con el esquema actualizado
+-- Inserciones en Tipo_Usuario
+INSERT INTO Tipo_Usuario (tipo) VALUES ('Autor');
+
+INSERT INTO Tipo_Usuario (tipo) VALUES ('Revisor');
+
+INSERT INTO Tipo_Usuario (tipo) VALUES ('Jefe Comite de Programa');
+
 -- Inserciones en Usuario (sin la columna tipo)
 INSERT INTO
     Usuario (

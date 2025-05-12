@@ -10,15 +10,18 @@ $showLoginButton = false; // Variable para controlar la visibilidad del botón d
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $rut = $_POST['rut'];
+    $nombre = $_POST['nombre'] ?? null;
+    $usuario = $_POST['usuario'] ?? null;
+    $email = $_POST['email'] ?? null;
     $password = $_POST['password'];
     $tipo = $_POST['rol'];
-    $email = $_POST['email'] ?? null;
-    $nombre = $_POST['nombre'] ?? null;
 
     if (empty($nombre)) {
         $message = "El campo de nombre es obligatorio.";
     } elseif (empty($email)) {
         $message = "El campo de correo electrónico es obligatorio.";
+    } elseif (empty($usuario)) {
+        $message = "El campo de nombre de usuario es obligatorio.";
     } else {
         // Verificar si el correo ya existe en la base de datos
         $sql_check = "SELECT COUNT(*) FROM Usuario WHERE email = ?";
@@ -35,14 +38,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $hashed_password = $password; // Usar la contraseña directamente
 
             // Insertar el nuevo usuario en la base de datos
-            $sql = "INSERT INTO Usuario (rut, nombre, email, password, tipo) VALUES (?, ?, ?, ?, ?)";
+            $sql = "INSERT INTO Usuario (rut, nombre, email, usuario, password, tipo) VALUES (?, ?, ?, ?, ?, ?)";
             $stmt = $conn->prepare($sql);
 
             if (!$stmt) {
                 die("Error en la consulta SQL: " . $conn->error);
             }
 
-            $stmt->bind_param("sssss", $rut, $nombre, $email, $hashed_password, $tipo);
+            $stmt->bind_param("ssssss", $rut, $nombre, $email, $usuario, $hashed_password, $tipo);
 
             if ($stmt->execute()) {
                 $message = "Usuario registrado exitosamente.";

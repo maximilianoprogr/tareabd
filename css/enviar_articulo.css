@@ -28,9 +28,8 @@ h2 {
 
 label {
     display: block;
-    text-align: left;
-    font-weight: bold;
     margin-bottom: 5px;
+    font-weight: bold;
     color: #555;
 }
 
@@ -38,8 +37,8 @@ input[type="text"],
 input[type="email"],
 textarea {
     width: 100%;
-    padding: 10px;
-    margin-bottom: 15px;
+    padding: 8px;
+    margin-bottom: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
     font-size: 14px;
@@ -145,4 +144,13 @@ button#agregar-otro-autor {
 
 button#agregar-otro-autor:hover {
     background-color: #0056b3;
+}
+
+.autores div,
+#nuevo-autor-container div {
+    margin-bottom: 15px; /* Espacio entre los autores */
+    padding: 10px; /* Espaciado interno */
+    border: 1px solid #ccc; /* Borde para distinguir cada sección */
+    border-radius: 5px; /* Bordes redondeados */
+    background-color: #f9f9f9; /* Fondo claro */
 }

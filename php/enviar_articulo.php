@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Validar los datos
     if (empty($titulo) || empty($resumen) || empty($autores)) {
-        $message = "<p class='error-message'>Error: Todos los campos son obligatorios.</p>";
+        $message = "<p>Error: Todos los campos son obligatorios.</p>";
     } else {
         // Conectar a la base de datos
         include('conexion.php');
@@ -81,9 +81,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt_topico->execute([$id_articulo, $id_topico]);
             }
 
-            $message = "<p class='success-message'>Artículo enviado exitosamente.</p>";
+            $message = "<p>Artículo enviado exitosamente.</p>";
         } catch (Exception $e) {
-            $message = "<p class='error-message'>Error al enviar el artículo: " . $e->getMessage() . "</p>";
+            $message = "<p>Error al enviar el artículo: " . $e->getMessage() . "</p>";
         }
     }
 }
@@ -95,7 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Enviar Artículo</title>
-    <link rel="stylesheet" href="../css/enviar_articulo.css"> <!-- Archivo CSS externo -->
+    <!-- <link rel="stylesheet" href="../css/enviar_articulo.css"> Archivo CSS externo -->
 </head>
 <body>
     <div class="container">
@@ -115,7 +115,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <?php foreach ($autores as $autor): ?>
                     <div>
                         <input type="checkbox" id="autor_<?php echo $autor['id_autor']; ?>" name="autores[]" value="<?php echo $autor['id_autor']; ?>">
-                        <label for="autor_<?php echo $autor['id_autor']; ?>"> <?php echo htmlspecialchars($autor['nombre']); ?> (<?php echo htmlspecialchars($autor['email']); ?>, <?php echo htmlspecialchars($autor['contacto']); ?>) </label>
+                        <label for="autor_<?php echo $autor['id_autor']; ?>"> 
+                            <?php echo htmlspecialchars($autor['nombre']); ?> 
+                            (<?php echo htmlspecialchars($autor['email']); ?>, <?php echo htmlspecialchars($autor['contacto']); ?>)
+                        </label>
+                        <input type="checkbox" id="contacto_<?php echo $autor['id_autor']; ?>" name="contacto_autor[]" value="<?php echo $autor['id_autor']; ?>">
+                        <label for="contacto_<?php echo $autor['id_autor']; ?>">Es contacto</label>
                     </div>
                 <?php endforeach; ?>
             </div>
@@ -131,6 +136,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     <label for="nuevo_autor_contacto">Contacto:</label>
                     <input type="text" name="nuevo_autor_contacto[]" placeholder="Contacto">
+
+                    <!-- Checkbox para marcar si es contacto -->
+                    <label for="nuevo_autor_es_contacto">Es contacto:</label>
+                    <input type="checkbox" name="nuevo_autor_es_contacto[]" value="1">
                 </div>
                 <div id="nuevo-autor-container">
                     <div>
@@ -142,9 +151,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                         <label for="nuevo_autor_contacto">Contacto:</label>
                         <input type="text" name="nuevo_autor_contacto[]" placeholder="Contacto">
+
+                        <!-- Checkbox para marcar si es contacto -->
+                        <label for="nuevo_autor_es_contacto">Es contacto:</label>
+                        <input type="checkbox" name="nuevo_autor_es_contacto[]" value="1">
                     </div>
                 </div>
-                <button type="button" id="agregar-otro-autor" onclick="agregarOtroAutor(); return false;">Agregar Otro</button>
+                <button type="button" id="agregar-otro-autor">Agregar Otro</button>
             </div>
 
             <h2>Tópicos del Artículo</h2>
@@ -185,6 +198,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         });
         container.appendChild(div);
     }
+
+    // Agregar el evento al botón (asegúrate de que solo exista este bloque)
+    document.getElementById('agregar-otro-autor').addEventListener('click', (event) => {
+        event.preventDefault();
+        agregarOtroAutor();
+    });
 
     // Asegurar que los campos de título y resumen mantengan sus valores
     const tituloInput = document.getElementById('titulo');

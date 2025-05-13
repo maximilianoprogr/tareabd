@@ -154,3 +154,22 @@ button#agregar-otro-autor:hover {
     border-radius: 5px; /* Bordes redondeados */
     background-color: #f9f9f9; /* Fondo claro */
 }
+
+.nuevo-autor-group {
+        margin: 15px 0;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        background: #f9f9f9;
+    }
+    
+    #nuevo-autor-container {
+        max-height: 60vh; /* Limita la altura máxima */
+        overflow-y: auto; /* Agrega scroll interno si es necesario */
+    }
+
+.nuevo-autor-group {
+    margin: 15px 0;
+    padding: 10px;
+    border: 1px solid #ddd;
+}

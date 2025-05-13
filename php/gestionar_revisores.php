@@ -48,9 +48,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Depuración: Mostrar el valor recibido en el campo email
     echo "<p style='color: blue;'>Valor recibido en el campo email: " . htmlspecialchars($email) . "</p>";
 
+    // Validar que la acción sea válida antes de procesarla
+    $acciones_validas = ['create', 'update', 'delete'];
+    if (!in_array($action, $acciones_validas)) {
+        echo "<p style='color: red;'>Acción no válida: $action</p>";
+        exit();
+    }
+
+    // Ajustar la validación del RUT para que no sea obligatorio en la acción 'create'
+    if ($action === 'delete' && !$rut) {
+        echo "<p style='color: red;'>No se recibió un RUT válido para eliminar.</p>";
+        exit();
+    }
+
+    if (($action === 'update' || $action === 'delete') && !$rut) {
+        echo "<p style='color: red;'>El RUT es obligatorio para la acción $action.</p>";
+        exit();
+    }
+
     // Validar que el RUT no exceda los 10 caracteres
     if (strlen($rut) > 10) {
         echo "<p style='color: red;'>El RUT no puede exceder los 10 caracteres.</p>";
+        exit();
+    }
+
+    // Validar que el RUT no sea nulo antes de ejecutar la consulta
+    if (empty($rut)) {
+        echo "<p style='color: red;'>El RUT no puede ser nulo. Por favor, proporcione un valor válido.</p>";
+        registrarError("Error: El RUT no puede ser nulo.");
         exit();
     }
 
@@ -75,117 +100,167 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    if ($action === 'create' && $rut && $nombre && $email) {
-        // Verificar duplicados por nombre y email
-        $sql_duplicate = "SELECT COUNT(*) FROM Revisor WHERE nombre = ? OR email = ?";
-        $stmt_duplicate = $pdo->prepare($sql_duplicate);
-        $stmt_duplicate->execute([$nombre, $email]);
-        if ($stmt_duplicate->fetchColumn() > 0) {
-            echo "<p style='color: red;'>Ya existe un revisor con el mismo nombre o email.</p>";
-            exit();
-        }
-
-        // Insertar primero en la tabla Usuario
-        try {
-            $sql_usuario = "INSERT INTO Usuario (rut, nombre, email, usuario, password, tipo) VALUES (?, ?, ?, ?, ?, 'Revisor')";
-            $stmt_usuario = $pdo->prepare($sql_usuario);
-            $stmt_usuario->execute([$rut, $nombre, $email, $_POST['userid'], $_POST['password']]);
-            echo "<p style='color: green;'>Usuario agregado exitosamente: RUT=$rut, Nombre=$nombre, Email=$email</p>";
-        } catch (Exception $e) {
-            echo "<p style='color: red;'>Error al agregar usuario: " . $e->getMessage() . "</p>";
-            exit();
-        }
-
-        // Insertar en la tabla Revisor
-        try {
-            $sql_revisor = "INSERT INTO Revisor (rut) VALUES (?)";
-            $stmt_revisor = $pdo->prepare($sql_revisor);
-            $stmt_revisor->execute([$rut]);
-            echo "<p style='color: green;'>Revisor agregado exitosamente: RUT=$rut</p>";
-        } catch (Exception $e) {
-            echo "<p style='color: red;'>Error al agregar revisor: " . $e->getMessage() . "</p>";
-        }
-
-        // Asignar tópicos al revisor
-        $topicos = $_POST['topicos'] ?? [];
-        // Validar que no existan tópicos duplicados al asignar a un revisor
-        if (count($topicos) !== count(array_unique($topicos))) {
-            echo "<p style='color: red;'>No se permiten tópicos duplicados para un revisor.</p>";
-            exit();
-        }
-
-        if (!empty($topicos)) {
-            $sql_topicos = "INSERT INTO Revisor_Topico (rut_revisor, id_topico) VALUES (?, ?)";
-            $stmt_topicos = $pdo->prepare($sql_topicos);
-            foreach ($topicos as $id_topico) {
-                $stmt_topicos->execute([$rut, $id_topico]);
+    // Manejar acciones de forma independiente
+    if ($action === 'create') {
+        // Lógica para crear un revisor
+        if ($nombre && $email && $_POST['userid'] && $_POST['password']) {
+            // Corregir la consulta para verificar duplicados en la tabla Usuario
+            $sql_duplicate = "SELECT COUNT(*) FROM Usuario WHERE nombre = ? OR email = ?";
+            $stmt_duplicate = $pdo->prepare($sql_duplicate);
+            $stmt_duplicate->execute([$nombre, $email]);
+            if ($stmt_duplicate->fetchColumn() > 0) {
+                echo "<p style='color: red;'>Ya existe un usuario con el mismo nombre o email.</p>";
+                exit();
             }
-        } else {
-            echo "<script>alert('Debe asignar al menos un tópico al revisor');</script>";
-        }
-        echo "<script>alert('Revisor agregado exitosamente');</script>";
 
-        // Enviar notificación por email
-        mail($email, "Bienvenido como Revisor", "Hola $nombre, has sido registrado como revisor en el sistema.");
+            // Insertar primero en la tabla Usuario
+            try {
+                $sql_usuario = "INSERT INTO Usuario (rut, nombre, email, usuario, password, tipo) VALUES (?, ?, ?, ?, ?, 'Revisor')";
+                $stmt_usuario = $pdo->prepare($sql_usuario);
+                $stmt_usuario->execute([$rut, $nombre, $email, $_POST['userid'], $_POST['password']]);
+                echo "<p style='color: green;'>Usuario agregado exitosamente: RUT=$rut, Nombre=$nombre, Email=$email</p>";
+            } catch (Exception $e) {
+                $errorMensaje = "Error al agregar usuario: " . $e->getMessage();
+                registrarError($errorMensaje);
+                echo "<p style='color: red;'>$errorMensaje</p>";
+                exit();
+            }
 
-        // Redirigir al usuario después de insertar los datos para actualizar la tabla
-        echo "<script>window.location.href = 'gestionar_revisores.php';</script>";
-    } elseif ($action === 'update' && $rut && $nombre && $email) {
-        $sql = "UPDATE Revisor SET nombre = ?, email = ? WHERE rut = ?";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$nombre, $email, $rut]);
-        echo "<script>alert('Revisor actualizado exitosamente');</script>";
-    } elseif ($action === 'delete' && $rut) {
-        // Depuración: Verificar si la acción y el RUT se reciben correctamente
-        echo "<p style='color: blue;'>Intentando eliminar revisor con RUT: $rut</p>";
-        try {
-            // Verificar si el revisor tiene artículos asignados
-            $sql_check = "SELECT COUNT(*) FROM Articulo_Revisor WHERE rut_revisor = ?";
-            $stmt_check = $pdo->prepare($sql_check);
-            $stmt_check->execute([$rut]);
-            $tiene_articulos = $stmt_check->fetchColumn() > 0;
+            // Insertar en la tabla Revisor
+            try {
+                $sql_revisor = "INSERT INTO Revisor (rut) VALUES (?)";
+                $stmt_revisor = $pdo->prepare($sql_revisor);
+                $stmt_revisor->execute([$rut]);
+                echo "<p style='color: green;'>Revisor agregado exitosamente: RUT=$rut</p>";
+            } catch (Exception $e) {
+                $errorMensaje = "Error al agregar revisor: " . $e->getMessage();
+                registrarError($errorMensaje);
+                echo "<p style='color: red;'>$errorMensaje</p>";
+                exit();
+            }
 
-            if ($tiene_articulos) {
-                echo "<p style='color: red;'>No se puede eliminar un revisor con artículos asignados.</p>";
+            // Asignar tópicos al revisor
+            $topicos = $_POST['topicos'] ?? [];
+            // Validar que no existan tópicos duplicados al asignar a un revisor
+            if (count($topicos) !== count(array_unique($topicos))) {
+                echo "<p style='color: red;'>No se permiten tópicos duplicados para un revisor.</p>";
+                exit();
+            }
+
+            // Validar tópicos enviados
+            if (!empty($topicos)) {
+                foreach ($topicos as $id_topico) {
+                    $sql_validar_topico = "SELECT COUNT(*) FROM Topicos WHERE id = ?";
+                    $stmt_validar_topico = $pdo->prepare($sql_validar_topico);
+                    $stmt_validar_topico->execute([$id_topico]);
+                    if ($stmt_validar_topico->fetchColumn() === 0) {
+                        echo "<p style='color: red;'>El tópico con ID $id_topico no es válido.</p>";
+                        exit();
+                    }
+                }
+            }
+
+            if (!empty($topicos)) {
+                try {
+                    $sql_topicos = "INSERT INTO Revisor_Topico (rut_revisor, id_topico) VALUES (?, ?)";
+                    $stmt_topicos = $pdo->prepare($sql_topicos);
+                    foreach ($topicos as $id_topico) {
+                        $stmt_topicos->execute([$rut, $id_topico]);
+                    }
+                } catch (Exception $e) {
+                    $errorMensaje = "Error al asignar tópicos: " . $e->getMessage();
+                    registrarError($errorMensaje);
+                    echo "<p style='color: red;'>$errorMensaje</p>";
+                    exit();
+                }
             } else {
-                // Eliminar las evaluaciones relacionadas en evaluacion_articulo
-                $sql_delete_evaluaciones = "DELETE FROM evaluacion_articulo WHERE rut_revisor = ?";
-                $stmt_delete_evaluaciones = $pdo->prepare($sql_delete_evaluaciones);
-                $stmt_delete_evaluaciones->execute([$rut]);
-
-                // Depuración: Confirmar eliminación de evaluaciones
-                echo "<p style='color: green;'>Evaluaciones del revisor eliminadas correctamente.</p>";
-
-                // Eliminar el revisor de la tabla Revisor_Topico
-                $sql_delete_topicos = "DELETE FROM Revisor_Topico WHERE rut_revisor = ?";
-                $stmt_delete_topicos = $pdo->prepare($sql_delete_topicos);
-                $stmt_delete_topicos->execute([$rut]);
-
-                // Depuración: Confirmar eliminación de tópicos
-                echo "<p style='color: green;'>Tópicos del revisor eliminados correctamente.</p>";
-
-                // Eliminar el revisor de la tabla Revisor
-                $sql_delete_revisor = "DELETE FROM Revisor WHERE rut = ?";
-                $stmt_delete_revisor = $pdo->prepare($sql_delete_revisor);
-                $stmt_delete_revisor->execute([$rut]);
-
-                // Depuración: Confirmar eliminación de revisor
-                echo "<p style='color: green;'>Revisor eliminado correctamente de la tabla Revisor.</p>";
-
-                // Eliminar el usuario de la tabla Usuario
-                $sql_delete_usuario = "DELETE FROM Usuario WHERE rut = ?";
-                $stmt_delete_usuario = $pdo->prepare($sql_delete_usuario);
-                $stmt_delete_usuario->execute([$rut]);
-
-                // Depuración: Confirmar eliminación de usuario
-                echo "<p style='color: green;'>Usuario eliminado correctamente de la tabla Usuario.</p>";
+                echo "<script>alert('Debe asignar al menos un tópico al revisor');</script>";
             }
-        } catch (Exception $e) {
-            echo "<p style='color: red;'>Error al eliminar revisor: " . $e->getMessage() . "</p>";
+            echo "<script>alert('Revisor agregado exitosamente');</script>";
+
+            // Enviar notificación por email
+            mail($email, "Bienvenido como Revisor", "Hola $nombre, has sido registrado como revisor en el sistema.");
+
+            // Redirigir para recargar la página y mostrar los datos actualizados
+            header("Location: gestionar_revisores.php?success=1");
+            exit();
+            echo "<p style='color: green;'>Revisor creado exitosamente.</p>";
+        } else {
+            echo "<p style='color: red;'>Faltan datos para crear el revisor.</p>";
+        }
+    } elseif ($action === 'update') {
+        // Lógica para actualizar un revisor
+        if ($rut && $nombre && $email) {
+            $sql = "UPDATE Revisor SET nombre = ?, email = ? WHERE rut = ?";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$nombre, $email, $rut]);
+            echo "<script>alert('Revisor actualizado exitosamente');</script>";
+            echo "<p style='color: green;'>Revisor actualizado exitosamente.</p>";
+        } else {
+            echo "<p style='color: red;'>Faltan datos para actualizar el revisor.</p>";
+        }
+    } elseif ($action === 'delete') {
+        // Lógica para eliminar un revisor
+        if ($rut) {
+            // Depuración: Verificar si la acción y el RUT se reciben correctamente
+            echo "<p style='color: blue;'>Intentando eliminar revisor con RUT: $rut</p>";
+            try {
+                // Verificar si el revisor tiene artículos asignados
+                $sql_check = "SELECT COUNT(*) FROM Articulo_Revisor WHERE rut_revisor = ?";
+                $stmt_check = $pdo->prepare($sql_check);
+                $stmt_check->execute([$rut]);
+                $tiene_articulos = $stmt_check->fetchColumn() > 0;
+
+                if ($tiene_articulos) {
+                    echo "<p style='color: red;'>No se puede eliminar un revisor con artículos asignados.</p>";
+                } else {
+                    // Eliminar las evaluaciones relacionadas en evaluacion_articulo
+                    $sql_delete_evaluaciones = "DELETE FROM evaluacion_articulo WHERE rut_revisor = ?";
+                    $stmt_delete_evaluaciones = $pdo->prepare($sql_delete_evaluaciones);
+                    $stmt_delete_evaluaciones->execute([$rut]);
+
+                    // Depuración: Confirmar eliminación de evaluaciones
+                    echo "<p style='color: green;'>Evaluaciones del revisor eliminadas correctamente.</p>";
+
+                    // Eliminar el revisor de la tabla Revisor_Topico
+                    $sql_delete_topicos = "DELETE FROM Revisor_Topico WHERE rut_revisor = ?";
+                    $stmt_delete_topicos = $pdo->prepare($sql_delete_topicos);
+                    $stmt_delete_topicos->execute([$rut]);
+
+                    // Depuración: Confirmar eliminación de tópicos
+                    echo "<p style='color: green;'>Tópicos del revisor eliminados correctamente.</p>";
+
+                    // Eliminar el revisor de la tabla Revisor
+                    $sql_delete_revisor = "DELETE FROM Revisor WHERE rut = ?";
+                    $stmt_delete_revisor = $pdo->prepare($sql_delete_revisor);
+                    $stmt_delete_revisor->execute([$rut]);
+
+                    // Depuración: Confirmar eliminación de revisor
+                    echo "<p style='color: green;'>Revisor eliminado correctamente de la tabla Revisor.</p>";
+
+                    // Eliminar el usuario de la tabla Usuario
+                    $sql_delete_usuario = "DELETE FROM Usuario WHERE rut = ?";
+                    $stmt_delete_usuario = $pdo->prepare($sql_delete_usuario);
+                    $stmt_delete_usuario->execute([$rut]);
+
+                    // Depuración: Confirmar eliminación de usuario
+                    echo "<p style='color: green;'>Usuario eliminado correctamente de la tabla Usuario.</p>";
+                }
+            } catch (Exception $e) {
+                echo "<p style='color: red;'>Error al eliminar revisor: " . $e->getMessage() . "</p>";
+            }
+            echo "<p style='color: green;'>Revisor eliminado exitosamente.</p>";
+        } else {
+            echo "<p style='color: red;'>No se recibió un RUT válido para eliminar.</p>";
         }
     } else {
-        echo "<p style='color: red;'>No se recibió un RUT válido para eliminar.</p>";
+        echo "<p style='color: red;'>Acción no reconocida: $action</p>";
     }
+}
+
+// Depuración adicional para verificar el valor de RUT
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'create') {
+    echo "<p style='color: blue;'>Valor de RUT recibido en el servidor: " . var_export($_POST['rut'], true) . "</p>";
 }
 
 // Leer revisores
@@ -288,11 +363,7 @@ $topicos_disponibles = $stmt_topicos->fetchAll();
     }
     ?>
 
-    <form method="GET" action="alta_revisor.php">
-        <button type="submit" style="font-size: 14px; padding: 10px 20px; background-color: #4CAF50; color: white; border: none; cursor: pointer;">Alta</button>
-    </form>
-
-    <form id="nuevoRevisorForm" method="POST" action="gestionar_revisores.php" style="margin-top: 20px; border: 1px solid #ccc; padding: 15px; display: none;">
+    <form id="nuevoRevisorForm" method="POST" action="gestionar_revisores.php" style="margin-top: 20px; border: 1px solid #ccc; padding: 15px; display: block;">
         <input type="hidden" name="action" value="create">
         <h2 style="font-size: 16px; color: #555;">Nuevo Revisor</h2>
         <label for="nombre" style="font-size: 14px; display: block; margin-bottom: 5px;">Nombre:</label>
@@ -300,7 +371,7 @@ $topicos_disponibles = $stmt_topicos->fetchAll();
         <label for="email" style="font-size: 14px; display: block; margin-bottom: 5px;">Email:</label>
         <input type="email" id="email" name="email" style="width: 100%; padding: 8px; margin-bottom: 10px;" required placeholder="usuario@dominio.com">
         <label for="rut" style="font-size: 14px; display: block; margin-bottom: 5px;">RUT:</label>
-        <input type="text" id="rut" name="rut" style="width: 100%; padding: 8px; margin-bottom: 10px;" required placeholder="Ingrese el RUT">
+        <input type="text" id="rut" name="rut" style="width: 100%; padding: 8px; margin-bottom: 10px;" required placeholder="Ingrese el RUT" value="12345678-9">
         <label for="userid" style="font-size: 14px; display: block; margin-bottom: 5px;">Usuario ID:</label>
         <input type="text" id="userid" name="userid" style="width: 100%; padding: 8px; margin-bottom: 10px;">
         <label for="password" style="font-size: 14px; display: block; margin-bottom: 5px;">Contraseña:</label>
@@ -331,18 +402,56 @@ $topicos_disponibles = $stmt_topicos->fetchAll();
     </script>
 
     <script>
-    // Mostrar el formulario de "Nuevo Revisor" al hacer clic en "Alta"
-    document.addEventListener('DOMContentLoaded', function() {
-        const altaButton = document.querySelector('form[method="POST"] button[type="submit"]');
-        const nuevoRevisorForm = document.getElementById('nuevoRevisorForm');
+    document.getElementById('nuevoRevisorForm').addEventListener('submit', function(event) {
+        const rutField = document.getElementById('rut');
+        if (!rutField.value) {
+            alert('El campo RUT no puede estar vacío. Por favor, ingrese un valor válido.');
+            event.preventDefault();
+        }
+    });
+    </script>
 
-        if (altaButton && nuevoRevisorForm) {
-            altaButton.addEventListener('click', function(event) {
-                event.preventDefault();
-                nuevoRevisorForm.style.display = 'block';
-            });
+    <script>
+    // Depurar el valor del campo RUT antes de enviar el formulario
+    document.getElementById('nuevoRevisorForm').addEventListener('submit', function(event) {
+        const rutField = document.getElementById('rut');
+        console.log('Valor del campo RUT antes de enviar:', rutField.value);
+    });
+    </script>
+
+    <script>
+    // Depurar todos los campos del formulario antes de enviarlo
+    document.getElementById('nuevoRevisorForm').addEventListener('submit', function(event) {
+        const formData = new FormData(this);
+        console.log('Datos del formulario antes de enviar:');
+        for (const [key, value] of formData.entries()) {
+            console.log(`${key}: ${value}`);
         }
     });
     </script>
 </body>
 </html>
+
+<?php
+// Definir la función registrarError para registrar errores en un archivo de log
+function registrarError($mensaje) {
+    $archivoLog = '../logs/errores.log';
+    $fecha = date('Y-m-d H:i:s');
+    file_put_contents($archivoLog, "[$fecha] $mensaje\n", FILE_APPEND);
+}
+
+// Agregar mensajes de depuración para verificar el envío del formulario
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'create') {
+    echo "<p style='color: blue;'>Formulario enviado correctamente. Datos recibidos:</p>";
+    echo "<pre style='color: blue;'>" . print_r($_POST, true) . "</pre>";
+}
+
+// Depurar el valor de RUT recibido
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'create') {
+    if (empty($_POST['rut'])) {
+        echo "<p style='color: red;'>El campo RUT está vacío en el formulario enviado.</p>";
+    } else {
+        echo "<p style='color: green;'>RUT recibido: " . htmlspecialchars($_POST['rut']) . "</p>";
+    }
+}
+?>

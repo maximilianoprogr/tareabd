@@ -95,7 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Enviar Artículo</title>
-    <!-- <link rel="stylesheet" href="../css/enviar_articulo.css"> Archivo CSS externo -->
+    <link rel="stylesheet" href="../css/enviar_articulo.css"> <!-- Archivo CSS externo -->
 </head>
 <body>
     <div class="container">
@@ -113,7 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <h2>Autores</h2>
             <div class="autores" id="autores-container">
                 <?php foreach ($autores as $autor): ?>
-                    <div>
+                    <div class="autor">
                         <input type="checkbox" id="autor_<?php echo $autor['id_autor']; ?>" name="autores[]" value="<?php echo $autor['id_autor']; ?>">
                         <label for="autor_<?php echo $autor['id_autor']; ?>"> 
                             <?php echo htmlspecialchars($autor['nombre']); ?> 
@@ -142,7 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <input type="checkbox" name="nuevo_autor_es_contacto[]" value="1">
                 </div>
                 <div id="nuevo-autor-container">
-                    <div>
+                    <div class="autor">
                         <label for="nuevo_autor_nombre">Nombre:</label>
                         <input type="text" name="nuevo_autor_nombre[]" placeholder="Nombre">
 
@@ -176,47 +176,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <script>
-    let autorCount = 1; // Contador para los autores
+    let autorCount = 1;
 
     function agregarOtroAutor() {
         autorCount++;
         const container = document.getElementById('nuevo-autor-container');
         const template = document.getElementById('nuevo-autor-template').innerHTML;
         const div = document.createElement('div');
-        div.innerHTML = template.replace(/Nuevo Autor/g, `Autor ${autorCount}`);
-        div.querySelectorAll('label').forEach((label) => {
-            const forAttribute = label.getAttribute('for');
-            if (forAttribute) {
-                label.setAttribute('for', `${forAttribute}_${autorCount}`);
-            }
-        });
-        div.querySelectorAll('input').forEach((input) => {
-            const idAttribute = input.getAttribute('id');
-            if (idAttribute) {
-                input.setAttribute('id', `${idAttribute}_${autorCount}`);
-            }
-        });
+        div.innerHTML = template;
         container.appendChild(div);
     }
 
-    // Agregar el evento al botón (asegúrate de que solo exista este bloque)
+    // Solo un event listener para el botón
     document.getElementById('agregar-otro-autor').addEventListener('click', (event) => {
         event.preventDefault();
         agregarOtroAutor();
-    });
-
-    // Asegurar que los campos de título y resumen mantengan sus valores
-    const tituloInput = document.getElementById('titulo');
-    const resumenTextarea = document.getElementById('resumen');
-
-    document.getElementById('agregar-otro-autor').addEventListener('click', (event) => {
-        event.preventDefault();
-        agregarOtroAutor();
-
+        
         // Mantener los valores de título y resumen
+        const tituloInput = document.getElementById('titulo');
+        const resumenTextarea = document.getElementById('resumen');
         tituloInput.value = tituloInput.value;
         resumenTextarea.value = resumenTextarea.value;
     });
-    </script>
+</script>
 </body>
 </html>

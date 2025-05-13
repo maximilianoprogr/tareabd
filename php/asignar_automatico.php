@@ -1,46 +1,45 @@
 <?php
-include('../php/conexion.php');
+require_once 'conexion.php';
 
-// Log: Inicio del proceso de asignación automática
-error_log("[INFO] Inicio del proceso de asignación automática de artículos a revisores.");
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Obtener todos los artículos sin suficientes revisores
+    $query = "SELECT a.id AS articulo_id FROM articulos a
+              LEFT JOIN asignaciones asg ON a.id = asg.articulo_id
+              GROUP BY a.id
+              HAVING COUNT(asg.revisor_id) < 2";
+    $result = $conn->query($query);
 
-// Asignar automáticamente artículos a revisores basados en tópicos
-$sql = "INSERT INTO Articulo_Revisor (id_articulo, rut_revisor)
-        SELECT at.id_articulo, rt.rut_revisor
-        FROM Articulo_Topico at
-        JOIN Revisor_Topico rt ON at.id_topico = rt.id_topico
-        WHERE NOT EXISTS (
-            SELECT 1 FROM Articulo_Revisor ar
-            WHERE ar.id_articulo = at.id_articulo AND ar.rut_revisor = rt.rut_revisor
-        )";
-$pdo->exec($sql);
+    while ($articulo = $result->fetch_assoc()) {
+        $articulo_id = $articulo['articulo_id'];
 
-// Log: Finalización de la asignación
-error_log("[INFO] Asignación automática completada.");
+        // Buscar revisores con tópicos coincidentes
+        $query_revisores = "SELECT r.id AS revisor_id FROM revisores r
+                            JOIN topicos_revisor tr ON r.id = tr.revisor_id
+                            JOIN topicos_articulo ta ON ta.topico_id = tr.topico_id
+                            WHERE ta.articulo_id = ? AND r.id NOT IN (
+                                SELECT autor_id FROM autores WHERE articulo_id = ?
+                            ) AND r.id NOT IN (
+                                SELECT revisor_id FROM asignaciones WHERE articulo_id = ?
+                            )
+                            LIMIT 2";
+        $stmt = $conn->prepare($query_revisores);
+        $stmt->bind_param('iii', $articulo_id, $articulo_id, $articulo_id);
+        $stmt->execute();
+        $revisores = $stmt->get_result();
 
-// Usar sentencias preparadas para resaltar artículos con menos de dos revisores
-$sql_resaltar = "SELECT id_articulo, COUNT(rut_revisor) AS num_revisores
-                 FROM Articulo_Revisor
-                 GROUP BY id_articulo
-                 HAVING num_revisores < 2";
-$stmt_resaltar = $pdo->prepare($sql_resaltar);
-$stmt_resaltar->execute();
-$articulos_pendientes = $stmt_resaltar->fetchAll();
+        while ($revisor = $revisores->fetch_assoc()) {
+            $revisor_id = $revisor['revisor_id'];
 
-if (!empty($articulos_pendientes)) {
-    echo "<h3>Artículos con menos de dos revisores:</h3><ul>";
-    foreach ($articulos_pendientes as $articulo) {
-        echo "<li>Artículo ID: " . htmlspecialchars($articulo['id_articulo']) . "</li>";
+            // Asignar automáticamente
+            $query_asignar = "INSERT INTO asignaciones (articulo_id, revisor_id, tipo_asignacion) VALUES (?, ?, 'automatico')";
+            $stmt_asignar = $conn->prepare($query_asignar);
+            $stmt_asignar->bind_param('ii', $articulo_id, $revisor_id);
+            $stmt_asignar->execute();
+        }
     }
-    echo "</ul>";
-    error_log("[WARNING] Hay artículos con menos de dos revisores.");
+
+    echo "Asignaciones automáticas completadas.";
 } else {
-    echo "<p style='color: green;'>Todos los artículos tienen al menos dos revisores.</p>";
-    error_log("[INFO] Todos los artículos tienen al menos dos revisores.");
+    echo "Método no permitido.";
 }
-
-// Log: Fin del proceso
-error_log("[INFO] Proceso de asignación automática finalizado.");
-
-echo "Asignación automática completada.";
 ?>

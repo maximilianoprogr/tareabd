@@ -103,7 +103,7 @@ $revisores_carga = $pdo->query($sql_revisores)->fetchAll();
 
 // Mostrar tabla de asignación de artículos a revisores
 $sql_articulos = "SELECT a.id_articulo, a.titulo, 
-                  GROUP_CONCAT(DISTINCT CONCAT(u.nombre, ' (', u.rut, ')') SEPARATOR ', ') AS autores,
+                  COALESCE(GROUP_CONCAT(DISTINCT CONCAT(u.nombre, ' (', u.rut, ')') SEPARATOR ', '), 'Sin autores') AS autores,
                   GROUP_CONCAT(DISTINCT t.nombre SEPARATOR ', ') AS topicos,
                   GROUP_CONCAT(DISTINCT r.nombre SEPARATOR ', ') AS revisores
                   FROM Articulo a
@@ -123,9 +123,10 @@ echo '<th>Número</th><th>Título</th><th>Autores</th><th>Tópicos</th><th>Revis
 echo '</tr>';
 foreach ($articulos as $articulo) {
     $resaltado = in_array($articulo['id_articulo'], array_column($articulos_pendientes, 'id_articulo')) ? 'style="background-color: #ffcccc;"' : '';
-    $autores = isset($articulo['autores']) ? htmlspecialchars($articulo['autores']) : 'N/A';
-    $topicos = isset($articulo['topicos']) ? htmlspecialchars($articulo['topicos']) : 'N/A';
-    $revisores = isset($articulo['revisores']) ? htmlspecialchars($articulo['revisores']) : 'N/A';
+    $autores = isset($articulo['autores']) ? str_replace(', ', '<br>', htmlspecialchars($articulo['autores'])) : 'Sin autores';
+    $topicos = isset($articulo['topicos']) ? str_replace(', ', '<br>', htmlspecialchars($articulo['topicos'])) : 'N/A';
+    // Ajustar la visualización de los revisores para que aparezcan en líneas separadas
+    $revisores = isset($articulo['revisores']) ? str_replace(', ', '<br>', htmlspecialchars($articulo['revisores'])) : 'N/A';
     echo "<tr $resaltado>";
     echo '<td>' . htmlspecialchars($articulo['id_articulo']) . '</td>';
     echo '<td>' . htmlspecialchars($articulo['titulo']) . '</td>';
@@ -136,15 +137,23 @@ foreach ($articulos as $articulo) {
     echo '<form method="POST" action="asignar_articulos.php" style="display:inline; margin-bottom: 5px;">';
     echo '<input type="hidden" name="id_articulo" value="' . htmlspecialchars($articulo['id_articulo']) . '">';
     echo '<select name="rut_revisor" style="margin-bottom: 5px;">';
+    // Cambiar el diseño del selector de revisores para que aparezcan en una lista vertical
     foreach ($revisores_disponibles as $revisor) {
         echo '<option value="' . htmlspecialchars($revisor['rut']) . '">' . htmlspecialchars($revisor['nombre']) . '</option>';
     }
-    echo '</select><br>';
+    // Aplicar estilo CSS para lista vertical
+    echo '</select><br>'; // Asegurar separación entre elementos
     echo '<button type="submit" name="asignar" style="background-color: #4CAF50; color: white; border: none; padding: 5px 10px; cursor: pointer;">Asignar</button>';
     echo '</form>';
-    echo '<form method="POST" action="asignar_articulos.php" style="display:inline;">';
+    // Modificar el botón de quitar para redirigir a la nueva página de quitar revisores
+    echo '<form method="GET" action="quitar_revisores.php" style="display:inline;">';
     echo '<input type="hidden" name="id_articulo" value="' . htmlspecialchars($articulo['id_articulo']) . '">';
-    echo '<button type="submit" name="quitar" style="background-color: #f44336; color: white; border: none; padding: 5px 10px; cursor: pointer;">Quitar Revisor</button>';
+    echo '<button type="submit" style="background-color: #f44336; color: white; border: none; padding: 5px 10px; cursor: pointer;">Quitar Revisor</button>';
+    echo '</form>';
+    // Modificar el botón de asignar para redirigir a la nueva página de asignación de revisores
+    echo '<form method="GET" action="asignar_revisores.php" style="display:inline; margin-bottom: 5px;">';
+    echo '<input type="hidden" name="id_articulo" value="' . htmlspecialchars($articulo['id_articulo']) . '">';
+    echo '<button type="submit" style="background-color: #4CAF50; color: white; border: none; padding: 5px 10px; cursor: pointer;">Asignar</button>';
     echo '</form>';
     echo '</td>';
     echo '</tr>';
@@ -296,43 +305,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reasignacion_automati
         <?php endforeach; ?>
     </ul>
 
-    <!-- Tabla de asignación de artículos a revisores -->
-    <h2>Asignación de Artículos a Revisores</h2>
-    <table border="1" style="width: 100%; border-collapse: collapse; text-align: center; font-family: Arial, sans-serif;">
-        <tr style="background-color: #f2f2f2; font-weight: bold;">
-            <th>Número</th><th>Título</th><th>Autores</th><th>Tópicos</th><th>Revisores</th><th>Acciones</th>
-        </tr>
-        <?php
-        foreach ($articulos as $articulo) {
-            $resaltado = in_array($articulo['id_articulo'], array_column($articulos_pendientes, 'id_articulo')) ? 'style="background-color: #ffcccc;"' : '';
-            $autores = isset($articulo['autores']) ? htmlspecialchars($articulo['autores']) : 'N/A';
-            $topicos = isset($articulo['topicos']) ? htmlspecialchars($articulo['topicos']) : 'N/A';
-            $revisores = isset($articulo['revisores']) ? htmlspecialchars($articulo['revisores']) : 'N/A';
-            echo "<tr $resaltado>";
-            echo '<td>' . htmlspecialchars($articulo['id_articulo']) . '</td>';
-            echo '<td>' . htmlspecialchars($articulo['titulo']) . '</td>';
-            echo '<td>' . $autores . '</td>';
-            echo '<td>' . $topicos . '</td>';
-            echo '<td>' . $revisores . '</td>';
-            echo '<td>';
-            echo '<form method="POST" action="asignar_articulos.php" style="display:inline; margin-bottom: 5px;">';
-            echo '<input type="hidden" name="id_articulo" value="' . htmlspecialchars($articulo['id_articulo']) . '">';
-            echo '<select name="rut_revisor" style="margin-bottom: 5px;">';
-            foreach ($revisores_disponibles as $revisor) {
-                echo '<option value="' . htmlspecialchars($revisor['rut']) . '">' . htmlspecialchars($revisor['nombre']) . '</option>';
-            }
-            echo '</select><br>';
-            echo '<button type="submit" name="asignar" style="background-color: #4CAF50; color: white; border: none; padding: 5px 10px; cursor: pointer;">Asignar</button>';
-            echo '</form>';
-            echo '<form method="POST" action="asignar_articulos.php" style="display:inline;">';
-            echo '<input type="hidden" name="id_articulo" value="' . htmlspecialchars($articulo['id_articulo']) . '">';
-            echo '<button type="submit" name="quitar" style="background-color: #f44336; color: white; border: none; padding: 5px 10px; cursor: pointer;">Quitar Revisor</button>';
-            echo '</form>';
-            echo '</td>';
-            echo '</tr>';
-        }
-        ?>
-    </table>
+    
 
     <a href="../php/dashboard.php" class="btn-menu">Volver al Menú Principal</a>
     <a href="dashboard.php" style="font-family: Arial, sans-serif; font-size: 14px; color: #007BFF; text-decoration: none;">Volver al inicio</a>
@@ -359,3 +332,146 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['asignar'])) {
     exit();
 }
 ?>
+
+<?php
+require_once 'conexion.php';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $articulo_id = $_POST['articulo_id'];
+    $revisor_id = $_POST['revisor_id'];
+
+    // Verificar que el revisor no sea autor del artículo
+    $query = "SELECT COUNT(*) as count FROM autores WHERE articulo_id = ? AND autor_id = ?";
+    $stmt = $pdo->prepare($query);
+    $stmt->execute(['articulo_id' => $articulo_id, 'revisor_id' => $revisor_id]);
+    $row = $stmt->fetch();
+
+    if ($row['count'] > 0) {
+        echo "Error: El revisor no puede ser autor del artículo.";
+        exit;
+    }
+
+    // Verificar coincidencia de tópicos
+    $query = "SELECT COUNT(*) as count FROM topicos_articulo ta
+              JOIN topicos_revisor tr ON ta.topico_id = tr.topico_id
+              WHERE ta.articulo_id = ? AND tr.revisor_id = ?";
+    $stmt = $pdo->prepare($query);
+    $stmt->execute(['articulo_id' => $articulo_id, 'revisor_id' => $revisor_id]);
+    $row = $stmt->fetch();
+
+    if ($row['count'] == 0) {
+        echo "Advertencia: Los tópicos del artículo no coinciden con los del revisor.";
+    }
+
+    // Asignar el artículo al revisor
+    $query = "INSERT INTO asignaciones (articulo_id, revisor_id, tipo_asignacion) VALUES (?, ?, 'manual')";
+    $stmt = $pdo->prepare($query);
+
+    if ($stmt->execute(['articulo_id' => $articulo_id, 'revisor_id' => $revisor_id])) {
+        echo "Asignación realizada con éxito.";
+    } else {
+        echo "Error al realizar la asignación.";
+    }
+} else {
+    echo "Método no permitido.";
+}
+?>
+
+<?php
+require_once 'conexion.php';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $articulo_id = $_POST['articulo_id'] ?? null;
+    $revisor_id = $_POST['revisor_id'] ?? null;
+
+    if ($articulo_id && $revisor_id) {
+        // Verificar que el revisor no sea autor del artículo
+        $query = "SELECT COUNT(*) as count FROM autores WHERE articulo_id = :articulo_id AND autor_id = :revisor_id";
+        $stmt = $pdo->prepare($query);
+        $stmt->execute(['articulo_id' => $articulo_id, 'revisor_id' => $revisor_id]);
+        $row = $stmt->fetch();
+
+        if ($row['count'] > 0) {
+            echo "Error: El revisor no puede ser autor del artículo.";
+            exit;
+        }
+
+        // Asignar el artículo al revisor
+        $query = "INSERT INTO asignaciones (articulo_id, revisor_id, tipo_asignacion) VALUES (:articulo_id, :revisor_id, 'manual')";
+        $stmt = $pdo->prepare($query);
+
+        if ($stmt->execute(['articulo_id' => $articulo_id, 'revisor_id' => $revisor_id])) {
+            echo "Asignación realizada con éxito.";
+        } else {
+            echo "Error al realizar la asignación.";
+        }
+    } else {
+        echo "Error: Debes seleccionar tanto un artículo como un revisor.";
+    }
+}
+
+// Obtener artículos y revisores para los formularios
+$articulos = $pdo->query("SELECT id, titulo FROM articulos")->fetchAll();
+$revisores = $pdo->query("SELECT id, nombre FROM revisores")->fetchAll();
+?>
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asignar Artículos y Revisores</title>
+</head>
+<body>
+    <h1>Asignar un Artículo a un Revisor</h1>
+    <form method="POST">
+        <label for="articulo_id">Artículo:</label>
+        <select name="articulo_id" id="articulo_id" required>
+            <option value="">Seleccione un artículo</option>
+            <?php foreach ($articulos as $articulo): ?>
+                <option value="<?= htmlspecialchars($articulo['id']) ?>">
+                    <?= htmlspecialchars($articulo['titulo']) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+
+        <label for="revisor_id">Revisor:</label>
+        <select name="revisor_id" id="revisor_id" required>
+            <option value="">Seleccione un revisor</option>
+            <?php foreach ($revisores as $revisor): ?>
+                <option value="<?= htmlspecialchars($revisor['id']) ?>">
+                    <?= htmlspecialchars($revisor['nombre']) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+
+        <button type="submit">Asignar</button>
+    </form>
+
+    <h1>Asignar un Revisor a un Artículo</h1>
+    <form method="POST">
+        <label for="revisor_id">Revisor:</label>
+        <select name="revisor_id" id="revisor_id" required>
+            <option value="">Seleccione un revisor</option>
+            <?php foreach ($revisores as $revisor): ?>
+                <option value="<?= htmlspecialchars($revisor['id']) ?>">
+                    <?= htmlspecialchars($revisor['nombre']) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+
+        <label for="articulo_id">Artículo:</label>
+        <select name="articulo_id" id="articulo_id" required>
+            <option value="">Seleccione un artículo</option>
+            <?php foreach ($articulos as $articulo): ?>
+                <option value="<?= htmlspecialchars($articulo['id']) ?>">
+                    <?= htmlspecialchars($articulo['titulo']) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+
+        <button type="submit">Asignar</button>
+    </form>
+
+</body>
+</html>

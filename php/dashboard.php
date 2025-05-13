@@ -30,7 +30,7 @@ echo "<div class='welcome'>Bienvenido, " . $_SESSION['usuario'] . "</div>"; // M
 
     <div class="acciones">
         <button onclick="location.href='enviar_articulo.php'" class="action-btn">Enviar Artículo</button>
-        <button onclick="location.href='acceso_articulo.php'" class="action-btn">Acceso al Artículo</button>
+        <button onclick="location.href='acceso_articulo.php?id_articulo=1'" class="action-btn">Acceso al Artículo</button>
         <button onclick="location.href='gestionar_revisores.php'" class="action-btn">Gestión de Revisores</button>
         <button onclick="location.href='asignar_articulos.php'" class="action-btn">Asignación de Artículos</button>
     </div>

@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_articulo'], $_POST
     $stmt_check = $pdo->prepare($sql_check);
     $stmt_check->execute([$id_articulo, $rut_revisor]);
     if ($stmt_check->fetchColumn() > 0) {
-        echo "<p style='color: red;'>No se puede asignar un artículo a un revisor que sea autor.</p>";
+        echo '<p class="error">No se puede asignar un artículo a un revisor que sea autor.</p>';
     } else {
         // Verificar si los tópicos del artículo coinciden con los del revisor
         $sql_topicos = "SELECT COUNT(*) FROM Articulo_Topico at
@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_articulo'], $_POST
         $coincidencias = $stmt_topicos->fetchColumn();
 
         if ($coincidencias == 0) {
-            echo "<p style='color: orange;'>Advertencia: Los tópicos del artículo no coinciden con los del revisor seleccionado.</p>";
+            echo '<p class="warning">Advertencia: Los tópicos del artículo no coinciden con los del revisor seleccionado.</p>';
         }
 
         // Verificar si ya existe la asignación antes de insertar
@@ -48,13 +48,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_articulo'], $_POST
         $stmt_check_duplicate = $pdo->prepare($sql_check_duplicate);
         $stmt_check_duplicate->execute([$id_articulo, $rut_revisor]);
         if ($stmt_check_duplicate->fetchColumn() > 0) {
-            echo "<p style='color: red;'>Error: El artículo ya está asignado a este revisor.</p>";
+            echo '<p class="error">Error: El artículo ya está asignado a este revisor.</p>';
         } else {
             // Asignar el artículo al revisor
             $sql_assign = "INSERT INTO Articulo_Revisor (id_articulo, rut_revisor) VALUES (?, ?)";
             $stmt_assign = $pdo->prepare($sql_assign);
             $stmt_assign->execute([$id_articulo, $rut_revisor]);
-            echo "<p style='color: green;'>Artículo asignado exitosamente.</p>";
+            echo '<p class="success">Artículo asignado exitosamente.</p>';
         }
     }
 }
@@ -150,7 +150,7 @@ foreach ($articulos as $articulo) {
     echo '<input type="hidden" name="id_articulo" value="' . htmlspecialchars($articulo['id_articulo']) . '">';
     echo '<button type="submit" style="background-color: #f44336; color: white; border: none; padding: 5px 10px; cursor: pointer;">Quitar Revisor</button>';
     echo '</form>';
-    // Modificar el botón de asignar para redirigir a la nueva página de asignación de revisores
+    // Restaurar el botón "Asignar" que redirige a la página de asignar revisores
     echo '<form method="GET" action="asignar_revisores.php" style="display:inline; margin-bottom: 5px;">';
     echo '<input type="hidden" name="id_articulo" value="' . htmlspecialchars($articulo['id_articulo']) . '">';
     echo '<button type="submit" style="background-color: #4CAF50; color: white; border: none; padding: 5px 10px; cursor: pointer;">Asignar</button>';
@@ -158,6 +158,28 @@ foreach ($articulos as $articulo) {
     echo '</td>';
     echo '</tr>';
 }
+
+// Agregar botones "Quitar Artículo" y "Asignar Artículo" en la tabla
+foreach ($articulos as $articulo) {
+    echo '<tr>';
+    echo '<td>' . htmlspecialchars($articulo['id_articulo']) . '</td>';
+    echo '<td>' . htmlspecialchars($articulo['titulo']) . '</td>';
+    echo '<td>' . $autores . '</td>';
+    echo '<td>' . $topicos . '</td>';
+    echo '<td>' . $revisores . '</td>';
+    echo '<td>';
+    echo '<form method="POST" action="asignar_revisores.php" style="display:inline; margin-bottom: 5px;">';
+    echo '<input type="hidden" name="id_articulo" value="' . htmlspecialchars($articulo['id_articulo']) . '">';
+    echo '<button type="submit" style="background-color: #4CAF50; color: white; border: none; padding: 5px 10px; cursor: pointer;">Asignar Artículo</button>';
+    echo '</form>';
+    echo '<form method="POST" action="quitar_revisores.php" style="display:inline;">';
+    echo '<input type="hidden" name="id_articulo" value="' . htmlspecialchars($articulo['id_articulo']) . '">';
+    echo '<button type="submit" style="background-color: #f44336; color: white; border: none; padding: 5px 10px; cursor: pointer;">Quitar Artículo</button>';
+    echo '</form>';
+    echo '</td>';
+    echo '</tr>';
+}
+
 echo '</table>';
 
 // Función para obtener artículos con menos de dos revisores
@@ -245,6 +267,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reasignacion_automati
         .btn-menu:hover {
             background-color: #218838;
         }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: Arial, sans-serif;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #ddd;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            margin: 5px;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        .warning {
+            color: orange;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -305,7 +372,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reasignacion_automati
         <?php endforeach; ?>
     </ul>
 
-    
+    <!-- Agregar una tabla al final de la página para mostrar "Asignar Artículos" -->
+    <h2 style="text-align: center; margin-top: 20px;">Asignar Artículos</h2>
+    <table border="1" style="width: 100%; border-collapse: collapse; text-align: center; font-family: Arial, sans-serif; margin-top: 20px;">
+        <tr style="background-color: #f2f2f2; font-weight: bold;">
+            <th>Miembro</th><th>Tópicos</th><th>Artículos Asignados</th>
+        </tr>
+        <?php
+        // Modificar la consulta para obtener los títulos de los artículos asignados
+        $sql_miembros = "SELECT u.nombre AS miembro, 
+                                GROUP_CONCAT(DISTINCT t.nombre SEPARATOR '\n') AS topicos, 
+                                GROUP_CONCAT(DISTINCT a.titulo SEPARATOR '\n') AS articulos_asignados
+                         FROM Usuario u
+                         LEFT JOIN Revisor_Topico rt ON u.rut = rt.rut_revisor
+                         LEFT JOIN Topico t ON rt.id_topico = t.id_topico
+                         LEFT JOIN Articulo_Revisor ar ON u.rut = ar.rut_revisor
+                         LEFT JOIN Articulo a ON ar.id_articulo = a.id_articulo
+                         WHERE u.tipo = 'Revisor'
+                         GROUP BY u.nombre";
+        $stmt_miembros = $pdo->query($sql_miembros);
+        $miembros = $stmt_miembros->fetchAll();
+
+        foreach ($miembros as $miembro) {
+            echo '<tr>';
+            echo '<td>' . htmlspecialchars($miembro['miembro']) . '</td>';
+            echo '<td style="white-space: pre-line;">' . htmlspecialchars($miembro['topicos']) . '</td>';
+            // Ajustar la visualización de los artículos asignados para que aparezcan en líneas separadas
+            echo '<td style="white-space: pre-line;">' . (isset($miembro['articulos_asignados']) ? htmlspecialchars($miembro['articulos_asignados']) : 'N/A') . '</td>';
+            echo '</tr>';
+        }
+        ?>
+    </table>
+
+    <!-- Agregar botones de "Asignar Artículo" y "Eliminar" en la tabla de miembros -->
+    <?php
+    // Limitar el texto mostrado en las celdas largas y agregar un botón "Ver más" para expandir contenido
+    foreach ($miembros as $miembro) {
+        echo '<tr>';
+        echo '<td>' . htmlspecialchars($miembro['miembro']) . '</td>';
+        echo '<td style="white-space: pre-line; max-width: 200px; overflow: hidden; text-overflow: ellipsis;">' . htmlspecialchars($miembro['topicos']) . '</td>';
+        echo '<td style="white-space: pre-line; max-width: 200px; overflow: hidden; text-overflow: ellipsis;">';
+        echo '<div style="max-height: 100px; overflow: hidden;">' . (isset($miembro['articulos_asignados']) ? htmlspecialchars($miembro['articulos_asignados']) : 'N/A') . '</div>';
+        echo '<button onclick="this.previousElementSibling.style.maxHeight = this.previousElementSibling.style.maxHeight === \"100px\" ? \"none\" : \"100px\";">Ver más</button>';
+        echo '</td>';
+        echo '<td style="display: flex; justify-content: space-between;">';
+        echo '<button style="background-color: #4CAF50; color: white; border: none; padding: 5px 10px; cursor: pointer;">Asignar Artículo</button>';
+        echo '<button style="background-color: #f44336; color: white; border: none; padding: 5px 10px; cursor: pointer;">Eliminar</button>';
+        echo '</td>';
+        echo '</tr>';
+    }
+    ?>
 
     <a href="../php/dashboard.php" class="btn-menu">Volver al Menú Principal</a>
     <a href="dashboard.php" style="font-family: Arial, sans-serif; font-size: 14px; color: #007BFF; text-decoration: none;">Volver al inicio</a>

@@ -38,8 +38,19 @@ if (!isset($_GET['revision'])) {
     <h1 style="font-family: Arial, sans-serif; color: #333;">Revisión <?php echo $revision; ?></h1>
 
     <!-- Mostrar el formulario solo si se seleccionó una revisión -->
-    <?php if (isset($_GET['revision'])): ?>
-        <p style="font-size: 14px; color: #555;">El formulario de evaluación no está disponible en esta página.</p>
+    <?php if (!$resultados_publicados && ($_SESSION['rol'] === 'admin' || $_SESSION['rol'] === 'Jefe Comite de Programa' || $_GET['revision'] === $_SESSION['usuario'])): ?>
+        <p style="font-family: Arial, sans-serif; color: #555;">Aún no está listo.</p>
+        <form method="POST" action="crear_articulo.php" style="margin-top: 20px;">
+            <label for="titulo">Título:</label>
+            <input type="text" id="titulo" name="titulo" required style="display: block; margin-bottom: 10px;">
+
+            <label for="resumen">Resumen:</label>
+            <textarea id="resumen" name="resumen" required style="display: block; margin-bottom: 10px;"></textarea>
+
+            <button type="submit" style="padding: 10px 15px; background-color: #28a745; color: white; border: none; border-radius: 5px;">Crear Artículo</button>
+        </form>
+    <?php elseif ($resultados_publicados): ?>
+        <p style="font-family: Arial, sans-serif; color: #555;">El formulario de evaluación no está disponible en esta página.</p>
     <?php endif; ?>
 
     <br><br>

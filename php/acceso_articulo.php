@@ -97,13 +97,44 @@ if ($articulo_seleccionado) {
 
     <!-- Formulario de Evaluación se muestra solo si se accede a una revisión -->
     <?php if (isset($_GET['revision'])): ?>
-        <!-- Eliminado el formulario de evaluación de esta página -->
-        <p style="font-size: 14px; color: #555;">El formulario de evaluación no está disponible en esta página.</p>
-    <?php endif; ?>
-
-    <!-- Formulario de Evaluación en modo consulta si los resultados han sido publicados -->
-    <?php if ($resultados_publicados): ?>
-        <p style="font-size: 14px; color: #555;">El formulario de evaluación no está disponible en esta página.</p>
+        <?php
+        // Depuración de valores
+        echo "<p style='color: blue;'>Valor de revision: " . htmlspecialchars($_GET['revision']) . "</p>";
+        echo "<p style='color: blue;'>Usuario actual: " . htmlspecialchars($_SESSION['usuario']) . "</p>";
+        echo "<p style='color: blue;'>Rol actual: " . htmlspecialchars($_SESSION['rol']) . "</p>";
+        echo "<p style='color: blue;'>Es revisor: " . ($es_revisor ? 'Sí' : 'No') . "</p>";
+        echo "<p style='color: blue;'>Revisores asignados: " . implode(', ', $revisores) . "</p>";
+        echo "<p style='color: blue;'>Resultados publicados: " . ($resultados_publicados ? 'Sí' : 'No') . "</p>";
+        ?>
+        <?php if (!$resultados_publicados && ($es_revisor && in_array($_SESSION['usuario'], $revisores) || $_SESSION['rol'] === 'admin' || $_SESSION['rol'] === 'Jefe Comite de Programa')): ?>
+            <p style="font-size: 14px; color: #555;">Aún no está listo.</p>
+            <table border="1" style="width: 100%; margin-top: 20px;">
+                <thead>
+                    <tr>
+                        <th>Título</th>
+                        <th>Resumen</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <form method="POST" action="crear_articulo.php">
+                            <td>
+                                <input type="text" id="titulo" name="titulo" required style="width: 100%;">
+                            </td>
+                            <td>
+                                <textarea id="resumen" name="resumen" required style="width: 100%;"></textarea>
+                            </td>
+                            <td>
+                                <button type="submit" style="padding: 10px 15px; background-color: #28a745; color: white; border: none; border-radius: 5px;">Crear Artículo</button>
+                            </td>
+                        </form>
+                    </tr>
+                </tbody>
+            </table>
+        <?php elseif ($resultados_publicados): ?>
+            <p style="font-size: 14px; color: #555;">El formulario de evaluación no está disponible en esta página.</p>
+        <?php endif; ?>
     <?php endif; ?>
 
     <a href="dashboard.php" style="font-family: Arial, sans-serif; font-size: 14px; color: #007BFF; text-decoration: none;">Volver al inicio</a>

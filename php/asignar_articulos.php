@@ -151,6 +151,70 @@ foreach ($articulos as $articulo) {
 }
 echo '</table>';
 
+// Función para obtener artículos con menos de dos revisores
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['articulos_pendientes'])) {
+    $sql_pendientes = "SELECT a.id_articulo, a.titulo, COUNT(ar.rut_revisor) AS num_revisores
+                       FROM Articulo a
+                       LEFT JOIN Articulo_Revisor ar ON a.id_articulo = ar.id_articulo
+                       GROUP BY a.id_articulo
+                       HAVING num_revisores < 2";
+    $stmt_pendientes = $pdo->query($sql_pendientes);
+    $articulos_pendientes = $stmt_pendientes->fetchAll();
+
+    echo "<h3>Artículos con menos de dos revisores:</h3>";
+    foreach ($articulos_pendientes as $articulo) {
+        echo "<p>ID: {$articulo['id_articulo']}, Título: {$articulo['titulo']}, Revisores: {$articulo['num_revisores']}</p>";
+    }
+}
+
+// Función para asignación automática
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['asignacion_automatica'])) {
+    $sql_articulos = "SELECT id_articulo, titulo FROM Articulo";
+    $articulos = $pdo->query($sql_articulos)->fetchAll();
+
+    $sql_revisores = "SELECT rut, GROUP_CONCAT(id_topico) AS topicos FROM Revisor_Topico GROUP BY rut";
+    $revisores = $pdo->query($sql_revisores)->fetchAll();
+
+    foreach ($articulos as $articulo) {
+        foreach ($revisores as $revisor) {
+            $topicos_articulo = explode(',', $articulo['id_topico']);
+            $topicos_revisor = explode(',', $revisor['topicos']);
+
+            if (array_intersect($topicos_articulo, $topicos_revisor)) {
+                $sql_asignar = "INSERT IGNORE INTO Articulo_Revisor (id_articulo, rut_revisor) VALUES (?, ?)";
+                $stmt_asignar = $pdo->prepare($sql_asignar);
+                $stmt_asignar->execute([$articulo['id_articulo'], $revisor['rut']]);
+            }
+        }
+    }
+
+    echo "<p>Asignación automática completada.</p>";
+}
+
+// Función para reasignación automática sin perder asignaciones manuales
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reasignacion_automatica'])) {
+    $sql_articulos = "SELECT id_articulo, titulo FROM Articulo";
+    $articulos = $pdo->query($sql_articulos)->fetchAll();
+
+    $sql_revisores = "SELECT rut, GROUP_CONCAT(id_topico) AS topicos FROM Revisor_Topico GROUP BY rut";
+    $revisores = $pdo->query($sql_revisores)->fetchAll();
+
+    foreach ($articulos as $articulo) {
+        foreach ($revisores as $revisor) {
+            $topicos_articulo = explode(',', $articulo['id_topico']);
+            $topicos_revisor = explode(',', $revisor['topicos']);
+
+            if (array_intersect($topicos_articulo, $topicos_revisor)) {
+                $sql_asignar = "INSERT IGNORE INTO Articulo_Revisor (id_articulo, rut_revisor) VALUES (?, ?)";
+                $stmt_asignar = $pdo->prepare($sql_asignar);
+                $stmt_asignar->execute([$articulo['id_articulo'], $revisor['rut']]);
+            }
+        }
+    }
+
+    echo "<p>Reasignación automática completada sin perder asignaciones manuales.</p>";
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -216,6 +280,12 @@ echo '</table>';
     <form method="POST">
         <input type="hidden" name="asignar_automatico" value="1">
         <input type="submit" value="Asignar Automáticamente">
+    </form>
+
+    <!-- Botón para reasignación automática sin perder asignaciones manuales -->
+    <form method="POST">
+        <input type="hidden" name="reasignacion_automatica" value="1">
+        <input type="submit" value="Reasignar Automáticamente sin perder asignaciones manuales">
     </form>
 
     <!-- Mostrar carga de trabajo de los revisores -->

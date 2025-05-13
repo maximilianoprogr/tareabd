@@ -88,8 +88,9 @@ if ($articulo_seleccionado) {
 
             <?php if ($es_revisor): ?>
                 <a href="editar_articulo.php?id_articulo=<?php echo $articulo_seleccionado; ?>" style="padding: 10px 15px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px;">Editar</a>
-            <?php else: ?>
-                <a href="formulario_articulo.php?id_articulo=<?php echo $articulo_seleccionado; ?>" style="padding: 10px 15px; background-color: #007BFF; color: white; text-decoration: none; border-radius: 5px;">Ver</a>
+                <?php if ($es_revisor && in_array($_SESSION['usuario'], $revisores) || $_SESSION['rol'] === 'admin' || $_SESSION['rol'] === 'Jefe Comite de Programa'): ?>
+                    <a href="crear_articulo.php" style="padding: 10px 15px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px;">Crear</a>
+                <?php endif; ?>
             <?php endif; ?>
         </div>
     <?php endif; ?>

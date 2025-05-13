@@ -126,36 +126,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <div>
-                <h3>Crear Nuevo Autor</h3>
+            <h3>Crear Nuevo Autor</h3>
                 <div id="nuevo-autor-template" style="display: none;">
-                    <label for="nuevo_autor_nombre">Nombre:</label>
-                    <input type="text" name="nuevo_autor_nombre[]" placeholder="Nombre">
-
-                    <label for="nuevo_autor_email">Email:</label>
-                    <input type="email" name="nuevo_autor_email[]" placeholder="Email">
-
-                    <label for="nuevo_autor_contacto">Contacto:</label>
-                    <input type="text" name="nuevo_autor_contacto[]" placeholder="Contacto">
-
-                    <!-- Checkbox para marcar si es contacto -->
-                    <label for="nuevo_autor_es_contacto">Es contacto:</label>
-                    <input type="checkbox" name="nuevo_autor_es_contacto[]" value="1">
+                    <div class="nuevo-autor-group">
+                        <div class="autor">
+                            <label>Nombre:</label>
+                            <input type="text" name="nuevo_autor_nombre[]" placeholder="Nombre">
+                        </div>
+                        <div class="autor">
+                            <label>Email:</label>
+                            <input type="email" name="nuevo_autor_email[]" placeholder="Email">
+                        </div>
+                        <div class="autor">
+                            <label>Contacto:</label>
+                            <input type="text" name="nuevo_autor_contacto[]" placeholder="Contacto">
+                        </div>
+                        <div class="autor">
+                            <label>Es contacto:</label>
+                            <input type="checkbox" name="nuevo_autor_es_contacto[]" value="1">
+                        </div>
+                    </div>
                 </div>
                 <div id="nuevo-autor-container">
-                    <div class="autor">
-                        <label for="nuevo_autor_nombre">Nombre:</label>
-                        <input type="text" name="nuevo_autor_nombre[]" placeholder="Nombre">
-
-                        <label for="nuevo_autor_email">Email:</label>
-                        <input type="email" name="nuevo_autor_email[]" placeholder="Email">
-
-                        <label for="nuevo_autor_contacto">Contacto:</label>
-                        <input type="text" name="nuevo_autor_contacto[]" placeholder="Contacto">
-
-                        <!-- Checkbox para marcar si es contacto -->
-                        <label for="nuevo_autor_es_contacto">Es contacto:</label>
-                        <input type="checkbox" name="nuevo_autor_es_contacto[]" value="1">
-                    </div>
+                    <!-- El primer grupo de campos ya está aquí -->
                 </div>
                 <button type="button" id="agregar-otro-autor">Agregar Otro</button>
             </div>
@@ -179,24 +172,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     let autorCount = 1;
 
     function agregarOtroAutor() {
-        autorCount++;
         const container = document.getElementById('nuevo-autor-container');
         const template = document.getElementById('nuevo-autor-template').innerHTML;
+        
+        // Guardar posición actual del scroll
+        const scrollPosition = window.scrollY;
+        
+        // Crear y agregar el nuevo grupo de campos
         const div = document.createElement('div');
         div.innerHTML = template;
         container.appendChild(div);
+        
+        // Ajustar el scroll después de que el navegador renderice el cambio
+        setTimeout(() => {
+            window.scrollTo(0, scrollPosition);
+        }, 0);
     }
 
-    // Solo un event listener para el botón
     document.getElementById('agregar-otro-autor').addEventListener('click', (event) => {
         event.preventDefault();
         agregarOtroAutor();
-        
-        // Mantener los valores de título y resumen
-        const tituloInput = document.getElementById('titulo');
-        const resumenTextarea = document.getElementById('resumen');
-        tituloInput.value = tituloInput.value;
-        resumenTextarea.value = resumenTextarea.value;
     });
 </script>
 </body>

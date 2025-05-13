@@ -20,7 +20,8 @@ body {
     text-align: center;
 }
 
-h1, h2 {
+h1,
+h2 {
     color: #333;
     margin-bottom: 20px;
 }
@@ -49,7 +50,8 @@ textarea {
     resize: none;
 }
 
-.autores, .topicos {
+.autores,
+.topicos {
     margin-bottom: 20px;
 }
 
@@ -101,4 +103,46 @@ a.back-link {
 
 a.back-link:hover {
     text-decoration: underline;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+table th,
+table td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: center;
+}
+
+table th {
+    background-color: #f4f4f9;
+    font-weight: bold;
+}
+
+.topicos div {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.topicos label {
+    margin-left: 5px;
+}
+
+button#agregar-otro-autor {
+    margin-top: 10px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button#agregar-otro-autor:hover {
+    background-color: #0056b3;
 }

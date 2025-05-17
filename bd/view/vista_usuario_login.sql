@@ -8,5 +8,5 @@ SELECT
         WHEN EXISTS (SELECT 1 FROM Autor WHERE rut = usuario.rut) THEN 'Autor'
         WHEN EXISTS (SELECT 1 FROM Revisor WHERE rut = usuario.rut) THEN 'Revisor'
         ELSE 'Jefe Comite de Programa'
-    END AS tipo
+    END AS rol
 FROM Usuario usuario;

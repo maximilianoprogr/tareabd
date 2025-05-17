@@ -1,4 +1,3 @@
-Hola seba. chupalo seba
 <?php
 session_start();
 if (isset($_SESSION['user_id'])) {

@@ -75,3 +75,6 @@
 
 7. **Probar Diseño**:
    - Navegar por las páginas para confirmar que el diseño es consistente y responsivo gracias a Bootstrap.
+
+Se uso un prodecedimiento almacenado en "gestionar_asignaciones.php", la funcion AsignarArticuloRevisor.sql
+

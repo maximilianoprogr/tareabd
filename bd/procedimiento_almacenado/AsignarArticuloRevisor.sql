@@ -34,4 +34,4 @@ BEGIN
     VALUES (p_id_articulo, p_rut_revisor);
 END$$
 
-DELIMITER ;
+DELIMITER;

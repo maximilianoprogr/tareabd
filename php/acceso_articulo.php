@@ -35,6 +35,18 @@ if ($articulo_seleccionado) {
     $revisores = $stmt_revisores->fetchAll(PDO::FETCH_COLUMN);
 }
 
+// Redirigir automáticamente si no se seleccionó un artículo
+if (!$articulo_seleccionado) {
+    header("Location: dashboard.php?error=seleccione_articulo");
+    exit();
+}
+
+if (empty($revisores)) {
+    echo '<p style="font-family: Arial, sans-serif; color: red;">No hay revisores asignados a este artículo.</p>';
+    echo '<a href="dashboard.php" style="font-family: Arial, sans-serif; font-size: 14px; color: #007BFF; text-decoration: none;">Volver al inicio</a>';
+    exit();
+}
+
 // Verificar si los resultados de la revisión han sido publicados
 $resultados_publicados = false;
 if ($articulo_seleccionado) {

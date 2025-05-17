@@ -83,6 +83,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         echo "<p style='color: green;'>Artículo enviado exitosamente.</p>";
+        
+        // Redirigir al usuario de vuelta al formulario con los datos llenados
+        if (!headers_sent()) {
+            header("Location: formulario_articulo.php?id_articulo=$id_articulo");
+            exit();
+        } else {
+            echo "<script>window.location.href='formulario_articulo.php?id_articulo=$id_articulo';</script>";
+            exit();
+        }
     } catch (Exception $e) {
         echo "<p style='color: red;'>Error al enviar el artículo: " . $e->getMessage() . "</p>";
     }

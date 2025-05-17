@@ -19,10 +19,9 @@ if (isset($_GET['revision'])) {
     $resultados_publicados = $stmt_resultados->fetchColumn() > 0;
 }
 
-// Mostrar contenido solo si se seleccionó una revisión
+// Verificar si se seleccionó una revisión, de lo contrario redirigir al usuario
 if (!isset($_GET['revision'])) {
-    echo '<p style="font-family: Arial, sans-serif; color: #555;">Por favor, seleccione una revisión para continuar.</p>';
-    echo '<a href="acceso_articulo.php" style="font-family: Arial, sans-serif; font-size: 14px; color: #007BFF; text-decoration: none;">Volver</a>';
+    header("Location: acceso_articulo.php?error=seleccione_revision");
     exit();
 }
 ?>
@@ -38,38 +37,67 @@ if (!isset($_GET['revision'])) {
     <h1 style="font-family: Arial, sans-serif; color: #333;">Revisión <?php echo $revision; ?></h1>
 
     <!-- Mostrar el formulario solo si se seleccionó una revisión -->
-    <?php if (!$resultados_publicados && ($_SESSION['rol'] === 'admin' || $_SESSION['rol'] === 'Jefe Comite de Programa' || $_GET['revision'] === $_SESSION['usuario'])): ?>
-        <p style="font-family: Arial, sans-serif; font-size: 18px; color: #333; margin-bottom: 20px;">Formulario de Evaluación</p>
-        <form method="POST" action="procesar_evaluacion.php" style="margin-top: 20px; padding: 20px; border: 1px solid #ccc; border-radius: 10px; background-color: #f9f9f9;">
-            <div style="margin-bottom: 15px;">
-                <label for="calidad_tecnica" style="font-family: Arial, sans-serif; font-size: 14px; color: #555;">Calidad Técnica:</label>
-                <input type="checkbox" id="calidad_tecnica" name="calidad_tecnica" value="1" style="margin-left: 10px;">
-            </div>
+    <?php if (isset($_GET['revision'])): ?>
+        <?php if ($resultados_publicados): ?>
+            <h2 style="font-family: Arial, sans-serif; color: #555;">Formulario de Evaluación (Modo Consulta)</h2>
+            <form style="border: 1px solid #ccc; padding: 15px;">
+                <div style="margin-bottom: 15px;">
+                    <label for="calidad_tecnica" style="font-size: 14px; display: block; margin-bottom: 5px;">Calidad Técnica:</label>
+                    <input type="checkbox" id="calidad_tecnica" name="calidad_tecnica" disabled>
+                </div>
 
-            <div style="margin-bottom: 15px;">
-                <label for="originalidad" style="font-family: Arial, sans-serif; font-size: 14px; color: #555;">Originalidad:</label>
-                <input type="checkbox" id="originalidad" name="originalidad" value="1" style="margin-left: 10px;">
-            </div>
+                <div style="margin-bottom: 15px;">
+                    <label for="originalidad" style="font-size: 14px; display: block; margin-bottom: 5px;">Originalidad:</label>
+                    <input type="checkbox" id="originalidad" name="originalidad" disabled>
+                </div>
 
-            <div style="margin-bottom: 15px;">
-                <label for="valoracion_global" style="font-family: Arial, sans-serif; font-size: 14px; color: #555;">Valoración Global:</label>
-                <input type="checkbox" id="valoracion_global" name="valoracion_global" value="1" style="margin-left: 10px;">
-            </div>
+                <div style="margin-bottom: 15px;">
+                    <label for="valoracion_global" style="font-size: 14px; display: block; margin-bottom: 5px;">Valoración Global:</label>
+                    <input type="checkbox" id="valoracion_global" name="valoracion_global" disabled>
+                </div>
 
-            <div style="margin-bottom: 15px;">
-                <label for="argumentos_valoracion" style="font-family: Arial, sans-serif; font-size: 14px; color: #555;">Argumentos Valoración Global:</label>
-                <textarea id="argumentos_valoracion" name="argumentos_valoracion" required style="width: 100%; height: 80px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-family: Arial, sans-serif; font-size: 14px; color: #555;"></textarea>
-            </div>
+                <div style="margin-bottom: 15px;">
+                    <label for="argumentos_valoracion" style="font-size: 14px; display: block; margin-bottom: 5px;">Argumentos de Valoración Global:</label>
+                    <textarea id="argumentos_valoracion" name="argumentos_valoracion" rows="3" style="width: 100%; font-size: 12px; padding: 5px; border: 1px solid #ccc;" readonly></textarea>
+                </div>
 
-            <div style="margin-bottom: 15px;">
-                <label for="comentarios_autores" style="font-family: Arial, sans-serif; font-size: 14px; color: #555;">Comentarios a Autores:</label>
-                <textarea id="comentarios_autores" name="comentarios_autores" required style="width: 100%; height: 80px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-family: Arial, sans-serif; font-size: 14px; color: #555;"></textarea>
-            </div>
+                <div style="margin-bottom: 15px;">
+                    <label for="comentarios_autores" style="font-size: 14px; display: block; margin-bottom: 5px;">Comentarios a Autores:</label>
+                    <textarea id="comentarios_autores" name="comentarios_autores" rows="3" style="width: 100%; font-size: 12px; padding: 5px; border: 1px solid #ccc;" readonly></textarea>
+                </div>
+            </form>
+        <?php else: ?>
+            <!-- Formulario editable si los resultados no están publicados -->
+            <h2 style="font-family: Arial, sans-serif; color: #555;">Formulario de Evaluación</h2>
+            <form style="border: 1px solid #ccc; padding: 15px;">
+                <div style="margin-bottom: 15px;">
+                    <label for="calidad_tecnica" style="font-size: 14px; display: block; margin-bottom: 5px;">Calidad Técnica:</label>
+                    <input type="checkbox" id="calidad_tecnica" name="calidad_tecnica">
+                </div>
 
-            <button type="submit" style="padding: 10px 20px; background-color: #28a745; color: white; border: none; border-radius: 5px; font-family: Arial, sans-serif; font-size: 14px; cursor: pointer;">Enviar Evaluación</button>
-        </form>
-    <?php elseif ($resultados_publicados): ?>
-        <p style="font-family: Arial, sans-serif; color: #555;">El formulario de evaluación no está disponible en esta página.</p>
+                <div style="margin-bottom: 15px;">
+                    <label for="originalidad" style="font-size: 14px; display: block; margin-bottom: 5px;">Originalidad:</label>
+                    <input type="checkbox" id="originalidad" name="originalidad">
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label for="valoracion_global" style="font-size: 14px; display: block; margin-bottom: 5px;">Valoración Global:</label>
+                    <input type="checkbox" id="valoracion_global" name="valoracion_global">
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label for="argumentos_valoracion" style="font-size: 14px; display: block; margin-bottom: 5px;">Argumentos de Valoración Global:</label>
+                    <textarea id="argumentos_valoracion" name="argumentos_valoracion" rows="3" style="width: 100%; font-size: 12px; padding: 5px; border: 1px solid #ccc;"></textarea>
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label for="comentarios_autores" style="font-size: 14px; display: block; margin-bottom: 5px;">Comentarios a Autores:</label>
+                    <textarea id="comentarios_autores" name="comentarios_autores" rows="3" style="width: 100%; font-size: 12px; padding: 5px; border: 1px solid #ccc;"></textarea>
+                </div>
+
+                <button type="submit" style="font-size: 14px; padding: 10px 20px; background-color: #4CAF50; color: white; border: none; cursor: pointer;">Enviar Evaluación</button>
+            </form>
+        <?php endif; ?>
     <?php endif; ?>
 
     <br><br>

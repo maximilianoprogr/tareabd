@@ -16,6 +16,30 @@ $sql_asignaciones = "SELECT a.id_articulo, a.titulo,
                       GROUP BY a.id_articulo";
 $stmt_asignaciones = $pdo->query($sql_asignaciones);
 $asignaciones = $stmt_asignaciones->fetchAll();
+// Mostrar artículos con menos de dos revisores
+$query_articulos = "SELECT a.id, a.titulo, COUNT(asg.revisor_id) AS num_revisores
+                    FROM articulos a
+                    LEFT JOIN asignaciones asg ON a.id = asg.articulo_id
+                    GROUP BY a.id
+                    HAVING num_revisores < 2";
+$result_articulos = $conn->query($query_articulos);
+
+$articulos_menos_revisores = [];
+while ($articulo = $result_articulos->fetch_assoc()) {
+    $articulos_menos_revisores[] = $articulo;
+}
+
+// Mostrar número de artículos asignados a cada revisor
+$query_revisores = "SELECT r.id, r.nombre, COUNT(asg.articulo_id) AS num_articulos
+                    FROM revisores r
+                    LEFT JOIN asignaciones asg ON r.id = asg.revisor_id
+                    GROUP BY r.id";
+$result_revisores = $conn->query($query_revisores);
+
+$revisores_asignaciones = [];
+while ($revisor = $result_revisores->fetch_assoc()) {
+    $revisores_asignaciones[] = $revisor;
+}
 
 ?>
 <!DOCTYPE html>
@@ -48,25 +72,6 @@ $asignaciones = $stmt_asignaciones->fetchAll();
     </style>
 </head>
 <body>
-    <h1>Tabla de Asignaciones</h1>
-    <table>
-        <tr>
-            <th>Número</th>
-            <th>Título</th>
-            <th>Autores</th>
-            <th>Tópicos</th>
-            <th>Revisores</th>
-        </tr>
-        <?php foreach ($asignaciones as $asignacion): ?>
-            <tr>
-                <td><?= htmlspecialchars($asignacion['id_articulo']) ?></td>
-                <td><?= htmlspecialchars($asignacion['titulo']) ?></td>
-                <td><?= htmlspecialchars($asignacion['autores'] ?? 'N/A') ?></td>
-                <td><?= htmlspecialchars($asignacion['topicos'] ?? 'N/A') ?></td>
-                <td><?= htmlspecialchars($asignacion['revisores'] ?? 'N/A') ?></td>
-            </tr>
-        <?php endforeach; ?>
-    </table>
     <br>
     <a href="asignar_articulos.php" style="text-decoration: none; color: #007BFF;">Volver a Asignar Artículos</a>
 </body>

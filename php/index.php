@@ -18,8 +18,10 @@ if (!isset($_SESSION['user_id'])) {
         <h1>Bienvenido a la Plataforma de Artículos</h1>
         <p>Selecciona una opción del menú para comenzar.</p>
         <a href="dashboard.php" style="font-family: Arial, sans-serif; font-size: 14px; color: #007BFF; text-decoration: none;">Volver al inicio</a>
-        <?php include('../php/navegacion.php'); ?> <!-- Incluir la barra de navegación -->
     </div>
     <script src="../js/scripts.js"></script> <!-- Archivo JavaScript -->
+    <div>
+        <?php include('../php/navegacion.php'); ?> <!-- Incluir la barra de navegación -->
+    </div>
 </body>
 </html>

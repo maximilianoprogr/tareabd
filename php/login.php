@@ -1,4 +1,3 @@
-Hola seba. chupalo seba
 <?php
 session_start();
 if (isset($_SESSION['user_id'])) {
@@ -15,13 +14,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = $_POST['password'] ?? null;
 
     if ($rut && $password) {
-        $sql = "SELECT u.*, CASE 
-                    WHEN EXISTS (SELECT 1 FROM Autor WHERE rut = u.rut) THEN 'Autor'
-                    WHEN EXISTS (SELECT 1 FROM Revisor WHERE rut = u.rut) THEN 'Revisor'
-                    ELSE 'Jefe Comite de Programa'
-                END AS rol 
-                FROM Usuario u WHERE u.rut = ?";
-        $stmt = $pdo->prepare($sql); // Asegúrate de que $pdo esté definido correctamente
+        // Usar la vista en vez de la consulta con CASE
+        $sql = "SELECT * FROM vista_usuarios_login WHERE rut = ?";
+        $stmt = $pdo->prepare($sql);
         $stmt->execute([$rut]);
         $user = $stmt->fetch();
 

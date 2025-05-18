@@ -1,7 +1,7 @@
 # Proyecto INF-239: Gestión de Artículos
 
 ## Integrantes
-- Nombre 1 - ROL1
+- Fabian San Martin - 202304650-7
 - Nombre 2 - ROL2
 
 ## Instrucciones
@@ -75,3 +75,6 @@
 
 7. **Probar Diseño**:
    - Navegar por las páginas para confirmar que el diseño es consistente y responsivo gracias a Bootstrap.
+
+Se uso un prodecedimiento almacenado en "gestionar_asignaciones.php", la funcion AsignarArticuloRevisor.sql
+Se uso una View en "login.php".

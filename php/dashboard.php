@@ -18,10 +18,17 @@ if (!isset($_SESSION['usuario'])) {
 }
 
 echo "<div class='welcome'>Bienvenido, " . $_SESSION['usuario'] . "</div>"; // Muestra el nombre de usuario
+
+include('conexion.php');
+
+// Obtener los últimos 10 artículos
+$sql_ultimos = "SELECT id_articulo, titulo, fecha_envio FROM Articulo ORDER BY fecha_envio DESC LIMIT 10";
+$stmt_ultimos = $pdo->query($sql_ultimos);
+$ultimos_articulos = $stmt_ultimos->fetchAll();
 ?>
 
 <div class="container">
-    <a href="logout.php" class="logout-btn">Cerrar sesión</a> <!-- Opción para cerrar sesión -->
+    <a href="utilidades/logout.php" class="logout-btn">Cerrar sesión</a> <!-- Opción para cerrar sesión -->
 
     <form action="buscar_articulos.php" method="GET" class="search-form">
         <input type="text" name="query" placeholder="Buscar artículos..." class="search-input">
@@ -33,6 +40,23 @@ echo "<div class='welcome'>Bienvenido, " . $_SESSION['usuario'] . "</div>"; // M
         <button onclick="location.href='acceso_articulo.php?id_articulo=1'" class="action-btn">Acceso al Artículo</button>
         <button onclick="location.href='gestionar_revisores.php'" class="action-btn">Gestión de Revisores</button>
         <button onclick="location.href='asignar_articulos.php'" class="action-btn">Asignación de Artículos</button>
+    </div>
+
+    <!-- Mostrar los últimos 10 artículos -->
+    <div class="ultimos-articulos" style="margin-top: 30px;">
+        <h2>Articulos más recientes</h2>
+        <table border="1" style="width:100%; border-collapse: collapse;">
+            <tr>
+                <th>Título</th>
+                <th>Fecha de Envío</th>
+            </tr>
+            <?php foreach ($ultimos_articulos as $articulo): ?>
+            <tr>
+                <td><?php echo htmlspecialchars($articulo['titulo']); ?></td>
+                <td><?php echo htmlspecialchars($articulo['fecha_envio']); ?></td>
+            </tr>
+            <?php endforeach; ?>
+        </table>
     </div>
 </div>
 </body>

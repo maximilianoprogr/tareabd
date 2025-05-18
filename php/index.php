@@ -14,12 +14,14 @@ if (!isset($_SESSION['user_id'])) {
     <link rel="stylesheet" href="../css/estilos.css"> <!-- Archivo CSS -->
 </head>
 <body>
-    <?php include('../php/navegacion.php'); ?> <!-- Incluir la barra de navegación -->
     <div id="content">
         <h1>Bienvenido a la Plataforma de Artículos</h1>
         <p>Selecciona una opción del menú para comenzar.</p>
         <a href="dashboard.php" style="font-family: Arial, sans-serif; font-size: 14px; color: #007BFF; text-decoration: none;">Volver al inicio</a>
     </div>
     <script src="../js/scripts.js"></script> <!-- Archivo JavaScript -->
+    <div>
+        <?php include('../php/navegacion.php'); ?> <!-- Incluir la barra de navegación -->
+    </div>
 </body>
 </html>

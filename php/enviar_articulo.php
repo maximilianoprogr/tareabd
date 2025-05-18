@@ -47,9 +47,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             // Insertar el artículo en la base de datos
-            $sql_articulo = "INSERT INTO Articulo (titulo, resumen, fecha_envio, rut_autor, estado) VALUES (?, ?, NOW(), ?, 'En revisión')";
-            $stmt_articulo = $pdo->prepare($sql_articulo);
-            $stmt_articulo->execute([$titulo, $resumen, $_SESSION['usuario']]);
+            try {
+                $sql_articulo = "INSERT INTO Articulo (titulo, resumen, fecha_envio, rut_autor, estado) VALUES (?, ?, NOW(), ?, 'En revisión')";
+                $stmt_articulo = $pdo->prepare($sql_articulo);
+                $stmt_articulo->execute([$titulo, $resumen, $_SESSION['usuario']]);
+                echo "Artículo insertado correctamente.";
+            } catch (PDOException $e) {
+                // Capturar el error generado por el trigger
+                echo "Error: " . $e->getMessage();
+            }
 
             $id_articulo = $pdo->lastInsertId();
 

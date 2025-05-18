@@ -379,16 +379,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reasignacion_automati
             <th>Miembro</th><th>Tópicos</th><th>Artículos Asignados</th>
         </tr>
         <?php
-        // Modificar la consulta para obtener los títulos de los artículos asignados
+        // Modificar la consulta para obtener los títulos de los artículos asignados y sus tópicos en líneas separadas
         $sql_miembros = "SELECT u.nombre AS miembro, 
                                 GROUP_CONCAT(DISTINCT t.nombre SEPARATOR '\n') AS topicos, 
-                                GROUP_CONCAT(DISTINCT a.titulo SEPARATOR '\n') AS articulos_asignados
+                                GROUP_CONCAT(DISTINCT CONCAT(a.titulo, ' (', t.nombre, ')') SEPARATOR '\n') AS articulos_asignados
                          FROM Usuario u
                          LEFT JOIN Revisor_Topico rt ON u.rut = rt.rut_revisor
                          LEFT JOIN Topico t ON rt.id_topico = t.id_topico
                          LEFT JOIN Articulo_Revisor ar ON u.rut = ar.rut_revisor
                          LEFT JOIN Articulo a ON ar.id_articulo = a.id_articulo
-                         WHERE u.tipo = 'Revisor'
                          GROUP BY u.nombre";
         $stmt_miembros = $pdo->query($sql_miembros);
         $miembros = $stmt_miembros->fetchAll();

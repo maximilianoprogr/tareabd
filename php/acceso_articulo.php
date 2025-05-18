@@ -148,5 +148,8 @@ if ($articulo_seleccionado) {
     <?php endif; ?>
 
     <a href="dashboard.php" style="font-family: Arial, sans-serif; font-size: 14px; color: #007BFF; text-decoration: none;">Volver al inicio</a>
+    <div style="margin-top: 20px;">
+        <a href="inicio.php" class="button" style="background-color: #007BFF; color: white; padding: 10px 15px; border: none; border-radius: 5px; text-decoration: none;">Volver</a>
+    </div>
 </body>
 </html>

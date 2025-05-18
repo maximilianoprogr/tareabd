@@ -93,9 +93,9 @@ if ($articulo_seleccionado) {
             <div>
                 <?php if (!empty($revisores)): ?>
                     <?php foreach ($revisores as $revisor): ?>
-                        <a href="revisiones.php?revision=<?php echo htmlspecialchars($revisor); ?>" class="button">R<?php echo htmlspecialchars($revisor); ?> Consultar</a>
+                        <a href="revisiones.php?revision=<?php echo htmlspecialchars($revisor); ?>&id_articulo=<?php echo htmlspecialchars($articulo_seleccionado); ?>" class="button">R<?php echo htmlspecialchars($revisor); ?> Consultar</a>
                         <div style="margin-top: 5px;">
-                            <a href="opinar.php?revision=<?php echo htmlspecialchars($revisor); ?>" class="button">R<?php echo htmlspecialchars($revisor); ?> Opinar</a>
+                            <a href="opinar.php?revision=<?php echo htmlspecialchars($articulo_seleccionado); ?>&revisor=<?php echo htmlspecialchars($revisor); ?>" class="button">R<?php echo htmlspecialchars($revisor); ?> Opinar</a>
                         </div>
                     <?php endforeach; ?>
                 <?php else: ?>

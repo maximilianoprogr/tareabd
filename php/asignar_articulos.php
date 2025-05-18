@@ -23,6 +23,26 @@ ORDER BY a.id_articulo ASC
 
 $stmt = $pdo->query($sql);
 $articulos = $stmt->fetchAll();
+
+// Obtener todos los revisores con sus tópicos y artículos asignados
+$sql_revisores = "
+SELECT 
+    u.rut,
+    u.nombre,
+    GROUP_CONCAT(DISTINCT t.nombre SEPARATOR ', ') AS topicos,
+    COUNT(DISTINCT ar2.id_articulo) AS articulos_asignados,
+    GROUP_CONCAT(DISTINCT a2.titulo SEPARATOR ', ') AS titulos_asignados
+FROM Revisor r
+JOIN Usuario u ON r.rut = u.rut
+LEFT JOIN Revisor_Topico rt ON r.rut = rt.rut_revisor
+LEFT JOIN Topico t ON rt.id_topico = t.id_topico
+LEFT JOIN Articulo_Revisor ar2 ON r.rut = ar2.rut_revisor
+LEFT JOIN Articulo a2 ON ar2.id_articulo = a2.id_articulo
+GROUP BY u.rut, u.nombre
+ORDER BY u.nombre
+";
+$stmt_revisores = $pdo->query($sql_revisores);
+$revisores = $stmt_revisores->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -35,6 +55,7 @@ $articulos = $stmt->fetchAll();
     </style>
 </head>
 <body>
+<a href="dashboard.php">Volver al inicio</a>
 <h2>Listado de Artículos</h2>
 <table border="1" cellpadding="6" style="border-collapse:collapse;width:100%">
     <tr style="background:#f2f2f2">
@@ -43,6 +64,7 @@ $articulos = $stmt->fetchAll();
         <th>Autores</th>
         <th>Tópicos</th>
         <th>Revisores</th>
+        <th>Acciones</th>
     </tr>
     <?php foreach ($articulos as $articulo): ?>
     <tr>
@@ -62,9 +84,52 @@ $articulos = $stmt->fetchAll();
         </td>
         <td>
             <?php
-            $revisores = array_filter(explode('|||', $articulo['revisores'] ?? ''));
-            echo $revisores ? nl2br(htmlspecialchars(implode("\n", $revisores))) : 'Sin revisores';
+            $revisores_art = array_filter(explode('|||', $articulo['revisores'] ?? ''));
+            if ($revisores_art) {
+                foreach ($revisores_art as $revisor) {
+                    echo htmlspecialchars($revisor);
+                    // Botón para quitar revisor (envía id_articulo y nombre del revisor)
+                    echo ' <a href="utilidades/quitar_revizor.php?id_articulo=' . urlencode($articulo['id_articulo']) .
+                        '&revisor=' . urlencode($revisor) . '" onclick="return confirm(\'¿Quitar este revisor del artículo?\')" style="color:#fff;background:#dc3545;padding:2px 8px;border-radius:3px;text-decoration:none;margin-left:6px;font-size:13px;">Quitar</a><br>';
+                }
+            } else {
+                echo 'Sin revisores';
+            }
             ?>
+        </td>
+        <td>
+            <a href="utilidades/asignar_revisor.php?id_articulo=<?= urlencode($articulo['id_articulo']) ?>">Asignar revisor</a>
+        </td>
+    </tr>
+    <?php endforeach; ?>
+</table>
+
+<!-- Tabla de revisores al final -->
+<h2 style="margin-top:40px;">Listado de Revisores</h2>
+<table border="1" cellpadding="6" style="border-collapse:collapse;width:100%">
+    <tr style="background:#f2f2f2">
+        <th>Nombre</th>
+        <th>Tópicos</th>
+        <th>Artículos asignados</th>
+        <th>Acción</th>
+    </tr>
+    <?php foreach ($revisores as $revisor): ?>
+    <tr>
+        <td><?= htmlspecialchars($revisor['nombre']) ?></td>
+        <td><?= $revisor['topicos'] ? nl2br(htmlspecialchars(str_replace(', ', "\n", $revisor['topicos']))) : 'Sin tópicos'; ?></td>
+        <td>
+            <?php
+            if ($revisor['titulos_asignados']) {
+                echo nl2br(htmlspecialchars(str_replace(', ', "\n", $revisor['titulos_asignados'])));
+            } else {
+                echo 'Sin artículos';
+            }
+            ?>
+        </td>
+        <td>
+            <a href="utilidades/asignar_articulo.php?rut_revisor=<?= urlencode($revisor['rut']) ?>" style="background:#007BFF;color:#fff;padding:4px 10px;border-radius:4px;text-decoration:none;font-size:13px;">
+                Asignar artículo
+            </a>
         </td>
     </tr>
     <?php endforeach; ?>

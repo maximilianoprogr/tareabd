@@ -203,6 +203,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo "<p style='color: red;'>Faltan datos para actualizar el revisor.</p>";
         }
     } elseif ($action === 'delete') {
+        // Depurar el valor de 'rut' recibido para la acción 'delete'
+        echo "<p style='color: blue;'>Intentando eliminar revisor con RUT: " . htmlspecialchars($rut) . "</p>";
         // Lógica para eliminar un revisor
         if ($rut) {
             // Depuración: Verificar si la acción y el RUT se reciben correctamente

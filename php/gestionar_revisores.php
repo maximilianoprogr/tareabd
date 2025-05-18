@@ -217,7 +217,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $tiene_articulos = $stmt_check->fetchColumn() > 0;
 
                 if ($tiene_articulos) {
-                    echo "<p style='color: red;'>No se puede eliminar un revisor con artículos asignados.</p>";
+                    // Eliminar las asignaciones de artículos relacionadas con el revisor
+                    $sql_delete_asignaciones = "DELETE FROM Articulo_Revisor WHERE rut_revisor = ?";
+                    $stmt_delete_asignaciones = $pdo->prepare($sql_delete_asignaciones);
+                    $stmt_delete_asignaciones->execute([$rut]);
+
+                    // Depuración: Confirmar eliminación de asignaciones
+                    echo "<p style='color: green;'>Asignaciones de artículos eliminadas correctamente.</p>";
                 } else {
                     // Eliminar las evaluaciones relacionadas en evaluacion_articulo
                     $sql_delete_evaluaciones = "DELETE FROM evaluacion_articulo WHERE rut_revisor = ?";

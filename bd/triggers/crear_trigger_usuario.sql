@@ -11,12 +11,12 @@ BEGIN
     -- Contar el número de autores asignados al artículo
     SELECT COUNT(*) INTO num_autores
     FROM Autor_Articulo
-    WHERE id_articulo = NEW.id;
+    WHERE id_articulo = NEW.id_articulo;
 
     -- Contar el número de autores de contacto asignados al artículo
     SELECT COUNT(*) INTO num_contactos
     FROM Autor_Articulo
-    WHERE id_articulo = NEW.id AND es_contacto = 1;
+    WHERE id_articulo = NEW.id_articulo AND es_contacto = 1;
 
     -- Verificar que haya al menos un autor y un autor de contacto
     IF num_autores = 0 THEN

@@ -10,6 +10,11 @@
 <?php
 session_start();
 
+if (isset($_SESSION['message'])) {
+    echo "<div class='message'>" . $_SESSION['message'] . "</div>";
+    unset($_SESSION['message']);
+}
+
 // Verificar si el usuario está autenticado
 if (!isset($_SESSION['usuario'])) {
     // Si no hay sesión iniciada, redirige al login

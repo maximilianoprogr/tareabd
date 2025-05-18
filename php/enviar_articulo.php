@@ -29,7 +29,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Validar los datos
     if (empty($titulo) || empty($resumen) || empty($autores)) {
-        $message = "<p>Error: Todos los campos son obligatorios.</p>";
+        $_SESSION['message'] = "Error: Todos los campos son obligatorios.";
+        header("Location: dashboard.php");
+        exit();
     } else {
         // Conectar a la base de datos
         include('conexion.php');
@@ -87,9 +89,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt_topico->execute([$id_articulo, $id_topico]);
             }
 
-            $message = "<p>Artículo enviado exitosamente.</p>";
+            $message = "Artículo enviado exitosamente.";
+            $_SESSION['message'] = $message;
+            header("Location: dashboard.php");
+            exit();
         } catch (Exception $e) {
-            $message = "<p>Error al enviar el artículo: " . $e->getMessage() . "</p>";
+            $_SESSION['message'] = "Error al enviar el artículo: " . $e->getMessage();
+            header("Location: dashboard.php");
+            exit();
         }
     }
 }

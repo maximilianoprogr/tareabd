@@ -53,6 +53,23 @@ if ($_SESSION['rol'] === 'Jefe Comite de Programa') {
     $revisor_existe = true; // Forzar la validación para este rol
 }
 
+// Validar que el parámetro 'revisor' esté presente si el usuario es Jefe del Comité
+if ($_SESSION['rol'] === 'Jefe Comite de Programa' && !isset($_GET['revisor'])) {
+    echo "<p>Error: No se especificó un revisor válido.</p>";
+    exit();
+}
+
+// Limpiar el parámetro 'revisor' para eliminar prefijos como 'R'
+if (isset($_GET['revisor'])) {
+    $_GET['revisor'] = preg_replace('/^R/', '', $_GET['revisor']);
+    echo "<p>Depuración: parámetro revisor limpio = " . htmlspecialchars($_GET['revisor']) . "</p>";
+}
+
+// Depurar el valor del parámetro 'revisor'
+if (isset($_GET['revisor'])) {
+    echo "<p>Depuración: parámetro revisor = " . htmlspecialchars($_GET['revisor']) . "</p>";
+}
+
 // Validar y registrar al usuario como revisor si es necesario
 if ($_SESSION['rol'] === 'Jefe Comite de Programa') {
     // Verificar si el usuario ya está registrado como revisor
@@ -74,6 +91,15 @@ if (!$revisor_existe) {
     exit();
 }
 
+// Determinar el rut_revisor correcto
+$rut_revisor = $_SESSION['usuario'];
+if ($_SESSION['rol'] === 'Jefe Comite de Programa' && isset($_GET['revisor'])) {
+    $rut_revisor = $_GET['revisor']; // Usar el revisor de la página actual
+}
+
+// Depurar el valor de rut_revisor
+echo "<p>Depuración: rut_revisor = " . htmlspecialchars($rut_revisor) . "</p>";
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Procesar el formulario
     $calidad_tecnica = isset($_POST['calidad_tecnica']) ? 1 : 0;
@@ -82,29 +108,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $argumentos_valoracion = $_POST['argumentos_valoracion'] ?? '';
     $comentarios_autores = $_POST['comentarios_autores'] ?? '';
 
+    // Depurar los valores antes de la consulta
+    echo "<p>Depuración: id_articulo = " . htmlspecialchars($id_articulo) . ", rut_revisor = " . htmlspecialchars($rut_revisor) . ", calidad_tecnica = " . htmlspecialchars($calidad_tecnica) . ", originalidad = " . htmlspecialchars($originalidad) . ", valoracion_global = " . htmlspecialchars($valoracion_global) . ", argumentos_valoracion = " . htmlspecialchars($argumentos_valoracion) . ", comentarios_autores = " . htmlspecialchars($comentarios_autores) . "</p>";
+
     // Verificar si el registro existe antes de intentar actualizar
     $sql_check = "SELECT COUNT(*) FROM Evaluacion_Articulo WHERE id_articulo = ? AND rut_revisor = ?";
     $stmt_check = $pdo->prepare($sql_check);
-    $stmt_check->execute([$id_articulo, $_SESSION['usuario']]);
+    $stmt_check->execute([$id_articulo, $rut_revisor]);
     $exists = $stmt_check->fetchColumn() > 0;
 
     if ($exists) {
         // Actualizar el registro existente
         $sql = "UPDATE Evaluacion_Articulo SET calidad_tecnica = ?, originalidad = ?, valoracion_global = ?, argumentos_valoracion = ?, comentarios_autores = ? WHERE id_articulo = ? AND rut_revisor = ?";
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$calidad_tecnica, $originalidad, $valoracion_global, $argumentos_valoracion, $comentarios_autores, $id_articulo, $_SESSION['usuario']]);
+        $stmt->execute([$calidad_tecnica, $originalidad, $valoracion_global, $argumentos_valoracion, $comentarios_autores, $id_articulo, $rut_revisor]);
         echo "<p>Registro actualizado correctamente.</p>";
     } else {
         // Insertar un nuevo registro si no existe
         $sql = "INSERT INTO Evaluacion_Articulo (calidad_tecnica, originalidad, valoracion_global, argumentos_valoracion, comentarios_autores, id_articulo, rut_revisor) VALUES (?, ?, ?, ?, ?, ?, ?)";
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$calidad_tecnica, $originalidad, $valoracion_global, $argumentos_valoracion, $comentarios_autores, $id_articulo, $_SESSION['usuario']]);
+        $stmt->execute([$calidad_tecnica, $originalidad, $valoracion_global, $argumentos_valoracion, $comentarios_autores, $id_articulo, $rut_revisor]);
         echo "<p>Nuevo registro insertado correctamente.</p>";
     }
 
     // Depurar la consulta SQL
     echo "<p>Consulta ejecutada: " . htmlspecialchars($sql) . "</p>";
-    echo "<p>Parámetros: " . htmlspecialchars(json_encode([$calidad_tecnica, $originalidad, $valoracion_global, $argumentos_valoracion, $comentarios_autores, $id_articulo, $_SESSION['usuario']])) . "</p>";
+    echo "<p>Parámetros: " . htmlspecialchars(json_encode([$calidad_tecnica, $originalidad, $valoracion_global, $argumentos_valoracion, $comentarios_autores, $id_articulo, $rut_revisor])) . "</p>";
 
     // Verificar si la consulta afecta registros
     $affected_rows = $stmt->rowCount();

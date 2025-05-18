@@ -114,20 +114,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </div>
 
 <script>
-document.getElementById('agregar-autor').onclick = function() {
-    const autoresDiv = document.getElementById('autores');
-    const index = autoresDiv.children.length;
-    const div = document.createElement('div');
-    div.className = 'autor-row';
-    div.innerHTML = `
-        <input type="text" name="rut_autor[]" placeholder="RUT del autor" required>
-        <label>
-            <input type="checkbox" name="es_contacto[]" value="${index}">
-            Es contacto
-        </label>
-    `;
-    autoresDiv.appendChild(div);
-};
+    document.getElementById('agregar-autor').onclick = function() {
+        const autoresDiv = document.getElementById('autores');
+        const index = autoresDiv.children.length;
+        const div = document.createElement('div');
+        div.className = 'autor-row';
+        div.innerHTML = `
+            <input type="text" name="rut_autor[]" placeholder="RUT del autor" required>
+            <label>
+                <input type="checkbox" name="es_contacto[]" value="${index}">
+                Es contacto
+            </label>
+        `;
+        autoresDiv.appendChild(div);
+    };
 </script>
 </body>
 </html>

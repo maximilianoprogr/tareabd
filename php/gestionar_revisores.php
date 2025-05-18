@@ -82,6 +82,71 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
+    // Evitar validaciones innecesarias para la acción 'delete'
+    if ($action === 'delete') {
+        // Continuar directamente con la lógica de eliminación
+        // Lógica para eliminar un revisor
+        if ($rut) {
+            // Depuración: Verificar si la acción y el RUT se reciben correctamente
+            echo "<p style='color: blue;'>Intentando eliminar revisor con RUT: $rut</p>";
+            try {
+                // Verificar si el revisor tiene artículos asignados
+                $sql_check = "SELECT COUNT(*) FROM Articulo_Revisor WHERE rut_revisor = ?";
+                $stmt_check = $pdo->prepare($sql_check);
+                $stmt_check->execute([$rut]);
+                $tiene_articulos = $stmt_check->fetchColumn() > 0;
+
+                if ($tiene_articulos) {
+                    // Eliminar las asignaciones de artículos relacionadas con el revisor
+                    $sql_delete_asignaciones = "DELETE FROM Articulo_Revisor WHERE rut_revisor = ?";
+                    $stmt_delete_asignaciones = $pdo->prepare($sql_delete_asignaciones);
+                    $stmt_delete_asignaciones->execute([$rut]);
+
+                    // Depuración: Confirmar eliminación de asignaciones
+                    echo "<p style='color: green;'>Asignaciones de artículos eliminadas correctamente.</p>";
+                } else {
+                    // Eliminar las evaluaciones relacionadas en evaluacion_articulo
+                    $sql_delete_evaluaciones = "DELETE FROM evaluacion_articulo WHERE rut_revisor = ?";
+                    $stmt_delete_evaluaciones = $pdo->prepare($sql_delete_evaluaciones);
+                    $stmt_delete_evaluaciones->execute([$rut]);
+
+                    // Depuración: Confirmar eliminación de evaluaciones
+                    echo "<p style='color: green;'>Evaluaciones del revisor eliminadas correctamente.</p>";
+
+                    // Eliminar el revisor de la tabla Revisor_Topico
+                    $sql_delete_topicos = "DELETE FROM Revisor_Topico WHERE rut_revisor = ?";
+                    $stmt_delete_topicos = $pdo->prepare($sql_delete_topicos);
+                    $stmt_delete_topicos->execute([$rut]);
+
+                    // Depuración: Confirmar eliminación de tópicos
+                    echo "<p style='color: green;'>Tópicos del revisor eliminados correctamente.</p>";
+
+                    // Eliminar el revisor de la tabla Revisor
+                    $sql_delete_revisor = "DELETE FROM Revisor WHERE rut = ?";
+                    $stmt_delete_revisor = $pdo->prepare($sql_delete_revisor);
+                    $stmt_delete_revisor->execute([$rut]);
+
+                    // Depuración: Confirmar eliminación de revisor
+                    echo "<p style='color: green;'>Revisor eliminado correctamente de la tabla Revisor.</p>";
+
+                    // Eliminar el usuario de la tabla Usuario
+                    $sql_delete_usuario = "DELETE FROM Usuario WHERE rut = ?";
+                    $stmt_delete_usuario = $pdo->prepare($sql_delete_usuario);
+                    $stmt_delete_usuario->execute([$rut]);
+
+                    // Depuración: Confirmar eliminación de usuario
+                    echo "<p style='color: green;'>Usuario eliminado correctamente de la tabla Usuario.</p>";
+                }
+            } catch (Exception $e) {
+                echo "<p style='color: red;'>Error al eliminar revisor: " . $e->getMessage() . "</p>";
+            }
+            echo "<p style='color: green;'>Revisor eliminado exitosamente.</p>";
+        } else {
+            echo "<p style='color: red;'>No se recibió un RUT válido para eliminar.</p>";
+        }
+        return;
+    }
+
     // Mover las validaciones de email y nombre dentro de las acciones 'create' y 'update'
     if (($action === 'create' || $action === 'update') && $rut && $nombre && $email) {
         // Validar que el email tenga un formato válido
@@ -202,70 +267,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             echo "<p style='color: red;'>Faltan datos para actualizar el revisor.</p>";
         }
-    } elseif ($action === 'delete') {
-        // Depurar el valor de 'rut' recibido para la acción 'delete'
-        echo "<p style='color: blue;'>Intentando eliminar revisor con RUT: " . htmlspecialchars($rut) . "</p>";
-        // Lógica para eliminar un revisor
-        if ($rut) {
-            // Depuración: Verificar si la acción y el RUT se reciben correctamente
-            echo "<p style='color: blue;'>Intentando eliminar revisor con RUT: $rut</p>";
-            try {
-                // Verificar si el revisor tiene artículos asignados
-                $sql_check = "SELECT COUNT(*) FROM Articulo_Revisor WHERE rut_revisor = ?";
-                $stmt_check = $pdo->prepare($sql_check);
-                $stmt_check->execute([$rut]);
-                $tiene_articulos = $stmt_check->fetchColumn() > 0;
-
-                if ($tiene_articulos) {
-                    // Eliminar las asignaciones de artículos relacionadas con el revisor
-                    $sql_delete_asignaciones = "DELETE FROM Articulo_Revisor WHERE rut_revisor = ?";
-                    $stmt_delete_asignaciones = $pdo->prepare($sql_delete_asignaciones);
-                    $stmt_delete_asignaciones->execute([$rut]);
-
-                    // Depuración: Confirmar eliminación de asignaciones
-                    echo "<p style='color: green;'>Asignaciones de artículos eliminadas correctamente.</p>";
-                } else {
-                    // Eliminar las evaluaciones relacionadas en evaluacion_articulo
-                    $sql_delete_evaluaciones = "DELETE FROM evaluacion_articulo WHERE rut_revisor = ?";
-                    $stmt_delete_evaluaciones = $pdo->prepare($sql_delete_evaluaciones);
-                    $stmt_delete_evaluaciones->execute([$rut]);
-
-                    // Depuración: Confirmar eliminación de evaluaciones
-                    echo "<p style='color: green;'>Evaluaciones del revisor eliminadas correctamente.</p>";
-
-                    // Eliminar el revisor de la tabla Revisor_Topico
-                    $sql_delete_topicos = "DELETE FROM Revisor_Topico WHERE rut_revisor = ?";
-                    $stmt_delete_topicos = $pdo->prepare($sql_delete_topicos);
-                    $stmt_delete_topicos->execute([$rut]);
-
-                    // Depuración: Confirmar eliminación de tópicos
-                    echo "<p style='color: green;'>Tópicos del revisor eliminados correctamente.</p>";
-
-                    // Eliminar el revisor de la tabla Revisor
-                    $sql_delete_revisor = "DELETE FROM Revisor WHERE rut = ?";
-                    $stmt_delete_revisor = $pdo->prepare($sql_delete_revisor);
-                    $stmt_delete_revisor->execute([$rut]);
-
-                    // Depuración: Confirmar eliminación de revisor
-                    echo "<p style='color: green;'>Revisor eliminado correctamente de la tabla Revisor.</p>";
-
-                    // Eliminar el usuario de la tabla Usuario
-                    $sql_delete_usuario = "DELETE FROM Usuario WHERE rut = ?";
-                    $stmt_delete_usuario = $pdo->prepare($sql_delete_usuario);
-                    $stmt_delete_usuario->execute([$rut]);
-
-                    // Depuración: Confirmar eliminación de usuario
-                    echo "<p style='color: green;'>Usuario eliminado correctamente de la tabla Usuario.</p>";
-                }
-            } catch (Exception $e) {
-                echo "<p style='color: red;'>Error al eliminar revisor: " . $e->getMessage() . "</p>";
-            }
-            echo "<p style='color: green;'>Revisor eliminado exitosamente.</p>";
-        } else {
-            echo "<p style='color: red;'>No se recibió un RUT válido para eliminar.</p>";
-        }
-    } else {
-        echo "<p style='color: red;'>Acción no reconocida: $action</p>";
     }
 }
 
@@ -351,7 +352,7 @@ $topicos_disponibles = $stmt_topicos->fetchAll();
             foreach ($topicos_disponibles as $topico) {
                 $checked = strpos($topicos, $topico['nombre']) !== false ? 'checked' : '';
                 echo '<label style="display: block;">';
-                echo '<input type="checkbox" name="topicos[]" value="' . $topico['id_topico'] . '" ' . $checked . '> ' . htmlspecialchars($topico['nombre']);
+                echo '<input type="checkbox" name="topicos[]" value="' . $topico['id_topico'] . '" ' . $checked . ' data-rut-revisor="' . htmlspecialchars($revisor['rut']) . '" data-id-topico="' . htmlspecialchars($topico['id_topico']) . '"> ' . htmlspecialchars($topico['nombre']);
                 echo '</label>';
             }
 
@@ -438,6 +439,59 @@ $topicos_disponibles = $stmt_topicos->fetchAll();
         for (const [key, value] of formData.entries()) {
             console.log(`${key}: ${value}`);
         }
+    });
+    </script>
+
+    <script>
+    document.querySelectorAll('form[action="gestionar_revisores.php"]').forEach(form => {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Evitar el envío tradicional del formulario
+
+            const formData = new FormData(this);
+
+            fetch('gestionar_revisores.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(data => {
+                console.log('Respuesta del servidor:', data);
+                // Actualizar la página o eliminar el revisor de la tabla sin recargar
+                this.closest('tr').remove();
+            })
+            .catch(error => console.error('Error en la solicitud:', error));
+        });
+    });
+    </script>
+
+    <script>
+    document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const rutRevisor = this.dataset.rutRevisor;
+            const idTopico = this.dataset.idTopico;
+            const action = this.checked ? 'add' : 'remove';
+
+            fetch('procesar_quitar_revisores.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    rut_revisor: rutRevisor,
+                    id_topico: idTopico,
+                    action: action
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Actualización exitosa:', data.message);
+                } else {
+                    console.error('Error al actualizar:', data.message);
+                }
+            })
+            .catch(error => console.error('Error en la solicitud:', error));
+        });
     });
     </script>
 </body>

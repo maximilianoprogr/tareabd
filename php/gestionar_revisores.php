@@ -6,8 +6,11 @@ error_reporting(E_ALL);
 session_start();
 include('../php/conexion.php'); // Asegúrate de que este archivo define correctamente $pdo
 
-// Mensaje de depuración para verificar si el archivo se carga correctamente
-echo "<p style='color: green;'>El archivo gestionar_revisores.php se ha cargado correctamente.</p>";
+// Verificar permisos: solo el Jefe del Comité puede acceder
+if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'Jefe Comite de Programa') {
+    echo "<div style='color: red; font-weight: bold; margin: 30px 0; font-size: 18px;'>Error: No tiene permisos suficientes para acceder a esta página.</div>";
+    exit();
+}
 
 // Depuración: Verificar el rol del usuario en la sesión
 if (isset($_SESSION['rol'])) {

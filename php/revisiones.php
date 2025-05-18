@@ -39,7 +39,14 @@ echo "<p>Depuración: rut_revisor = " . htmlspecialchars($_GET['revision']) . ",
 $sql_respuestas = "SELECT calidad_tecnica, originalidad, valoracion_global, argumentos_valoracion, comentarios_autores FROM Evaluacion_Articulo WHERE rut_revisor = ? AND id_articulo = ?";
 $stmt_respuestas = $pdo->prepare($sql_respuestas);
 $stmt_respuestas->execute([$_GET['revision'], $_GET['id_articulo']]);
+// Verificar si hay resultados en la consulta
 $respuestas = $stmt_respuestas->fetch(PDO::FETCH_ASSOC);
+
+// Redirigir a una página que indique que el revisor aún no ha completado la evaluación
+if (!$respuestas) {
+    header("Location: evaluacion_incompleta.php?revisor=" . urlencode($_GET['revision']) . "&id_articulo=" . urlencode($_GET['id_articulo']));
+    exit();
+}
 
 // Depurar los resultados de la consulta
 if ($respuestas) {

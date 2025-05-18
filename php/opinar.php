@@ -97,6 +97,12 @@ if (strcasecmp($_SESSION['rol'], 'autor') === 0) {
     exit();
 }
 
+// Verificar si el usuario es el revisor correspondiente
+if (strcasecmp($_SESSION['rol'], 'revisor') === 0 && $_SESSION['usuario'] !== $_GET['revisor']) {
+    header("Location: revisor_incorrecto.php?revisor=" . urlencode($_GET['revisor']) . "&usuario=" . urlencode($_SESSION['usuario']));
+    exit();
+}
+
 // Determinar el rut_revisor correcto
 $rut_revisor = $_SESSION['usuario'];
 if ($_SESSION['rol'] === 'Jefe Comite de Programa' && isset($_GET['revisor'])) {

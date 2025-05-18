@@ -7,16 +7,30 @@ if (!isset($_SESSION['usuario'])) {
     exit();
 }
 
-// Verificar el rol del usuario
-$es_revisor = isset($_SESSION['rol']) && $_SESSION['rol'] === 'revisor';
+// Obtener el rol del usuario desde la base de datos
+include('conexion.php');
+$stmt_rol = $pdo->prepare("SELECT tipo FROM Usuario WHERE rut = ?");
+$stmt_rol->execute([$_SESSION['usuario']]);
+$rol = $stmt_rol->fetchColumn();
 
-// Ajustar la comparación para que sea insensible a mayúsculas y minúsculas
-$es_autor = isset($_SESSION['rol']) && strcasecmp($_SESSION['rol'], 'autor') === 0;
+// Actualizar el rol en la sesión con el valor obtenido de la base de datos
+$_SESSION['rol'] = $rol;
+
+// Ajustar las variables de rol basadas en el valor obtenido de la base de datos
+$es_revisor = strcasecmp($rol, 'revisor') === 0;
+$es_jefe_comite = strcasecmp($rol, 'Jefe Comite de Programa') === 0;
+$es_autor = strcasecmp($rol, 'autor') === 0;
 
 // Ajustar la lógica para permitir acceso al artículo pero bloquear la funcionalidad de opinar
 if ($es_autor) {
     echo '<p style="font-family: Arial, sans-serif; color: red;">No puedes opinar sobre este artículo porque no eres el revisor asignado.</p>';
     // No terminar la ejecución, permitir acceso al artículo
+} elseif ($es_jefe_comite) {
+    echo '<p style="font-family: Arial, sans-serif; color: blue;">Acceso como Jefe del Comité de Programa.</p>';
+} elseif ($es_revisor) {
+    echo '<p style="font-family: Arial, sans-serif; color: green;">Acceso como Revisor.</p>';
+} else {
+    echo '<p style="font-family: Arial, sans-serif; color: orange;">Rol no reconocido.</p>';
 }
 
 // Obtener todos los artículos enviados
@@ -66,11 +80,26 @@ if ($articulo_seleccionado) {
     $resultados_publicados = $stmt_resultados->fetchColumn() > 0;
 }
 
-// Depuración: Mostrar el valor de $_SESSION['rol'] para verificar el rol del usuario
+// Depuración: Mostrar el rol en la sesión
 echo "<p style='color: blue;'>Rol en la sesión: " . htmlspecialchars($_SESSION['rol']) . "</p>";
 
 // Depuración: Mostrar el valor de $es_autor para verificar si se evalúa correctamente
 echo "<p style='color: green;'>Valor de es_autor: " . (isset($es_autor) && $es_autor ? 'true' : 'false') . "</p>";
+
+// Depuración adicional: Verificar el valor de $_SESSION['rol'] y $_SESSION['usuario']
+echo "<p style='color: green;'>Depuración: Rol en la sesión: " . htmlspecialchars($_SESSION['rol']) . "</p>";
+echo "<p style='color: green;'>Depuración: Usuario en la sesión: " . htmlspecialchars($_SESSION['usuario']) . "</p>";
+
+// Depuración: Mostrar los revisores obtenidos de la base de datos
+echo "<p style='color: green;'>Revisores obtenidos: " . (empty($revisores) ? 'Ninguno' : implode(', ', $revisores)) . "</p>";
+
+// Depuración: Mostrar el rol obtenido de la base de datos
+echo "<p style='color: purple;'>Rol obtenido de la base de datos: " . htmlspecialchars($rol) . "</p>";
+
+// Depuración: Mostrar el estado de las variables de rol
+echo "<p style='color: orange;'>Es revisor: " . ($es_revisor ? 'true' : 'false') . "</p>";
+echo "<p style='color: orange;'>Es jefe de comité: " . ($es_jefe_comite ? 'true' : 'false') . "</p>";
+echo "<p style='color: orange;'>Es autor: " . ($es_autor ? 'true' : 'false') . "</p>";
 
 ?>
 <!DOCTYPE html>

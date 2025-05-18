@@ -66,6 +66,24 @@ if (!isset($_GET['revision'])) {
                     <textarea id="comentarios_autores" name="comentarios_autores" rows="3" style="width: 100%; font-size: 12px; padding: 5px; border: 1px solid #ccc;" readonly></textarea>
                 </div>
             </form>
+
+            <?php
+            // Obtener las respuestas de la base de datos
+            $sql_respuestas = "SELECT calidad_tecnica, originalidad, valoracion_global, argumentos_valoracion, comentarios_autores FROM Evaluacion_Articulo WHERE rut_revisor = ? AND id_articulo = ?";
+            $stmt_respuestas = $pdo->prepare($sql_respuestas);
+            $stmt_respuestas->execute([$_GET['revision'], $_GET['id_articulo']]);
+            $respuestas = $stmt_respuestas->fetch(PDO::FETCH_ASSOC);
+            ?>
+
+            <div style="margin-top: 20px;">
+                <h2>Respuestas del Revisor</h2>
+                <p><strong>Calidad Técnica:</strong> <?php echo $respuestas['calidad_tecnica'] ? 'Sí' : 'No'; ?></p>
+                <p><strong>Originalidad:</strong> <?php echo $respuestas['originalidad'] ? 'Sí' : 'No'; ?></p>
+                <p><strong>Valoración Global:</strong> <?php echo $respuestas['valoracion_global'] ? 'Sí' : 'No'; ?></p>
+                <p><strong>Argumentos de Valoración Global:</strong> <?php echo htmlspecialchars($respuestas['argumentos_valoracion']); ?></p>
+                <p><strong>Comentarios a Autores:</strong> <?php echo htmlspecialchars($respuestas['comentarios_autores']); ?></p>
+            </div>
+
         <?php else: ?>
             <!-- Formulario editable si los resultados no están publicados -->
             <h2 style="font-family: Arial, sans-serif; color: #555;">Formulario de Evaluación</h2>

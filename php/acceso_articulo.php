@@ -68,46 +68,42 @@ if ($articulo_seleccionado) {
     <link rel="stylesheet" href="../css/dashboard.css">
 </head>
 <body style="font-family: Arial, sans-serif; margin: 20px;">
-    <h1 style="font-size: 18px; color: #333;">Artículos Enviados</h1>
-    <ul>
-        <?php foreach ($articulos as $articulo): ?>
-            <li><a href="acceso_articulo.php?id_articulo=<?php echo $articulo['id_articulo']; ?>" style="color: #007BFF; text-decoration: none;">Artículo: <?php echo htmlspecialchars($articulo['titulo']); ?></a></li>
-        <?php endforeach; ?>
-    </ul>
+    <div class="container">
+        <?php if (empty($revisores)) { ?>
+            <p class="message">No hay revisores asignados a este artículo.</p>
+            <a href="dashboard.php" class="button">Volver al inicio</a>
+        <?php } ?>
 
-    <?php if ($detalles_articulo): ?>
-        <h1 style="font-size: 18px; color: #333;">Datos del Artículo</h1>
-        <div style="margin-bottom: 20px; border: 1px solid #ccc; padding: 10px;">
-            <p><strong>ID:</strong> <?php echo htmlspecialchars($articulo_seleccionado); ?></p>
-            <p><strong>Título:</strong> <?php echo htmlspecialchars($detalles_articulo['titulo']); ?></p>
-            <p><strong>Resumen:</strong> <?php echo htmlspecialchars($detalles_articulo['resumen']); ?></p>
-        </div>
+        <h1>Artículos Enviados</h1>
+        <ul>
+            <?php foreach ($articulos as $articulo): ?>
+                <li><a href="acceso_articulo.php?id_articulo=<?php echo $articulo['id_articulo']; ?>">Artículo: <?php echo htmlspecialchars($articulo['titulo']); ?></a></li>
+            <?php endforeach; ?>
+        </ul>
 
-        <h2 style="font-size: 16px; color: #555;">Revisiones</h2>
-        <div style="margin-bottom: 20px;">
-            <?php if (!empty($revisores)): ?>
-                <?php foreach ($revisores as $revisor): ?>
-                    <a href="revisiones.php?revision=<?php echo htmlspecialchars($revisor); ?>" style="font-size: 12px; padding: 5px 10px; margin-right: 10px; background-color: #007BFF; color: white; text-decoration: none; border-radius: 5px;">R<?php echo htmlspecialchars($revisor); ?> Consultar</a>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <p>No hay revisores asignados a este artículo.</p>
-            <?php endif; ?>
-        </div>
+        <?php if ($detalles_articulo): ?>
+            <h2>Datos del Artículo</h2>
+            <div>
+                <p><strong>ID:</strong> <?php echo htmlspecialchars($articulo_seleccionado); ?></p>
+                <p><strong>Título:</strong> <?php echo htmlspecialchars($detalles_articulo['titulo']); ?></p>
+                <p><strong>Resumen:</strong> <?php echo htmlspecialchars($detalles_articulo['resumen']); ?></p>
+            </div>
 
-        <!-- Mostrar detalles del artículo -->
-        <div style="margin-top: 20px;">
-            <h2 style="font-size: 16px; color: #555;">Detalles del Artículo</h2>
-            <p><strong>Título:</strong> <?php echo htmlspecialchars($detalles_articulo['titulo']); ?></p>
-            <p><strong>Resumen:</strong> <?php echo htmlspecialchars($detalles_articulo['resumen']); ?></p>
-
-            <?php if ($es_revisor): ?>
-                <a href="editar_articulo.php?id_articulo=<?php echo $articulo_seleccionado; ?>" style="padding: 10px 15px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px;">Editar</a>
-                <?php if ($es_revisor && in_array($_SESSION['usuario'], $revisores) || $_SESSION['rol'] === 'admin' || $_SESSION['rol'] === 'Jefe Comite de Programa'): ?>
-                    <a href="crear_articulo.php" style="padding: 10px 15px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px;">Crear</a>
+            <h2>Revisiones</h2>
+            <div>
+                <?php if (!empty($revisores)): ?>
+                    <?php foreach ($revisores as $revisor): ?>
+                        <a href="revisiones.php?revision=<?php echo htmlspecialchars($revisor); ?>" class="button">R<?php echo htmlspecialchars($revisor); ?> Consultar</a>
+                        <div style="margin-top: 5px;">
+                            <a href="opinar.php?revision=<?php echo htmlspecialchars($revisor); ?>" class="button">R<?php echo htmlspecialchars($revisor); ?> Opinar</a>
+                        </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <p class="message">No hay revisores asignados a este artículo.</p>
                 <?php endif; ?>
-            <?php endif; ?>
-        </div>
-    <?php endif; ?>
+            </div>
+        <?php endif; ?>
+    </div>
 
     <!-- Formulario de Evaluación se muestra solo si se accede a una revisión -->
     <?php if (isset($_GET['revision'])): ?>

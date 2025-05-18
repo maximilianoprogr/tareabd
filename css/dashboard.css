@@ -1,7 +1,7 @@
-/* Estilo general para centrar y embellecer la página */
+/* Mejora del diseño para hacerlo más atractivo */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f9f9f9;
+    font-family: 'Roboto', sans-serif;
+    background: linear-gradient(135deg, #74ebd5, #acb6e5);
     margin: 0;
     padding: 0;
     display: flex;
@@ -10,24 +10,34 @@ body {
     height: 100vh;
 }
 
-/* Contenedor principal */
 .container {
-    background-color: #ffffff;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    max-width: 800px;
+    background: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+    padding: 30px;
+    max-width: 900px;
     width: 100%;
     text-align: center;
+    animation: fadeIn 1s ease-in-out;
 }
 
-/* Títulos */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 h1, h2 {
     color: #333;
     margin-bottom: 20px;
+    font-weight: bold;
 }
 
-/* Lista de artículos */
 ul {
     list-style: none;
     padding: 0;
@@ -40,33 +50,38 @@ ul li {
 ul li a {
     color: #007BFF;
     text-decoration: none;
-    font-size: 16px;
+    font-size: 18px;
+    font-weight: 500;
+    transition: color 0.3s;
 }
 
 ul li a:hover {
+    color: #0056b3;
     text-decoration: underline;
 }
 
-/* Botones */
 a.button {
     display: inline-block;
-    padding: 10px 15px;
-    background-color: #007BFF;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #007BFF, #0056b3);
     color: white;
     text-decoration: none;
-    border-radius: 5px;
-    margin: 10px 5px;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: bold;
+    transition: background 0.3s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 a.button:hover {
-    background-color: #0056b3;
+    background: linear-gradient(135deg, #0056b3, #003f7f);
 }
 
-/* Mensajes */
 .message {
-    color: red;
-    font-size: 14px;
+    color: #e74c3c;
+    font-size: 16px;
     margin-bottom: 20px;
+    font-weight: bold;
 }
 
 .welcome {

@@ -1,4 +1,3 @@
-
 CREATE TABLE Usuario (
     rut VARCHAR(10) PRIMARY KEY,
     nombre VARCHAR(64) NOT NULL,
@@ -60,6 +59,11 @@ CREATE TABLE Evaluacion_Articulo (
     rut_revisor VARCHAR(10),
     resena VARCHAR(128),
     calificacion INT,
+    calidad_tecnica BOOLEAN,
+    originalidad BOOLEAN,
+    valoracion_global BOOLEAN,
+    argumentos_valoracion VARCHAR(128),
+    comentarios_autores VARCHAR(128),
     PRIMARY KEY (id_articulo, rut_revisor),
     FOREIGN KEY (id_articulo) REFERENCES Articulo (id_articulo) ON DELETE CASCADE,
     FOREIGN KEY (rut_revisor) REFERENCES Revisor (rut) ON DELETE CASCADE

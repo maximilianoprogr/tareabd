@@ -11,7 +11,7 @@ fake = faker.Faker()
 def generate_users():
     users = []
     unique_ruts = set()
-    for _ in range(10):
+    for _ in range(60):
         while True:
             rut = fake.unique.numerify("########-#")
             if rut not in unique_ruts:

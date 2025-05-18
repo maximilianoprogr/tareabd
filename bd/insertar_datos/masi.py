@@ -149,14 +149,19 @@ def generate_article_reviewers(articles, reviewers, article_topics, reviewer_top
 
 def write_to_sql(users, topics, articles, article_topics, reviews, reviewer_topics, author_articles, article_reviewers):
     with open("FAKER_INSERT.sql", "w", encoding="utf-8") as f:
-        # Deshabilitar restricciones de claves foráneas
+        # Bloque de limpieza de tablas en el orden correcto
         f.write("SET FOREIGN_KEY_CHECKS = 0;\n")
         f.write("DELETE FROM Articulo_Revisor;\n")
-        f.write("DELETE FROM Revisor_Topico;\n")
-        f.write("DELETE FROM Revisor;\n")
+        f.write("DELETE FROM Evaluacion_Articulo;\n")
+        f.write("DELETE FROM Articulo_Topico;\n")
         f.write("DELETE FROM Autor_Articulo;\n")
+        f.write("DELETE FROM Revisor_Topico;\n")
+        f.write("DELETE FROM Articulo;\n")
+        f.write("DELETE FROM Revisor;\n")
         f.write("DELETE FROM Autor;\n")
-        f.write("DELETE FROM Usuario;\n\n")
+        f.write("DELETE FROM Usuario;\n")
+        f.write("DELETE FROM Topico;\n")
+        f.write("ALTER TABLE Topico AUTO_INCREMENT = 1;\n")
         f.write("SET FOREIGN_KEY_CHECKS = 1;\n\n")
 
         # Usuarios
@@ -194,10 +199,10 @@ def write_to_sql(users, topics, articles, article_topics, reviews, reviewer_topi
 
         # Artículos
         f.write("-- Inserts para la tabla Articulo\n")
-        f.write("INSERT INTO Articulo (titulo, resumen, fecha_envio, rut_autor, estado) VALUES\n")
+        f.write("INSERT INTO Articulo (id_articulo, titulo, resumen, fecha_envio, rut_autor, estado) VALUES\n")
         f.write(",\n".join([
-            f"('{titulo}', '{resumen}', '{fecha_envio}', '{rut_autor}', '{estado}')"
-            for titulo, resumen, fecha_envio, rut_autor, estado in articles
+            f"({i+1}, '{titulo}', '{resumen}', '{fecha_envio}', '{rut_autor}', '{estado}')"
+            for i, (titulo, resumen, fecha_envio, rut_autor, estado) in enumerate(articles)
         ]))
         f.write(";\n\n")
 

@@ -1,0 +1,14 @@
+SET FOREIGN_KEY_CHECKS = 0;
+
+DELETE FROM Articulo_Revisor;
+DELETE FROM Evaluacion_Articulo;
+DELETE FROM Articulo_Topico;
+DELETE FROM Autor_Articulo;
+DELETE FROM Revisor_Topico;
+DELETE FROM Articulo;
+DELETE FROM Revisor;
+DELETE FROM Autor;
+DELETE FROM Usuario;
+DELETE FROM Topico;
+
+SET FOREIGN_KEY_CHECKS = 1;

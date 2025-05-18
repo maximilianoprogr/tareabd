@@ -78,3 +78,4 @@
 
 Se uso un prodecedimiento almacenado en "gestionar_asignaciones.php", la funcion AsignarArticuloRevisor.sql
 Se uso una View en "login.php".
+Hay un tigger en la tabla "autor_articulo" que chuequea su uso correcto.

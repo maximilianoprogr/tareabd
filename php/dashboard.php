@@ -17,14 +17,19 @@ if (isset($_SESSION['message'])) {
 
 // Verificar si el usuario está autenticado
 if (!isset($_SESSION['usuario'])) {
-    // Si no hay sesión iniciada, redirige al login
     header("Location: login.php");
     exit();
 }
 
-echo "<div class='welcome'>Bienvenido, " . $_SESSION['usuario'] . "</div>"; // Muestra el nombre de usuario
-
 include('conexion.php');
+
+// Obtener el rol del usuario desde la base de datos
+$stmt_rol = $pdo->prepare("SELECT tipo FROM Usuario WHERE rut = ?");
+$stmt_rol->execute([$_SESSION['usuario']]);
+$rol = $stmt_rol->fetchColumn();
+
+echo "<div class='welcome'>Bienvenido, " . $_SESSION['usuario'] . "</div>";
+echo "<div class='user-role'><strong></strong> " . htmlspecialchars($rol) . "</div>";
 
 // Obtener los últimos 10 artículos
 $sql_ultimos = "SELECT id_articulo, titulo, fecha_envio FROM Articulo ORDER BY fecha_envio DESC LIMIT 10";

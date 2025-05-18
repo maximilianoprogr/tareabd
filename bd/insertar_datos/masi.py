@@ -93,9 +93,13 @@ def generate_article_reviews(articles, reviewers):
 
 def generate_reviewer_topics(reviewers, topics):
     reviewer_topics = []
+    topic_ids = list(range(1, len(topics) + 1))
     for reviewer in reviewers:
-        topic_id = random.randint(1, len(topics))
-        reviewer_topics.append((reviewer[0], topic_id))
+        # Cada revisor tendrá al menos 1 especialidad, pero puede tener más
+        num_topics = random.randint(1, min(3, len(topic_ids)))  # 1 a 3 tópicos por revisor
+        selected_topics = random.sample(topic_ids, num_topics)
+        for topic_id in selected_topics:
+            reviewer_topics.append((reviewer[0], topic_id))
     return reviewer_topics
 
 # Generar datos para la tabla Autor_Articulo (relación entre autores y artículos con contacto principal)
@@ -115,55 +119,62 @@ def generate_author_articles(articles, authors):
 # Generar datos para la tabla Articulo_Revisor
 
 
-def generate_article_reviewers(articles, reviewers):
+def generate_article_reviewers(articles, reviewers, article_topics, reviewer_topics):
     article_reviewers = []
+    # Crear un diccionario: artículo -> set de tópicos
+    articulo_a_topicos = {}
+    for id_articulo, id_topico in article_topics:
+        articulo_a_topicos.setdefault(id_articulo, set()).add(id_topico)
+    # Crear un diccionario: rut_revisor -> set de tópicos
+    revisor_a_topicos = {}
+    for rut_revisor, id_topico in reviewer_topics:
+        revisor_a_topicos.setdefault(rut_revisor, set()).add(id_topico)
     for article_id, article in enumerate(articles, start=1):
-        # Cada artículo puede tener entre 1 y 2 revisores
-        num_reviewers = random.randint(1, min(2, len(reviewers)))
-        selected_reviewers = random.sample(reviewers, num_reviewers)
-        for reviewer in selected_reviewers:
-            article_reviewers.append((article_id, reviewer[0]))
+        posibles_revisores = []
+        for reviewer in reviewers:
+            rut = reviewer[0]
+            if articulo_a_topicos[article_id] & revisor_a_topicos.get(rut, set()):
+                posibles_revisores.append(rut)
+        # Si hay posibles revisores, asignar 1 o 2 distintos
+        if posibles_revisores:
+            num_reviewers = min(len(posibles_revisores), random.randint(1, 2))
+            seleccionados = random.sample(posibles_revisores, num_reviewers)
+            for rut in seleccionados:
+                article_reviewers.append((article_id, rut))
+        # Si no hay ningún revisor con especialidad, no asigna ninguno
     return article_reviewers
 
 # Escribir los datos generados en un archivo SQL
 
 
-def write_to_sql(users, authors, reviewers, topics, articles, article_topics, reviews, reviewer_topics, author_articles, article_reviewers):
+def write_to_sql(users, topics, articles, article_topics, reviews, reviewer_topics, author_articles, article_reviewers):
     with open("FAKER_INSERT.sql", "w", encoding="utf-8") as f:
         # Deshabilitar restricciones de claves foráneas
         f.write("SET FOREIGN_KEY_CHECKS = 0;\n")
-
-        # Eliminar datos existentes con DELETE
         f.write("DELETE FROM Articulo_Revisor;\n")
+        f.write("DELETE FROM Revisor_Topico;\n")
         f.write("DELETE FROM Revisor;\n")
+        f.write("DELETE FROM Autor_Articulo;\n")
+        f.write("DELETE FROM Autor;\n")
         f.write("DELETE FROM Usuario;\n\n")
-
-        # Habilitar restricciones de claves foráneas
         f.write("SET FOREIGN_KEY_CHECKS = 1;\n\n")
-
-        # Revisores como usuarios
-        revisor_users = [(rut, f"Revisor {i+1}", f"revisor{i+1}@example.com", f"revisor{i+1}",
-                          "password123", "Revisor") for i, rut in enumerate([r[0] for r in reviewers])]
-        # Asegurar unicidad de RUTs para revisores adicionales
-        for i, (rut, nombre, email, usuario, password, tipo) in enumerate(revisor_users):
-            while rut in [user[0] for user in users]:
-                rut = fake.unique.numerify("########-#")
-            revisor_users[i] = (rut, nombre, email, usuario, password, tipo)
 
         # Usuarios
         f.write("-- Inserts para la tabla Usuario\n")
-        f.write(
-            "INSERT INTO Usuario (rut, nombre, email, usuario, password, tipo) VALUES\n")
+        f.write("INSERT INTO Usuario (rut, nombre, email, usuario, password, tipo) VALUES\n")
         f.write(",\n".join([
             f"('{rut}', '{nombre}', '{email}', '{usuario}', '{password}', '{tipo}')"
-            for rut, nombre, email, usuario, password, tipo in users + revisor_users
+            for rut, nombre, email, usuario, password, tipo in users
         ]))
         f.write(";\n\n")
 
         # Autores
         f.write("-- Inserts para la tabla Autor\n")
         f.write("INSERT INTO Autor (rut) VALUES\n")
-        f.write(",\n".join([f"('{rut}')" for rut in authors]))
+        f.write(",\n".join([
+            f"('{rut}')"
+            for rut, nombre, email, usuario, password, tipo in users if tipo == 'Autor'
+        ]))
         f.write(";\n\n")
 
         # Revisores
@@ -171,7 +182,7 @@ def write_to_sql(users, authors, reviewers, topics, articles, article_topics, re
         f.write("INSERT INTO Revisor (rut) VALUES\n")
         f.write(",\n".join([
             f"('{rut}')"
-            for rut, _ in reviewers
+            for rut, nombre, email, usuario, password, tipo in users if tipo == 'Revisor'
         ]))
         f.write(";\n\n")
 
@@ -183,8 +194,7 @@ def write_to_sql(users, authors, reviewers, topics, articles, article_topics, re
 
         # Artículos
         f.write("-- Inserts para la tabla Articulo\n")
-        f.write(
-            "INSERT INTO Articulo (titulo, resumen, fecha_envio, rut_autor, estado) VALUES\n")
+        f.write("INSERT INTO Articulo (titulo, resumen, fecha_envio, rut_autor, estado) VALUES\n")
         f.write(",\n".join([
             f"('{titulo}', '{resumen}', '{fecha_envio}', '{rut_autor}', '{estado}')"
             for titulo, resumen, fecha_envio, rut_autor, estado in articles
@@ -200,8 +210,7 @@ def write_to_sql(users, authors, reviewers, topics, articles, article_topics, re
 
         # Evaluaciones de Artículos
         f.write("-- Inserts para la tabla Evaluacion_Articulo\n")
-        f.write(
-            "INSERT INTO Evaluacion_Articulo (id_articulo, rut_revisor, resena, calificacion) VALUES\n")
+        f.write("INSERT INTO Evaluacion_Articulo (id_articulo, rut_revisor, resena, calificacion) VALUES\n")
         f.write(",\n".join([
             f"({id_articulo}, '{rut_revisor}', '{resena}', {calificacion})"
             for id_articulo, rut_revisor, resena, calificacion in reviews
@@ -213,12 +222,11 @@ def write_to_sql(users, authors, reviewers, topics, articles, article_topics, re
         f.write("INSERT INTO Revisor_Topico (rut_revisor, id_topico) VALUES\n")
         f.write(",\n".join(
             [f"('{rut_revisor}', {id_topico})" for rut_revisor, id_topico in reviewer_topics]))
-        f.write(";\n")
+        f.write(";\n\n")
 
         # Autor-Artículo
         f.write("-- Inserts para la tabla Autor_Articulo\n")
-        f.write(
-            "INSERT INTO Autor_Articulo (id_articulo, rut_autor, es_contacto) VALUES\n")
+        f.write("INSERT INTO Autor_Articulo (id_articulo, rut_autor, es_contacto) VALUES\n")
         f.write(",\n".join([
             f"({id_articulo}, '{rut_autor}', {es_contacto})"
             for id_articulo, rut_autor, es_contacto in author_articles
@@ -235,16 +243,18 @@ def write_to_sql(users, authors, reviewers, topics, articles, article_topics, re
         f.write(";\n\n")
 
 
+# --- En el main, solo necesitas users, no separar autores/revisores ---
 if __name__ == "__main__":
     users = generate_users()
-    authors, reviewers = generate_authors_and_reviewers(users)
     topics = generate_topics()
+    # Extraer autores y revisores desde users
+    authors = [user[0] for user in users if user[5] == 'Autor']
+    reviewers = [(user[0], user[1]) for user in users if user[5] == 'Revisor']
     articles = generate_articles(authors)
     article_topics = generate_article_topics(articles, topics)
     reviews = generate_article_reviews(articles, reviewers)
     reviewer_topics = generate_reviewer_topics(reviewers, topics)
     author_articles = generate_author_articles(articles, authors)
-    article_reviewers = generate_article_reviewers(articles, reviewers)
-    write_to_sql(users, authors, reviewers, topics, articles,
-                 article_topics, reviews, reviewer_topics, author_articles, article_reviewers)
+    article_reviewers = generate_article_reviewers(articles, reviewers, article_topics, reviewer_topics)
+    write_to_sql(users, topics, articles, article_topics, reviews, reviewer_topics, author_articles, article_reviewers)
     print("Datos generados y guardados en FAKER_INSERT.sql")

@@ -37,15 +37,40 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             echo "<p>Error: No se detectó el rol del usuario.</p>";
         }
 
+        // Mensaje de depuración para verificar el rol recuperado de la base de datos
+        if (isset($user['tipo_usuario'])) {
+            echo "<p style='color: green;'>Rol recuperado de la base de datos: " . htmlspecialchars($user['tipo_usuario']) . "</p>";
+        } else {
+            echo "<p style='color: red;'>Error: No se encontró el rol en la base de datos.</p>";
+        }
+
         // Eliminar cualquier lógica relacionada con cifrado o descifrado de contraseñas
         // Comparar directamente las contraseñas ingresadas y almacenadas
         if ($password === $user['password']) {
             echo "Contraseña verificada correctamente.<br>";
             // Si la contraseña es correcta, se redirige al usuario a la página principal
+            
+            // Reiniciar la sesión completamente antes de asignar un nuevo rol
             session_start();
+            session_unset();
+            session_destroy();
+            session_start();
+
+            // Mensaje de depuración para verificar el rol recuperado de la base de datos
+            if (isset($user['tipo_usuario'])) {
+                echo "<p style='color: green;'>Rol recuperado de la base de datos: " . htmlspecialchars($user['tipo_usuario']) . "</p>";
+            } else {
+                echo "<p style='color: red;'>Error: No se encontró el rol en la base de datos.</p>";
+            }
+
+            // Asignar valores a la sesión
             $_SESSION['rut'] = $user['rut'];
             $_SESSION['nombre'] = $user['nombre'];
-            $_SESSION['rol'] = $user['tipo_usuario']; // Asignar el rol del usuario a la sesión
+            $_SESSION['rol'] = $user['tipo_usuario'];
+
+            // Mensaje de depuración para verificar el rol asignado a la sesión
+            echo "<p style='color: blue;'>Rol asignado a la sesión: " . htmlspecialchars($_SESSION['rol']) . "</p>";
+
             header("Location: ../php/index.php");
             exit();
         } else {

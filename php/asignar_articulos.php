@@ -2,6 +2,27 @@
 session_start();
 include('../php/conexion.php');
 
+// Verificar si el usuario está autenticado
+if (!isset($_SESSION['usuario'])) {
+    header("Location: login.php");
+    exit();
+}
+
+// Obtener el rol del usuario desde la base de datos
+$stmt_rol = $pdo->prepare("SELECT tipo FROM Usuario WHERE rut = ?");
+$stmt_rol->execute([$_SESSION['usuario']]);
+$rol = $stmt_rol->fetchColumn();
+
+// Actualizar el rol en la sesión con el valor obtenido de la base de datos
+$_SESSION['rol'] = $rol;
+
+// Verificar si el usuario no es Jefe del Comité de Programa
+if (strcasecmp($rol, 'Jefe Comite de Programa') !== 0) {
+    echo "<p style='color: red; font-weight: bold;'>Acceso denegado: Solo el Jefe del Comité de Programa puede acceder a esta página.</p>";
+    header("Refresh: 3; url=inicio.php"); // Redirigir al inicio después de 3 segundos
+    exit();
+}
+
 // Consulta para obtener artículos con autores, tópicos y revisores (como arrays)
 $sql = "
 SELECT 

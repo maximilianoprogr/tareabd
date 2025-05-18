@@ -3,18 +3,84 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+// Iniciar sesión
 session_start();
-include('../php/conexion.php'); // Asegúrate de que este archivo define correctamente $pdo
 
-// Verificar permisos: solo el Jefe del Comité puede acceder
-if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'Jefe Comite de Programa') {
-    echo "<div style='color: red; font-weight: bold; margin: 30px 0; font-size: 18px;'>Error: No tiene permisos suficientes para acceder a esta página.</div>";
+// Verificar si el usuario está autenticado
+if (!isset($_SESSION['usuario'])) {
+    header("Location: login.php");
     exit();
 }
 
-// Mostrar el rol actual en la sesión al cargar la página
+// Obtener el rol del usuario desde la base de datos
+include('../php/conexion.php'); // Asegúrate de que este archivo define correctamente $pdo
+$stmt_rol = $pdo->prepare("SELECT tipo FROM Usuario WHERE rut = ?");
+$stmt_rol->execute([$_SESSION['usuario']]);
+$rol = $stmt_rol->fetchColumn();
+
+// Actualizar el rol en la sesión con el valor obtenido de la base de datos
+$_SESSION['rol'] = $rol;
+
+// Verificar si el usuario no es Jefe del Comité de Programa
+if (strcasecmp($rol, 'Jefe Comite de Programa') !== 0) {
+    echo "<p style='color: red; font-weight: bold;'>Acceso denegado: Solo el Jefe del Comité de Programa puede acceder a esta página.</p>";
+    header("Refresh: 3; url=inicio.php"); // Redirigir al inicio después de 3 segundos
+    exit();
+}
+
+// Mostrar el rol actual en la sesión para depuración
+echo "<p style='color: blue;'>Rol actual en la sesión: " . htmlspecialchars($_SESSION['rol']) . "</p>";
+
+// Ajustar las variables de rol basadas en el valor obtenido de la base de datos
+$es_revisor = strcasecmp($rol, 'revisor') === 0;
+$es_jefe_comite = strcasecmp($rol, 'Jefe Comite de Programa') === 0;
+$es_autor = strcasecmp($rol, 'autor') === 0;
+
+// Mostrar mensajes basados en el rol del usuario
+if ($es_autor) {
+    echo '<p style="font-family: Arial, sans-serif; color: red;">Acceso como Autor.</p>';
+} elseif ($es_jefe_comite) {
+    echo '<p style="font-family: Arial, sans-serif; color: blue;">Acceso como Jefe del Comité de Programa.</p>';
+} elseif ($es_revisor) {
+    echo '<p style="font-family: Arial, sans-serif; color: green;">Acceso como Revisor.</p>';
+} else {
+    echo '<p style="font-family: Arial, sans-serif; color: orange;">Rol no reconocido.</p>';
+}
+
+// Depuración: Verificar el rol al inicio de la página
+if (isset($_SESSION['rol'])) {
+    error_log("[Depuración] Rol al inicio de gestionar_revisores.php: " . $_SESSION['rol']);
+} else {
+    error_log("[Depuración] No se encontró el rol al inicio de gestionar_revisores.php.");
+}
+
+// Mensaje de prueba para verificar los logs
+error_log("[Prueba] Este es un mensaje de prueba para verificar los logs.");
+
+// Verificar permisos: solo el Jefe del Comité puede acceder
+if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'Jefe Comite de Programa') {
+    // Redirigir a una página de error o al inicio si el usuario no tiene permisos
+    header("Location: ../php/inicio.php");
+    exit();
+}
+
+// Verificar si el usuario es autor y mostrar un mensaje
+if (isset($_SESSION['rol']) && strcasecmp($_SESSION['rol'], 'autor') === 0) {
+    echo "<p style='color: red; font-weight: bold;'>Acceso denegado: Los autores no pueden acceder a la gestión de revisores.</p>";
+    header("Refresh: 3; url=inicio.php"); // Redirigir al inicio después de 3 segundos
+    exit();
+}
+
+// Mostrar el rol actual en la sesión para depuración
 if (isset($_SESSION['rol'])) {
     echo "<p style='color: blue;'>Rol actual en la sesión: " . htmlspecialchars($_SESSION['rol']) . "</p>";
+} else {
+    echo "<p style='color: red;'>Error: No se encontró el rol en la sesión.</p>";
+}
+
+// Depuración: Mostrar el valor exacto de $_SESSION['rol']
+if (isset($_SESSION['rol'])) {
+    echo "<p style='color: green;'>Depuración: Rol en la sesión: " . htmlspecialchars($_SESSION['rol']) . "</p>";
 } else {
     echo "<p style='color: red;'>Error: No se encontró el rol en la sesión.</p>";
 }
@@ -150,6 +216,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($action === 'delete' && !$tiene_articulos) {
             echo "<p style='color: green;'>Correo enviado al revisor correspondiente.</p>";
         }
+        // Mostrar mensaje de correo enviado después de eliminar un revisor
+        if ($action === 'delete') {
+            echo "<p style='color: green;'>Correo enviado al revisor correspondiente tras eliminar.</p>";
+        }
         return;
     }
 
@@ -172,6 +242,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo "<p style='color: red;'>El email no puede exceder los 255 caracteres.</p>";
             exit();
         }
+    }
+
+    // Verificar si ya existe un revisor con el mismo nombre o correo electrónico
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nombre'], $_POST['email'])) {
+        $nombre = $_POST['nombre'];
+        $email = $_POST['email'];
+
+        $sql_check_duplicate = "SELECT COUNT(*) FROM Usuario WHERE nombre = ? OR email = ?";
+        $stmt_check = $pdo->prepare($sql_check_duplicate);
+        $stmt_check->execute([$nombre, $email]);
+        $is_duplicate = $stmt_check->fetchColumn() > 0;
+
+        if ($is_duplicate) {
+            echo "<p style='color: red;'>Error: Ya existe un revisor con el mismo nombre o correo electrónico.</p>";
+            exit();
+        }
+
+        // ...existing code for adding a new revisor...
     }
 
     // Manejar acciones de forma independiente
@@ -518,6 +606,11 @@ $topicos_disponibles = $stmt_topicos->fetchAll();
         });
     });
     </script>
+
+    <?php
+    // Mensaje de prueba para verificar la ejecución del código
+    echo "<p style='color: green;'>[Prueba] Este es un mensaje de prueba para verificar la ejecución del código.</p>";
+    ?>
 </body>
 </html>
 
@@ -555,5 +648,39 @@ if (isset($action) && in_array($action, ['create', 'update', 'delete'])) {
     echo "<p style='color: green;'>Correo enviado al revisor correspondiente.</p>";
 } else {
     echo "<p style='color: red;'>Error: Acción no válida o no reconocida.</p>";
+}
+
+// Mostrar mensaje de correo enviado después de cualquier acción
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    echo "<p style='color: green;'>Correo enviado al revisor correspondiente.</p>";
+    error_log('Correo enviado al revisor correspondiente. POST data: ' . print_r($_POST, true));
+}
+
+// Mostrar mensaje de correo enviado después de cualquier acción válida
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
+    echo "<p style='color: green;'>Correo enviado al revisor correspondiente.</p>";
+}
+
+// Mostrar mensaje de correo enviado después de cualquier acción válida
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST)) {
+    echo "<p style='color: green;'>Correo enviado al revisor correspondiente.</p>";
+}
+
+// Mostrar mensaje de correo enviado después de procesar cualquier acción
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    echo "<p style='color: green;'>Correo enviado al revisor correspondiente.</p>";
+}
+
+// Depuración: Confirmar que se ejecuta después de cualquier acción válida
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    error_log('POST recibido: ' . print_r($_POST, true));
+    echo "<p style='color: green;'>Correo enviado al revisor correspondiente.</p>";
+}
+
+// Depuración: Verificar el rol antes de finalizar la ejecución
+if (isset($_SESSION['rol'])) {
+    error_log("[Depuración] Rol al final de gestionar_revisores.php: " . $_SESSION['rol']);
+} else {
+    error_log("[Depuración] No se encontró el rol al final de gestionar_revisores.php.");
 }
 ?>

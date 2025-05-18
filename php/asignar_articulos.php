@@ -119,8 +119,10 @@ $revisores = $stmt_revisores->fetchAll();
         <th>Artículos asignados</th>
         <th>Acción</th>
     </tr>
-    <?php foreach ($revisores as $revisor): ?>
-    <tr>
+    <?php foreach ($revisores as $revisor): 
+        $sin_articulos = empty($revisor['titulos_asignados']);
+    ?>
+    <tr<?php if ($sin_articulos) echo ' style="background:#ffe6e6;"'; ?>>
         <td><?= htmlspecialchars($revisor['nombre']) ?></td>
         <td><?= $revisor['topicos'] ? nl2br(htmlspecialchars(str_replace(', ', "\n", $revisor['topicos']))) : 'Sin tópicos'; ?></td>
         <td>

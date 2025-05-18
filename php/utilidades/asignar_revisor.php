@@ -23,9 +23,17 @@ if (!$articulo) {
     exit;
 }
 
-// Procesar asignación si se envió el formulario
+// Procesar quitar revisor si se envió el formulario
 $msg = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rut_revisor'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rut_revisor']) && isset($_POST['quitar'])) {
+    $rut_revisor = $_POST['rut_revisor'];
+    $stmt = $pdo->prepare("DELETE FROM Articulo_Revisor WHERE id_articulo = ? AND rut_revisor = ?");
+    $stmt->execute([$id_articulo, $rut_revisor]);
+    $msg = "Revisor quitado correctamente.";
+}
+
+// Procesar asignación si se envió el formulario (y no es quitar)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rut_revisor']) && !isset($_POST['quitar'])) {
     $rut_revisor = $_POST['rut_revisor'];
     // Verificar si ya está asignado
     $stmt = $pdo->prepare("SELECT 1 FROM Articulo_Revisor WHERE id_articulo = ? AND rut_revisor = ?");
@@ -33,9 +41,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rut_revisor'])) {
     if ($stmt->fetch()) {
         $msg = "El revisor ya está asignado a este artículo.";
     } else {
+        // Obtener tópicos del artículo y del revisor
+        $topicos_articulo = array_filter(array_map('trim', preg_split('/,\s*/', $articulo['topicos'] ?? '')));
+        $stmt = $pdo->prepare("SELECT GROUP_CONCAT(DISTINCT t.nombre SEPARATOR ', ') AS topicos
+                               FROM Revisor_Topico rt
+                               LEFT JOIN Topico t ON rt.id_topico = t.id_topico
+                               WHERE rt.rut_revisor = ?");
+        $stmt->execute([$rut_revisor]);
+        $row = $stmt->fetch();
+        $topicos_revisor = array_filter(array_map('trim', preg_split('/,\s*/', $row['topicos'] ?? '')));
+        $hay_coincidencia = false;
+        foreach ($topicos_revisor as $topico) {
+            if ($topico !== '' && in_array($topico, $topicos_articulo, true)) {
+                $hay_coincidencia = true;
+                break;
+            }
+        }
+        // Asignar revisor
         $stmt = $pdo->prepare("INSERT INTO Articulo_Revisor (id_articulo, rut_revisor) VALUES (?, ?)");
         $stmt->execute([$id_articulo, $rut_revisor]);
-        $msg = "Revisor asignado correctamente.";
+        if (!$hay_coincidencia) {
+            $msg = "Revisor asignado correctamente, pero este revisor NO tiene especialidad en el tópico del artículo.";
+        } else {
+            $msg = "Revisor asignado correctamente.";
+        }
     }
 }
 
@@ -58,6 +87,11 @@ ORDER BY u.nombre
 ";
 $stmt = $pdo->query($sql);
 $revisores = $stmt->fetchAll();
+
+// Obtener los revisores ya asignados a este artículo
+$stmt_asignados = $pdo->prepare("SELECT rut_revisor FROM Articulo_Revisor WHERE id_articulo = ?");
+$stmt_asignados->execute([$id_articulo]);
+$revisores_asignados = $stmt_asignados->fetchAll(PDO::FETCH_COLUMN);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -68,12 +102,12 @@ $revisores = $stmt->fetchAll();
 </head>
 <body>
 <a href="../asignar_articulos.php">Volver a artículos</a>
-<h2>Asignar revisor a: <br> <?= htmlspecialchars($articulo['titulo']) ?></h2>
+<h2>Asignar revisor a: <br> <span style="font-weight:normal;"><?= htmlspecialchars($articulo['titulo']) ?></span></h2>
 <p><strong>Tópicos del artículo:</strong><br>
 <?= $articulo['topicos'] ? nl2br(htmlspecialchars(str_replace(', ', "\n", $articulo['topicos']))) : 'Sin tópicos'; ?>
 </p>
 <?php if ($msg): ?>
-    <p style="color:green;"><?= htmlspecialchars($msg) ?></p>
+    <p style="color:<?= strpos($msg, 'NO tiene especialidad') !== false ? 'orange' : 'green' ?>;"><?= htmlspecialchars($msg) ?></p>
 <?php endif; ?>
 <table border="1" cellpadding="6" style="border-collapse:collapse;width:100%">
     <tr style="background:#f2f2f2">
@@ -83,11 +117,9 @@ $revisores = $stmt->fetchAll();
         <th>Acción</th>
     </tr>
     <?php
-    // Normaliza los tópicos del artículo
     $topicos_articulo = array_filter(array_map('trim', preg_split('/,\s*/', $articulo['topicos'] ?? '')));
 
     foreach ($revisores as $revisor): 
-        // Normaliza los tópicos del revisor
         $topicos_revisor = array_filter(array_map('trim', preg_split('/,\s*/', $revisor['topicos'] ?? '')));
         $hay_coincidencia = false;
         foreach ($topicos_revisor as $topico) {
@@ -97,6 +129,7 @@ $revisores = $stmt->fetchAll();
             }
         }
         $clase_td = $hay_coincidencia ? 'coincide-topico-celda' : '';
+        $ya_asignado = in_array($revisor['rut'], $revisores_asignados);
     ?>
     <tr>
         <td><?= htmlspecialchars($revisor['nombre']) ?></td>
@@ -105,7 +138,6 @@ $revisores = $stmt->fetchAll();
             if ($topicos_revisor) {
                 foreach ($topicos_revisor as $topico) {
                     if ($topico !== '' && in_array($topico, $topicos_articulo, true)) {
-                        // Solo resalta el color y agrega subrayado, sin negrita
                         echo '<span class="topico-coincidente">' . htmlspecialchars($topico) . '</span><br>';
                     } elseif ($topico !== '') {
                         echo htmlspecialchars($topico) . '<br>';
@@ -126,10 +158,18 @@ $revisores = $stmt->fetchAll();
             ?>
         </td>
         <td>
-            <form method="post" style="margin:0;">
-                <input type="hidden" name="rut_revisor" value="<?= htmlspecialchars($revisor['rut']) ?>">
-                <button type="submit">Asignar</button>
-            </form>
+            <?php if ($ya_asignado): ?>
+                <form method="post" style="margin:0;">
+                    <input type="hidden" name="rut_revisor" value="<?= htmlspecialchars($revisor['rut']) ?>">
+                    <input type="hidden" name="quitar" value="1">
+                    <button type="submit" style="background:#dc3545;color:#fff;">Quitar</button>
+                </form>
+            <?php else: ?>
+                <form method="post" style="margin:0;">
+                    <input type="hidden" name="rut_revisor" value="<?= htmlspecialchars($revisor['rut']) ?>">
+                    <button type="submit">Asignar</button>
+                </form>
+            <?php endif; ?>
         </td>
     </tr>
     <?php endforeach; ?>

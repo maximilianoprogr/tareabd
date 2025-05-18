@@ -30,6 +30,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         echo "<br>Contraseña ingresada (depuración): '" . addslashes($password) . "'";
         echo "<br>Contraseña almacenada (depuración): '" . addslashes($user['password']) . "'";
 
+        // Depurar el valor de tipo_usuario para verificar el rol
+        if (isset($user['tipo_usuario'])) {
+            echo "<p>Rol detectado: " . htmlspecialchars($user['tipo_usuario']) . "</p>";
+        } else {
+            echo "<p>Error: No se detectó el rol del usuario.</p>";
+        }
+
         // Eliminar cualquier lógica relacionada con cifrado o descifrado de contraseñas
         // Comparar directamente las contraseñas ingresadas y almacenadas
         if ($password === $user['password']) {

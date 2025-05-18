@@ -25,15 +25,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $message = "Debe seleccionar al menos un tópico.";
     } else {
         try {
-            // Registrar autores en tabla Autor si no existen
+            // Validar que el RUT exista en la tabla Usuario antes de insertarlo en Autor
             foreach ($ruts as $rut) {
                 $rut = trim($rut);
                 if ($rut === '') continue;
+
+                // Verificar si el RUT existe en Usuario
+                $stmt = $pdo->prepare("SELECT COUNT(*) FROM Usuario WHERE rut = ?");
+                $stmt->execute([$rut]);
+                if ($stmt->fetchColumn() == 0) {
+                    $message = "El RUT $rut no está registrado en el sistema. Por favor, regístrelo primero.";
+                    break;
+                }
+
+                // Verificar si el RUT ya está en Autor
                 $stmt = $pdo->prepare("SELECT COUNT(*) FROM Autor WHERE rut = ?");
                 $stmt->execute([$rut]);
                 if ($stmt->fetchColumn() == 0) {
                     $pdo->prepare("INSERT INTO Autor (rut) VALUES (?)")->execute([$rut]);
                 }
+            }
+
+            // Validar que el título no exista para alguno de los autores
+            $stmt = $pdo->prepare("SELECT COUNT(*) FROM Articulo a JOIN Autor_Articulo aa ON a.id_articulo = aa.id_articulo WHERE a.titulo = ? AND aa.rut_autor IN (" . implode(',', array_fill(0, count($ruts), '?')) . ")");
+            $stmt->execute(array_merge([$titulo], $ruts));
+            if ($stmt->fetchColumn() > 0) {
+                $message = "El título del artículo ya existe para uno de los autores.";
+                throw new Exception($message);
+            }
+
+            // Validar que no se repitan nombres de autores
+            if (count($ruts) !== count(array_unique($ruts))) {
+                $message = "No se pueden repetir nombres de autores.";
+                throw new Exception($message);
+            }
+
+            // Validar que el RUT del autor principal exista en la tabla Autor antes de insertar el artículo
+            $stmt = $pdo->prepare("SELECT COUNT(*) FROM Autor WHERE rut = ?");
+            $stmt->execute([$ruts[0]]);
+            if ($stmt->fetchColumn() == 0) {
+                $message = "El RUT del autor principal ($ruts[0]) no está registrado como Autor. Por favor, regístrelo primero.";
+                throw new Exception($message);
             }
 
             // Insertar artículo

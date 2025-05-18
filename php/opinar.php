@@ -91,6 +91,12 @@ if (!$revisor_existe) {
     exit();
 }
 
+// Ajustar la validación para que sea insensible a mayúsculas y minúsculas
+if (strcasecmp($_SESSION['rol'], 'autor') === 0) {
+    echo "<p>Error: No puedes opinar porque no eres el revisor asignado para este artículo.</p>";
+    exit();
+}
+
 // Determinar el rut_revisor correcto
 $rut_revisor = $_SESSION['usuario'];
 if ($_SESSION['rol'] === 'Jefe Comite de Programa' && isset($_GET['revisor'])) {

@@ -11,6 +11,9 @@ if (!isset($_SESSION['rol'])) {
     echo "<p style='color: blue;'>Rol actual en la sesión: " . htmlspecialchars($_SESSION['rol']) . "</p>";
 }
 
+// Mostrar el rol del usuario en la esquina superior izquierda
+echo "<div style='position: fixed; top: 10px; left: 10px; font-weight: bold; background-color: #f0f0f0; padding: 5px; border: 1px solid #ccc;'>Rol: " . htmlspecialchars($_SESSION['rol']) . "</div>";
+
 // Eliminar mensajes visibles antes de la redirección
 if (!isset($_SESSION['rol']) || ($_SESSION['rol'] !== 'admin' && $_SESSION['rol'] !== 'Jefe Comite de Programa')) {
     header("Location: ../php/dashboard.php");

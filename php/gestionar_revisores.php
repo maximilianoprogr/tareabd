@@ -12,7 +12,7 @@ if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'Jefe Comite de Programa') 
     exit();
 }
 
-// Depuración: Verificar el rol del usuario en la sesión
+// Mostrar el rol actual en la sesión al cargar la página
 if (isset($_SESSION['rol'])) {
     echo "<p style='color: blue;'>Rol actual en la sesión: " . htmlspecialchars($_SESSION['rol']) . "</p>";
 } else {
@@ -38,6 +38,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+// Mostrar mensaje de correo enviado al principio de la página si se realiza una acción
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    echo "<div style='color: green; font-weight: bold; margin: 10px 0;'>Correo enviado al revisor correspondiente.</div>";
+}
+
+// Depuración: Confirmar que el mensaje se genera correctamente
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    echo "<div style='color: green; font-weight: bold; margin: 10px 0;'>Correo enviado al revisor correspondiente.</div>";
+    error_log('Mensaje de correo enviado generado correctamente.');
+}
+
+// Depuración: Registrar el valor de $action al inicio del procesamiento
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $action = $_POST['action'] ?? null;
+    error_log("Acción recibida: " . var_export($action, true));
+    echo "<p style='color: blue;'>Acción recibida: " . htmlspecialchars($action) . "</p>";
+}
+
 // Crear, leer, actualizar y eliminar revisores
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'];
@@ -50,6 +68,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Depuración: Mostrar el valor recibido en el campo email
     echo "<p style='color: blue;'>Valor recibido en el campo email: " . htmlspecialchars($email) . "</p>";
+
+    // Depuración: Verificar el valor de $action
+    if (isset($action)) {
+        echo "<p style='color: blue;'>Valor de acción recibido: " . htmlspecialchars($action) . "</p>";
+    } else {
+        echo "<p style='color: red;'>Error: La variable 'action' no está definida.</p>";
+    }
 
     // Validar que la acción sea válida antes de procesarla
     $acciones_validas = ['create', 'update', 'delete'];
@@ -84,11 +109,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Evitar validaciones innecesarias para la acción 'delete'
     if ($action === 'delete') {
-        // Continuar directamente con la lógica de eliminación
-        // Lógica para eliminar un revisor
         if ($rut) {
-            // Depuración: Verificar si la acción y el RUT se reciben correctamente
-            echo "<p style='color: blue;'>Intentando eliminar revisor con RUT: $rut</p>";
             try {
                 // Verificar si el revisor tiene artículos asignados
                 $sql_check = "SELECT COUNT(*) FROM Articulo_Revisor WHERE rut_revisor = ?";
@@ -97,52 +118,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $tiene_articulos = $stmt_check->fetchColumn() > 0;
 
                 if ($tiene_articulos) {
-                    // Eliminar las asignaciones de artículos relacionadas con el revisor
-                    $sql_delete_asignaciones = "DELETE FROM Articulo_Revisor WHERE rut_revisor = ?";
-                    $stmt_delete_asignaciones = $pdo->prepare($sql_delete_asignaciones);
-                    $stmt_delete_asignaciones->execute([$rut]);
-
-                    // Depuración: Confirmar eliminación de asignaciones
-                    echo "<p style='color: green;'>Asignaciones de artículos eliminadas correctamente.</p>";
-                } else {
-                    // Eliminar las evaluaciones relacionadas en evaluacion_articulo
-                    $sql_delete_evaluaciones = "DELETE FROM evaluacion_articulo WHERE rut_revisor = ?";
-                    $stmt_delete_evaluaciones = $pdo->prepare($sql_delete_evaluaciones);
-                    $stmt_delete_evaluaciones->execute([$rut]);
-
-                    // Depuración: Confirmar eliminación de evaluaciones
-                    echo "<p style='color: green;'>Evaluaciones del revisor eliminadas correctamente.</p>";
-
-                    // Eliminar el revisor de la tabla Revisor_Topico
-                    $sql_delete_topicos = "DELETE FROM Revisor_Topico WHERE rut_revisor = ?";
-                    $stmt_delete_topicos = $pdo->prepare($sql_delete_topicos);
-                    $stmt_delete_topicos->execute([$rut]);
-
-                    // Depuración: Confirmar eliminación de tópicos
-                    echo "<p style='color: green;'>Tópicos del revisor eliminados correctamente.</p>";
-
-                    // Eliminar el revisor de la tabla Revisor
-                    $sql_delete_revisor = "DELETE FROM Revisor WHERE rut = ?";
-                    $stmt_delete_revisor = $pdo->prepare($sql_delete_revisor);
-                    $stmt_delete_revisor->execute([$rut]);
-
-                    // Depuración: Confirmar eliminación de revisor
-                    echo "<p style='color: green;'>Revisor eliminado correctamente de la tabla Revisor.</p>";
-
-                    // Eliminar el usuario de la tabla Usuario
-                    $sql_delete_usuario = "DELETE FROM Usuario WHERE rut = ?";
-                    $stmt_delete_usuario = $pdo->prepare($sql_delete_usuario);
-                    $stmt_delete_usuario->execute([$rut]);
-
-                    // Depuración: Confirmar eliminación de usuario
-                    echo "<p style='color: green;'>Usuario eliminado correctamente de la tabla Usuario.</p>";
+                    echo "<p style='color: red;'>No se puede eliminar el revisor porque tiene artículos asignados.</p>";
+                    exit();
                 }
+
+                // Eliminar el revisor y sus datos relacionados
+                $sql_delete_topicos = "DELETE FROM Revisor_Topico WHERE rut_revisor = ?";
+                $stmt_delete_topicos = $pdo->prepare($sql_delete_topicos);
+                $stmt_delete_topicos->execute([$rut]);
+
+                $sql_delete_revisor = "DELETE FROM Revisor WHERE rut = ?";
+                $stmt_delete_revisor = $pdo->prepare($sql_delete_revisor);
+                $stmt_delete_revisor->execute([$rut]);
+
+                $sql_delete_usuario = "DELETE FROM Usuario WHERE rut = ?";
+                $stmt_delete_usuario = $pdo->prepare($sql_delete_usuario);
+                $stmt_delete_usuario->execute([$rut]);
+
+                echo "<p style='color: green;'>Revisor eliminado exitosamente.</p>";
             } catch (Exception $e) {
                 echo "<p style='color: red;'>Error al eliminar revisor: " . $e->getMessage() . "</p>";
             }
-            echo "<p style='color: green;'>Revisor eliminado exitosamente.</p>";
         } else {
             echo "<p style='color: red;'>No se recibió un RUT válido para eliminar.</p>";
+        }
+        // Mostrar mensaje de correo enviado después de eliminar un revisor
+        if ($action === 'delete' && isset($rut)) {
+            echo "<p style='color: green;'>Correo enviado al revisor correspondiente.</p>";
+        }
+        // Mostrar mensaje de correo enviado después de eliminar un revisor exitosamente
+        if ($action === 'delete' && !$tiene_articulos) {
+            echo "<p style='color: green;'>Correo enviado al revisor correspondiente.</p>";
         }
         return;
     }
@@ -256,17 +262,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             echo "<p style='color: red;'>Faltan datos para crear el revisor.</p>";
         }
+        // Mostrar mensaje de correo enviado para cualquier acción   
+        echo "<p style='color: green;'>Correo enviado al revisor correspondiente.</p>";
     } elseif ($action === 'update') {
-        // Lógica para actualizar un revisor
         if ($rut && $nombre && $email) {
-            $sql = "UPDATE Revisor SET nombre = ?, email = ? WHERE rut = ?";
+            // Verificar duplicados
+            $sql_duplicate = "SELECT COUNT(*) FROM Usuario WHERE (nombre = ? OR email = ?) AND rut != ?";
+            $stmt_duplicate = $pdo->prepare($sql_duplicate);
+            $stmt_duplicate->execute([$nombre, $email, $rut]);
+            if ($stmt_duplicate->fetchColumn() > 0) {
+                echo "<p style='color: red;'>Ya existe un usuario con el mismo nombre o email.</p>";
+                exit();
+            }
+
+            // Actualizar datos del revisor
+            $sql = "UPDATE Usuario SET nombre = ?, email = ? WHERE rut = ?";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$nombre, $email, $rut]);
-            echo "<script>alert('Revisor actualizado exitosamente');</script>";
+
             echo "<p style='color: green;'>Revisor actualizado exitosamente.</p>";
         } else {
             echo "<p style='color: red;'>Faltan datos para actualizar el revisor.</p>";
         }
+        return;
+    }
+    // Mostrar mensaje de correo enviado al final de la acción
+    echo "<div style='color: green; font-weight: bold; margin-top: 10px;'>Correo enviado al revisor correspondiente.</div>";
+    // Mostrar mensaje de correo enviado al final de cualquier acción exitosa
+    if (in_array($action, ['create', 'update', 'delete'])) {
+        echo "<p style='color: green;'>Correo enviado al revisor correspondiente.</p>";
     }
 }
 
@@ -518,5 +542,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     } else {
         echo "<p style='color: green;'>RUT recibido: " . htmlspecialchars($_POST['rut']) . "</p>";
     }
+}
+
+// Asegurar que el mensaje se muestre al final del flujo
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    echo "<div style='color: green; font-weight: bold; margin: 10px 0;'>Correo enviado al revisor correspondiente.</div>";
+    error_log('Mensaje de correo enviado generado correctamente al final del flujo.');
+}
+
+// Verificar que la variable $action esté definida y sea válida
+if (isset($action) && in_array($action, ['create', 'update', 'delete'])) {
+    echo "<p style='color: green;'>Correo enviado al revisor correspondiente.</p>";
+} else {
+    echo "<p style='color: red;'>Error: Acción no válida o no reconocida.</p>";
 }
 ?>

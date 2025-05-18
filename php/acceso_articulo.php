@@ -10,6 +10,15 @@ if (!isset($_SESSION['usuario'])) {
 // Verificar el rol del usuario
 $es_revisor = isset($_SESSION['rol']) && $_SESSION['rol'] === 'revisor';
 
+// Ajustar la comparación para que sea insensible a mayúsculas y minúsculas
+$es_autor = isset($_SESSION['rol']) && strcasecmp($_SESSION['rol'], 'autor') === 0;
+
+// Ajustar la lógica para permitir acceso al artículo pero bloquear la funcionalidad de opinar
+if ($es_autor) {
+    echo '<p style="font-family: Arial, sans-serif; color: red;">No puedes opinar sobre este artículo porque no eres el revisor asignado.</p>';
+    // No terminar la ejecución, permitir acceso al artículo
+}
+
 // Obtener todos los artículos enviados
 include('conexion.php');
 $sql_articulos = "SELECT id_articulo, titulo FROM Articulo";
@@ -57,6 +66,12 @@ if ($articulo_seleccionado) {
     $resultados_publicados = $stmt_resultados->fetchColumn() > 0;
 }
 
+// Depuración: Mostrar el valor de $_SESSION['rol'] para verificar el rol del usuario
+echo "<p style='color: blue;'>Rol en la sesión: " . htmlspecialchars($_SESSION['rol']) . "</p>";
+
+// Depuración: Mostrar el valor de $es_autor para verificar si se evalúa correctamente
+echo "<p style='color: green;'>Valor de es_autor: " . (isset($es_autor) && $es_autor ? 'true' : 'false') . "</p>";
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -95,7 +110,10 @@ if ($articulo_seleccionado) {
                     <?php foreach ($revisores as $revisor): ?>
                         <a href="revisiones.php?revision=<?php echo htmlspecialchars($revisor); ?>&id_articulo=<?php echo htmlspecialchars($articulo_seleccionado); ?>" class="button">R<?php echo htmlspecialchars($revisor); ?> Consultar</a>
                         <div style="margin-top: 5px;">
-                            <a href="opinar.php?revision=<?php echo htmlspecialchars($articulo_seleccionado); ?>&revisor=<?php echo htmlspecialchars($revisor); ?>" class="button">R<?php echo htmlspecialchars($revisor); ?> Opinar</a>
+                            <!-- Agregar validación para que el botón de "Opinar" no se muestre si el usuario es autor -->
+                            <?php if (!$es_autor): ?>
+                                <a href="opinar.php?revision=<?php echo htmlspecialchars($articulo_seleccionado); ?>&revisor=<?php echo htmlspecialchars($revisor); ?>" class="button">R<?php echo htmlspecialchars($revisor); ?> Opinar</a>
+                            <?php endif; ?>
                         </div>
                     <?php endforeach; ?>
                 <?php else: ?>
@@ -104,6 +122,9 @@ if ($articulo_seleccionado) {
             </div>
         <?php endif; ?>
     </div>
+
+    <!-- Mostrar el rol del usuario en la esquina superior izquierda -->
+    <?php echo "<div style='position: fixed; top: 10px; left: 10px; font-weight: bold; background-color: #f0f0f0; padding: 5px; border: 1px solid #ccc;'>Rol: " . htmlspecialchars($_SESSION['rol']) . "</div>"; ?>
 
     <!-- Formulario de Evaluación se muestra solo si se accede a una revisión -->
     <?php if (isset($_GET['revision'])): ?>

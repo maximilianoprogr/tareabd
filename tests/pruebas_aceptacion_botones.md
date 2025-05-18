@@ -20,7 +20,17 @@
 **Criterios de Aceptación:**
 - El botón debe estar visible en la interfaz principal después de iniciar sesión.
 - Al hacer clic, debe redirigir a la página `gestionar_revisores.php`.
-- La página debe permitir agregar, editar o eliminar revisores.
+- La página debe permitir:
+  - **Agregar Revisores:**
+    - Validar que no existan duplicados por nombre o email.
+    - Asegurar que cada revisor tenga al menos un tópico asignado.
+    - Enviar un correo al revisor con su `userid` y `password`.
+  - **Editar Revisores:**
+    - Validar que no existan duplicados por nombre o email al actualizar.
+    - Permitir modificar los datos del revisor y sus tópicos asignados.
+  - **Eliminar Revisores:**
+    - No permitir eliminar revisores con artículos asignados.
+    - Mostrar un mensaje claro si no se puede eliminar un revisor.
 
 ---
 

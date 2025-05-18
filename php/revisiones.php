@@ -146,5 +146,38 @@ if ($respuestas) {
     <a href="acceso_articulo.php" style="font-family: Arial, sans-serif; font-size: 14px; color: #007BFF; text-decoration: none;">Volver</a>
     <br><br>
     <a href="dashboard.php" style="font-family: Arial, sans-serif; font-size: 14px; color: #007BFF; text-decoration: none;">Volver al inicio</a>
+
+    <script>
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const field = this.name;
+                const value = this.checked ? 1 : 0;
+                const idArticulo = <?php echo json_encode($_GET['id_articulo']); ?>;
+                const rutRevisor = <?php echo json_encode($_GET['revision']); ?>;
+
+                fetch('procesar_evaluacion.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        field,
+                        value,
+                        id_articulo: idArticulo,
+                        rut_revisor: rutRevisor
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('Actualización exitosa');
+                    } else {
+                        console.error('Error al actualizar:', data.message);
+                    }
+                })
+                .catch(error => console.error('Error en la solicitud:', error));
+            });
+        });
+    </script>
 </body>
 </html>

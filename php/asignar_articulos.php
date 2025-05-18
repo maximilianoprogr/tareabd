@@ -70,9 +70,13 @@ $revisores = $stmt_revisores->fetchAll();
 <head>
     <meta charset="UTF-8">
     <title>Listado de Artículos</title>
+    <link rel="stylesheet" href="../css/estilos_articulos.css">
     <style>
         .subtabla { border-collapse: collapse; width: 100%; }
         .subtabla td { border: none; padding: 2px 8px; background: #f9f9f9; }
+        .resaltar-pocos-revisores {
+            background-color: #fff3cd;
+        }
     </style>
 </head>
 <body>
@@ -87,8 +91,11 @@ $revisores = $stmt_revisores->fetchAll();
         <th>Revisores</th>
         <th>Acciones</th>
     </tr>
-    <?php foreach ($articulos as $articulo): ?>
-    <tr>
+    <?php foreach ($articulos as $articulo): 
+        $revisores_art = array_filter(explode('|||', $articulo['revisores'] ?? ''));
+        $clase_resaltar = count($revisores_art) < 2 ? 'resaltar-pocos-revisores' : '';
+    ?>
+    <tr class="<?= $clase_resaltar ?>">
         <td><?= htmlspecialchars($articulo['id_articulo']) ?></td>
         <td><?= htmlspecialchars($articulo['titulo']) ?></td>
         <td>
@@ -105,7 +112,6 @@ $revisores = $stmt_revisores->fetchAll();
         </td>
         <td>
             <?php
-            $revisores_art = array_filter(explode('|||', $articulo['revisores'] ?? ''));
             if ($revisores_art) {
                 foreach ($revisores_art as $revisor) {
                     echo htmlspecialchars($revisor);

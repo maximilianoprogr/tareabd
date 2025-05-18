@@ -72,7 +72,7 @@ if (isset($_GET['msg'])) {
     <title>Asignar artículo a revisor</title>
 </head>
 <body>
-<a href="../asignar_articulos.php">Volver a artículos</a>
+<a href="../asignar_articulos.php" style="display:inline-block;padding:8px 16px;background:#007BFF;color:#fff;text-decoration:none;border-radius:4px;margin-bottom:16px;">Volver a artículos</a>
 <h2>Asignar artículo a: <?= htmlspecialchars($revisor['nombre']) ?></h2>
 <p><strong>Tópicos del revisor:</strong><br>
 <?= $revisor['topicos'] ? nl2br(htmlspecialchars(str_replace(', ', "\n", $revisor['topicos']))) : 'Sin tópicos'; ?>

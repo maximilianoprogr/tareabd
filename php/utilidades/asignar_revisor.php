@@ -64,6 +64,7 @@ $revisores = $stmt->fetchAll();
 <head>
     <meta charset="UTF-8">
     <title>Asignar revisor a artículo</title>
+    <link rel="stylesheet" href="../../css/estilos_articulos.css">
 </head>
 <body>
 <a href="../asignar_articulos.php">Volver a artículos</a>
@@ -81,10 +82,40 @@ $revisores = $stmt->fetchAll();
         <th>Artículos asignados</th>
         <th>Acción</th>
     </tr>
-    <?php foreach ($revisores as $revisor): ?>
+    <?php
+    // Normaliza los tópicos del artículo
+    $topicos_articulo = array_filter(array_map('trim', preg_split('/,\s*/', $articulo['topicos'] ?? '')));
+
+    foreach ($revisores as $revisor): 
+        // Normaliza los tópicos del revisor
+        $topicos_revisor = array_filter(array_map('trim', preg_split('/,\s*/', $revisor['topicos'] ?? '')));
+        $hay_coincidencia = false;
+        foreach ($topicos_revisor as $topico) {
+            if ($topico !== '' && in_array($topico, $topicos_articulo, true)) {
+                $hay_coincidencia = true;
+                break;
+            }
+        }
+        $clase_td = $hay_coincidencia ? 'coincide-topico-celda' : '';
+    ?>
     <tr>
         <td><?= htmlspecialchars($revisor['nombre']) ?></td>
-        <td><?= $revisor['topicos'] ? nl2br(htmlspecialchars(str_replace(', ', "\n", $revisor['topicos']))) : 'Sin tópicos'; ?></td>
+        <td class="<?= $clase_td ?>">
+            <?php
+            if ($topicos_revisor) {
+                foreach ($topicos_revisor as $topico) {
+                    if ($topico !== '' && in_array($topico, $topicos_articulo, true)) {
+                        // Solo resalta el color y agrega subrayado, sin negrita
+                        echo '<span class="topico-coincidente">' . htmlspecialchars($topico) . '</span><br>';
+                    } elseif ($topico !== '') {
+                        echo htmlspecialchars($topico) . '<br>';
+                    }
+                }
+            } else {
+                echo 'Sin tópicos';
+            }
+            ?>
+        </td>
         <td>
             <?php
             if ($revisor['titulos_asignados']) {

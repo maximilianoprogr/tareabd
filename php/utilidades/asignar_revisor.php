@@ -107,7 +107,18 @@ $revisores_asignados = $stmt_asignados->fetchAll(PDO::FETCH_COLUMN);
 <?= $articulo['topicos'] ? nl2br(htmlspecialchars(str_replace(', ', "\n", $articulo['topicos']))) : 'Sin tópicos'; ?>
 </p>
 <?php if ($msg): ?>
-    <p style="color:<?= strpos($msg, 'NO tiene especialidad') !== false ? 'orange' : 'green' ?>;"><?= htmlspecialchars($msg) ?></p>
+    <?php
+    if (strpos($msg, 'NO tiene especialidad') !== false) {
+        $clase = 'mensaje-especialidad';
+    } elseif (strpos($msg, 'quitado correctamente') !== false) {
+        $clase = 'mensaje-peligro';
+    } elseif (strpos($msg, 'ya está asignado') !== false) {
+        $clase = 'mensaje-advertencia';
+    } else {
+        $clase = 'mensaje-exito';
+    }
+    ?>
+    <p class="<?= $clase ?>"><?= htmlspecialchars($msg) ?></p>
 <?php endif; ?>
 <table border="1" cellpadding="6" style="border-collapse:collapse;width:100%">
     <tr style="background:#f2f2f2">
@@ -130,9 +141,20 @@ $revisores_asignados = $stmt_asignados->fetchAll(PDO::FETCH_COLUMN);
         }
         $clase_td = $hay_coincidencia ? 'coincide-topico-celda' : '';
         $ya_asignado = in_array($revisor['rut'], $revisores_asignados);
+
+        // Resalta en verde si está asignado y hay coincidencia, en amarillo si está asignado y NO hay coincidencia
+        if ($ya_asignado && $hay_coincidencia) {
+            $clase_tr = 'revisor-ya-asignado';
+        } elseif ($ya_asignado && !$hay_coincidencia) {
+            $clase_tr = 'revisor-ya-asignado-sin-coincidencia';
+        } else {
+            $clase_tr = '';
+        }
     ?>
-    <tr>
-        <td><?= htmlspecialchars($revisor['nombre']) ?></td>
+    <tr class="<?= $clase_tr ?>">
+        <td>
+            <?= htmlspecialchars($revisor['nombre']) ?>
+        </td>
         <td class="<?= $clase_td ?>">
             <?php
             if ($topicos_revisor) {

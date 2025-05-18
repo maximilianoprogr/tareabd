@@ -16,3 +16,52 @@
     font-weight: normal;
     font-weight: bold;
 }
+
+.mensaje-exito {
+    color: #155724;
+    background: #d4edda;
+    border: 1px solid #c3e6cb;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+}
+.mensaje-advertencia {
+    color: #856404;
+    background: #fff3cd;
+    border: 1px solid #ffe082;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+}
+.mensaje-peligro {
+    color: #842029;
+    background: #f8d7da;
+    border: 1px solid #f5c2c7;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+}
+.mensaje-especialidad {
+    color: #b26a00;
+    background: #ffe8a1;
+    border: 1px solid #e0b200;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+}
+.fila-sin-coincidencia {
+    background: #fff3cd !important; /* Amarillo suave */
+}
+.revisor-coincidente {
+    background: #e3f2fd !important; /* Azul claro */
+    color: #1565c0 !important;
+    font-weight: bold;
+}
+.revisor-ya-asignado {
+    background: #d1ffd1 !important; /* Verde claro */
+    color: #256029 !important;
+}
+.revisor-ya-asignado-sin-coincidencia {
+    background: #fff3cd !important; /* Amarillo suave */
+    color: #856404 !important;
+}

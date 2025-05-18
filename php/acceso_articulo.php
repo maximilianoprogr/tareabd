@@ -41,10 +41,11 @@ if (!$articulo_seleccionado) {
     exit();
 }
 
+// Eliminar el bloque que detiene la ejecución si no hay revisores
 if (empty($revisores)) {
     echo '<p style="font-family: Arial, sans-serif; color: red;">No hay revisores asignados a este artículo.</p>';
     echo '<a href="dashboard.php" style="font-family: Arial, sans-serif; font-size: 14px; color: #007BFF; text-decoration: none;">Volver al inicio</a>';
-    exit();
+    // exit(); // Comentado para permitir que la página continúe cargando
 }
 
 // Verificar si los resultados de la revisión han sido publicados
@@ -64,6 +65,7 @@ if ($articulo_seleccionado) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Acceso al Artículo</title>
     <link rel="stylesheet" href="css/estilos.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
 </head>
 <body style="font-family: Arial, sans-serif; margin: 20px;">
     <h1 style="font-size: 18px; color: #333;">Artículos Enviados</h1>

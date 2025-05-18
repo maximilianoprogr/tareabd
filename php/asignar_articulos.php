@@ -59,6 +59,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_articulo'], $_POST
     }
 }
 
+// Depuración: Verificar si el formulario envía correctamente el id_articulo
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['id_articulo'])) {
+        echo '<p>Formulario envió id_articulo: ' . htmlspecialchars($_POST['id_articulo']) . '</p>';
+    } else {
+        echo '<p style="color: red;">Error: El formulario no envió el id_articulo.</p>';
+    }
+}
+
+// Depuración: Imprimir el valor de $id_articulo antes de ejecutar la consulta
+if (isset($_POST['id_articulo'])) {
+    $id_articulo = $_POST['id_articulo'];
+    echo '<p>Depuración: id_articulo seleccionado: ' . htmlspecialchars($id_articulo) . '</p>';
+}
+
+// Depuración: Imprimir los resultados de la consulta SQL
+$sql_revisores = "SELECT ar.rut_revisor FROM Articulo_Revisor ar WHERE ar.id_articulo = ?";
+$stmt_revisores = $pdo->prepare($sql_revisores);
+$stmt_revisores->execute([$id_articulo]);
+$revisores = $stmt_revisores->fetchAll(PDO::FETCH_COLUMN);
+
+if (empty($revisores)) {
+    echo '<p style="color: red;">No hay revisores asignados a este artículo.</p>';
+} else {
+    echo '<p style="color: green;">Revisores asignados:</p>';
+    echo '<ul>';
+    foreach ($revisores as $revisor) {
+        echo '<li>' . htmlspecialchars($revisor) . '</li>';
+    }
+    echo '</ul>';
+}
+
 // Manejar la acción de quitar revisores
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['quitar'])) {
     $id_articulo = $_POST['id_articulo'];
@@ -244,6 +276,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reasignacion_automati
     }
 
     echo "<p>Reasignación automática completada sin perder asignaciones manuales.</p>";
+}
+
+// Depuración: Verificar si el formulario HTML está enviando correctamente los datos
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    echo '<p>Depuración: Datos enviados por el formulario:</p>';
+    echo '<pre>' . print_r($_POST, true) . '</pre>';
 }
 
 ?>

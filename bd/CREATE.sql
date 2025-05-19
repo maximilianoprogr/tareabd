@@ -1,6 +1,6 @@
 CREATE TABLE Usuario (
     rut VARCHAR(10) PRIMARY KEY,
-    nombre VARCHAR(64) NOT NULL,
+    nombre VARCHAR(64) NOT NULL UNIQUE,
     email VARCHAR(64) NOT NULL UNIQUE,
     usuario VARCHAR(24) NOT NULL,
     password VARCHAR(12) NOT NULL,

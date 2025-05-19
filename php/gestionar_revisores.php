@@ -122,6 +122,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     echo "<p style='color: blue;'>Acción recibida: " . htmlspecialchars($action) . "</p>";
 }
 
+// Depuración: Confirmar que el formulario se envía correctamente
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    error_log("[Depuración] Formulario enviado correctamente. Datos recibidos:");
+    error_log(print_r($_POST, true));
+
+    if (empty($_POST['nombre']) || empty($_POST['email']) || empty($_POST['rut'])) {
+        error_log("[Error] Faltan campos obligatorios en el formulario.");
+        echo "<p style='color: red;'>Error: Faltan campos obligatorios en el formulario.</p>";
+        exit();
+    }
+
+    // Depuración: Confirmar que los datos se procesan correctamente
+    error_log("[Depuración] Procesando datos del formulario...");
+
+    // Verificar si la acción es válida
+    $action = $_POST['action'] ?? null;
+    if ($action !== 'create') {
+        error_log("[Error] Acción no válida: " . var_export($action, true));
+        echo "<p style='color: red;'>Error: Acción no válida.</p>";
+        exit();
+    }
+
+    // Depuración: Confirmar que la acción es 'create'
+    error_log("[Depuración] Acción recibida: " . $action);
+
+    // Procesar la acción 'create'
+    $nombre = $_POST['nombre'];
+    $email = $_POST['email'];
+    $rut = $_POST['rut'];
+    error_log("[Depuración] Datos procesados: Nombre=$nombre, Email=$email, RUT=$rut");
+
+    // Aquí puedes agregar la lógica para insertar los datos en la base de datos
+    echo "<p style='color: green;'>Formulario procesado correctamente. Datos: Nombre=$nombre, Email=$email, RUT=$rut</p>";
+}
+
 // Crear, leer, actualizar y eliminar revisores
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'];
@@ -427,7 +462,7 @@ $topicos_disponibles = $stmt_topicos->fetchAll();
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device=width, initial-scale=1.0">
     <title>Gestionar Revisores</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 </head>
@@ -500,7 +535,18 @@ $topicos_disponibles = $stmt_topicos->fetchAll();
         <input type="text" id="userid" name="userid" style="width: 100%; padding: 8px; margin-bottom: 10px;">
         <label for="password" style="font-size: 14px; display: block; margin-bottom: 5px;">Contraseña:</label>
         <input type="password" id="password" name="password" style="width: 100%; padding: 8px; margin-bottom: 10px;">
-        <button type="submit" style="font-size: 14px; padding: 10px 20px; background-color: #4CAF50; color: white; border: none; cursor: pointer;">Guardar</button>
+
+        <label style="font-size: 14px; display: block; margin-bottom: 5px;">Tópicos:</label>
+        <div style="margin-bottom: 10px;">
+            <?php foreach ($topicos_disponibles as $topico): ?>
+                <label style="display: block;">
+                    <input type="checkbox" name="topicos[]" value="<?php echo htmlspecialchars($topico['id_topico']); ?>">
+                    <?php echo htmlspecialchars($topico['nombre']); ?>
+                </label>
+            <?php endforeach; ?>
+        </div>
+
+        <button type="submit" id="guardarBtn" style="font-size: 14px; padding: 10px 20px; background-color: #4CAF50; color: white; border: none; cursor: pointer;">Guardar</button>
     </form>
 
     <a href="dashboard.php" style="font-family: Arial, sans-serif; font-size: 14px; color: #007BFF; text-decoration: none; display: block; margin-top: 20px;">Volver al inicio</a>
@@ -605,6 +651,55 @@ $topicos_disponibles = $stmt_topicos->fetchAll();
             .catch(error => console.error('Error en la solicitud:', error));
         });
     });
+    </script>
+
+    <script>
+    // Asegurar que el formulario se envíe correctamente
+    const form = document.getElementById('nuevoRevisorForm');
+    form.addEventListener('submit', function(event) {
+        const nombre = document.getElementById('nombre').value;
+        const email = document.getElementById('email').value;
+        const rut = document.getElementById('rut').value;
+
+        if (!nombre || !email || !rut) {
+            event.preventDefault();
+            alert('Por favor, complete todos los campos obligatorios.');
+        } else {
+            console.log('Formulario enviado con los siguientes datos:', {
+                nombre,
+                email,
+                rut
+            });
+        }
+    });
+    </script>
+
+    <script>
+    // Asegurar que el botón sea visible y funcional
+    const guardarBtn = document.getElementById('guardarBtn');
+    if (guardarBtn) {
+        guardarBtn.style.display = 'inline-block';
+        guardarBtn.disabled = false;
+        console.log('Botón de guardar está habilitado y visible.');
+    }
+
+    // Asegurar que el formulario se envíe correctamente
+    const form = document.getElementById('nuevoRevisorForm');
+    if (form) {
+        form.addEventListener('submit', function(event) {
+            const nombre = document.getElementById('nombre').value;
+            const email = document.getElementById('email').value;
+            const rut = document.getElementById('rut').value;
+
+            if (!nombre || !email || !rut) {
+                event.preventDefault();
+                alert('Por favor, complete todos los campos obligatorios.');
+                console.log('Formulario no enviado. Campos faltantes:', { nombre, email, rut });
+            } else {
+                console.log('Formulario enviado con los siguientes datos:', { nombre, email, rut });
+            }
+        });
+    }
     </script>
 
     <?php

@@ -1,6 +1,4 @@
 <?php
-// Solo la función, sin session_start ni include
-
 function asignar_revisores_automaticamente($pdo) {
     $asignados = 0;
 

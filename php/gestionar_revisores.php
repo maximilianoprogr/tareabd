@@ -3,6 +3,10 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+// Configurar el archivo de registro de errores
+ini_set('log_errors', 1);
+ini_set('error_log', __DIR__ . '/../logs/error_log.log');
+
 // Iniciar sesión
 session_start();
 
@@ -353,7 +357,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Validar tópicos enviados
             if (!empty($topicos)) {
                 foreach ($topicos as $id_topico) {
-                    $sql_validar_topico = "SELECT COUNT(*) FROM Topicos WHERE id = ?";
+                    $sql_validar_topico = "SELECT COUNT(*) FROM Topico WHERE id_topico = ?";
                     $stmt_validar_topico = $pdo->prepare($sql_validar_topico);
                     $stmt_validar_topico->execute([$id_topico]);
                     if ($stmt_validar_topico->fetchColumn() === 0) {
@@ -363,22 +367,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
 
-            if (!empty($topicos)) {
-                try {
-                    $sql_topicos = "INSERT INTO Revisor_Topico (rut_revisor, id_topico) VALUES (?, ?)";
-                    $stmt_topicos = $pdo->prepare($sql_topicos);
-                    foreach ($topicos as $id_topico) {
-                        $stmt_topicos->execute([$rut, $id_topico]);
-                    }
-                } catch (Exception $e) {
-                    $errorMensaje = "Error al asignar tópicos: " . $e->getMessage();
-                    registrarError($errorMensaje);
-                    echo "<p style='color: red;'>$errorMensaje</p>";
-                    exit();
-                }
-            } else {
-                echo "<script>alert('Debe asignar al menos un tópico al revisor');</script>";
+            // Validate that $topicos is an array and contains valid IDs
+            if (!is_array($topicos) || empty($topicos)) {
+                echo "<p style='color: red;'>Error: No se seleccionaron tópicos válidos.</p>";
+                error_log("[Error] No se seleccionaron tópicos válidos para el RUT: $rut");
+                exit();
             }
+
+            // Log before inserting into Revisor_Topico
+            error_log("[Debug] Preparing to insert topics into Revisor_Topico for RUT: $rut");
+
+            try {
+                $sql_topicos = "INSERT INTO Revisor_Topico (rut_revisor, id_topico) VALUES (?, ?)";
+                $stmt_topicos = $pdo->prepare($sql_topicos);
+                foreach ($topicos as $id_topico) {
+                    if (!is_numeric($id_topico)) {
+                        error_log("[Error] Invalid topic ID: $id_topico for RUT: $rut");
+                        continue;
+                    }
+                    error_log("[Debug] Attempting to insert topic ID: $id_topico for RUT: $rut");
+                    $stmt_topicos->execute([$rut, $id_topico]);
+                    error_log("[Debug] Successfully inserted topic ID: $id_topico for RUT: $rut");
+                }
+            } catch (Exception $e) {
+                $errorMensaje = "Error al asignar tópicos: " . $e->getMessage();
+                error_log("[Error] $errorMensaje");
+                echo "<p style='color: red;'>$errorMensaje</p>";
+                exit();
+            }
+
             echo "<script>alert('Revisor agregado exitosamente');</script>";
 
             // Enviar notificación por email
@@ -413,6 +430,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             echo "<p style='color: red;'>Faltan datos para actualizar el revisor.</p>";
         }
+
+        // Guardar los tópicos seleccionados en la base de datos
+        if (!empty($topicos)) {
+            try {
+                // Eliminar los tópicos existentes para el revisor
+                $sql_delete_topicos = "DELETE FROM Revisor_Topico WHERE rut_revisor = ?";
+                $stmt_delete_topicos = $pdo->prepare($sql_delete_topicos);
+                $stmt_delete_topicos->execute([$rut]);
+
+                // Insertar los nuevos tópicos seleccionados
+                $sql_insert_topicos = "INSERT INTO Revisor_Topico (rut_revisor, id_topico) VALUES (?, ?)";
+                $stmt_insert_topicos = $pdo->prepare($sql_insert_topicos);
+                foreach ($topicos as $id_topico) {
+                    $stmt_insert_topicos->execute([$rut, $id_topico]);
+                }
+            } catch (Exception $e) {
+                echo "<p style='color: red;'>Error al guardar los tópicos: " . $e->getMessage() . "</p>";
+                exit();
+            }
+        }
         return;
     }
     // Mostrar mensaje de correo enviado al final de la acción
@@ -426,6 +463,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Depuración adicional para verificar el valor de RUT
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'create') {
     echo "<p style='color: blue;'>Valor de RUT recibido en el servidor: " . var_export($_POST['rut'], true) . "</p>";
+}
+
+// Depuración: Verificar si los datos se insertan correctamente en la tabla Revisor_Topico
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'create') {
+    $rut = $_POST['rut'] ?? null;
+    $topicos = $_POST['topicos'] ?? [];
+
+    if ($rut && !empty($topicos)) {
+        try {
+            $sql_check = "SELECT * FROM Revisor_Topico WHERE rut_revisor = ?";
+            $stmt_check = $pdo->prepare($sql_check);
+            $stmt_check->execute([$rut]);
+            $result = $stmt_check->fetchAll();
+
+            error_log("[Depuración] Datos actuales en Revisor_Topico para el RUT $rut:");
+            error_log(print_r($result, true));
+        } catch (Exception $e) {
+            error_log("[Error] No se pudo verificar los datos en Revisor_Topico: " . $e->getMessage());
+        }
+    }
 }
 
 // Leer revisores
@@ -505,7 +562,7 @@ $topicos_disponibles = $stmt_topicos->fetchAll();
             foreach ($topicos_disponibles as $topico) {
                 $checked = strpos($topicos, $topico['nombre']) !== false ? 'checked' : '';
                 echo '<label style="display: block;">';
-                echo '<input type="checkbox" name="topicos[]" value="' . $topico['id_topico'] . '" ' . $checked . ' data-rut-revisor="' . htmlspecialchars($revisor['rut']) . '" data-id-topico="' . htmlspecialchars($topico['id_topico']) . '"> ' . htmlspecialchars($topico['nombre']);
+                echo '<input type="checkbox" name="topicos[]" value="' . htmlspecialchars($topico['id_topico']) . '" ' . $checked . '> ' . htmlspecialchars($topico['nombre']);
                 echo '</label>';
             }
 
@@ -745,6 +802,19 @@ $topicos_disponibles = $stmt_topicos->fetchAll();
     });
     </script>
 
+    <script>
+    // Al cargar la página, marcar las casillas de tópicos seleccionados
+    window.addEventListener('DOMContentLoaded', function() {
+        const topicosSeleccionados = document.querySelectorAll('input[name="topicos[]"]');
+
+        topicosSeleccionados.forEach(function(checkbox) {
+            if (checkbox.dataset.selected === 'true') {
+                checkbox.checked = true;
+            }
+        });
+    });
+    </script>
+
     <?php
     // Mensaje de prueba para verificar la ejecución del código
     echo "<p style='color: green;'>[Prueba] Este es un mensaje de prueba para verificar la ejecución del código.</p>";
@@ -820,5 +890,18 @@ if (isset($_SESSION['rol'])) {
     error_log("[Depuración] Rol al final de gestionar_revisores.php: " . $_SESSION['rol']);
 } else {
     error_log("[Depuración] No se encontró el rol al final de gestionar_revisores.php.");
+}
+
+// Depuración: Verificar los datos enviados desde el formulario
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    error_log("[Depuración] Datos recibidos en el formulario:");
+    error_log(print_r($_POST, true));
+
+    if (isset($_POST['topicos']) && is_array($_POST['topicos'])) {
+        error_log("[Depuración] Tópicos seleccionados:");
+        error_log(print_r($_POST['topicos'], true));
+    } else {
+        error_log("[Depuración] No se recibieron tópicos seleccionados o el formato es incorrecto.");
+    }
 }
 ?>

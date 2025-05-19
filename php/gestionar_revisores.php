@@ -656,22 +656,22 @@ $topicos_disponibles = $stmt_topicos->fetchAll();
     <script>
     // Asegurar que el formulario se envíe correctamente
     const form = document.getElementById('nuevoRevisorForm');
-    form.addEventListener('submit', function(event) {
-        const nombre = document.getElementById('nombre').value;
-        const email = document.getElementById('email').value;
-        const rut = document.getElementById('rut').value;
+    if (form) {
+        form.addEventListener('submit', function(event) {
+            const nombre = document.getElementById('nombre').value;
+            const email = document.getElementById('email').value;
+            const rut = document.getElementById('rut').value;
 
-        if (!nombre || !email || !rut) {
-            event.preventDefault();
-            alert('Por favor, complete todos los campos obligatorios.');
-        } else {
-            console.log('Formulario enviado con los siguientes datos:', {
-                nombre,
-                email,
-                rut
-            });
-        }
-    });
+            if (!nombre || !email || !rut) {
+                event.preventDefault();
+                alert('Por favor, complete todos los campos obligatorios.');
+                console.log('Formulario no enviado. Campos faltantes:', { nombre, email, rut });
+            } else {
+                alert('Formulario enviado correctamente. Redirigiendo...');
+                console.log('Formulario enviado con los siguientes datos:', { nombre, email, rut });
+            }
+        });
+    }
     </script>
 
     <script>

@@ -44,16 +44,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_articulo']) && !is
     if ($stmt->fetch()) {
         $msg = "El artículo ya está asignado a este revisor.";
     } else {
+        // Obtener tópicos del artículo
+        $stmt = $pdo->prepare("SELECT GROUP_CONCAT(DISTINCT t.nombre SEPARATOR ', ') AS topicos
+                               FROM Articulo_Topico at
+                               LEFT JOIN Topico t ON at.id_topico = t.id_topico
+                               WHERE at.id_articulo = ?");
+        $stmt->execute([$id_articulo]);
+        $row = $stmt->fetch();
+        $topicos_articulo = array_filter(array_map('trim', preg_split('/,\s*/', $row['topicos'] ?? '')));
+        // Obtener tópicos del revisor
+        $topicos_revisor = array_filter(array_map('trim', preg_split('/,\s*/', $revisor['topicos'] ?? '')));
+        $hay_coincidencia = false;
+        foreach ($topicos_revisor as $topico) {
+            if ($topico !== '' && in_array($topico, $topicos_articulo, true)) {
+                $hay_coincidencia = true;
+                break;
+            }
+        }
         $stmt = $pdo->prepare("INSERT INTO Articulo_Revisor (id_articulo, rut_revisor) VALUES (?, ?)");
         $stmt->execute([$id_articulo, $rut_revisor]);
-        $msg = "Artículo asignado correctamente.";
+        if (!$hay_coincidencia) {
+            $msg = "Artículo asignado correctamente, pero este revisor NO tiene especialidad en el tópico del artículo.";
+        } else {
+            $msg = "Artículo asignado correctamente.";
+        }
     }
     header("Location: asignar_articulo.php?rut_revisor=" . urlencode($rut_revisor) . "&msg=" . urlencode($msg));
     exit;
 }
 
-// Obtener todos los artículos y verificar si están asignados a este revisor
-$stmt = $pdo->query("SELECT id_articulo, titulo FROM Articulo ORDER BY id_articulo");
+// Obtener todos los artículos con sus tópicos
+$stmt = $pdo->query("
+    SELECT a.id_articulo, a.titulo, GROUP_CONCAT(DISTINCT t.nombre SEPARATOR ', ') AS topicos
+    FROM Articulo a
+    LEFT JOIN Articulo_Topico at ON a.id_articulo = at.id_articulo
+    LEFT JOIN Topico t ON at.id_topico = t.id_topico
+    GROUP BY a.id_articulo, a.titulo
+    ORDER BY a.id_articulo
+");
 $articulos = $stmt->fetchAll();
 
 // Obtener los IDs de los artículos ya asignados a este revisor
@@ -70,6 +98,7 @@ if (isset($_GET['msg'])) {
 <head>
     <meta charset="UTF-8">
     <title>Asignar artículo a revisor</title>
+    <link rel="stylesheet" href="../../css/estilos_articulos.css">
 </head>
 <body>
 <a href="../asignar_articulos.php" style="display:inline-block;padding:8px 16px;background:#007BFF;color:#fff;text-decoration:none;border-radius:4px;margin-bottom:16px;">Volver a artículos</a>
@@ -78,18 +107,45 @@ if (isset($_GET['msg'])) {
 <?= $revisor['topicos'] ? nl2br(htmlspecialchars(str_replace(', ', "\n", $revisor['topicos']))) : 'Sin tópicos'; ?>
 </p>
 <?php if ($msg): ?>
-    <p style="color:green;"><?= htmlspecialchars($msg) ?></p>
+    <?php
+    if (strpos($msg, 'NO tiene especialidad') !== false) {
+        $clase = 'mensaje-especialidad';
+    } elseif (strpos($msg, 'quitado correctamente') !== false) {
+        $clase = 'mensaje-peligro';
+    } elseif (strpos($msg, 'ya está asignado') !== false) {
+        $clase = 'mensaje-advertencia';
+    } else {
+        $clase = 'mensaje-exito';
+    }
+    ?>
+    <p class="<?= $clase ?>"><?= htmlspecialchars($msg) ?></p>
 <?php endif; ?>
 <table border="1" cellpadding="6" style="border-collapse:collapse;width:100%">
     <tr style="background:#f2f2f2">
         <th>ID</th>
         <th>Título</th>
+        <th>Tópicos</th>
         <th>Acción</th>
     </tr>
-    <?php foreach ($articulos as $articulo): ?>
-    <tr>
+    <?php foreach ($articulos as $articulo): 
+        // Procesar los tópicos del artículo y del revisor
+        $topicos_articulo = array_filter(array_map('trim', preg_split('/,\s*/', $articulo['topicos'] ?? '')));
+        $topicos_revisor = array_filter(array_map('trim', preg_split('/,\s*/', $revisor['topicos'] ?? '')));
+        $hay_coincidencia = false;
+        foreach ($topicos_revisor as $topico) {
+            if ($topico !== '' && in_array($topico, $topicos_articulo, true)) {
+                $hay_coincidencia = true;
+                break;
+            }
+        }
+        $clase_tr = $hay_coincidencia ? 'fila-coincide-topico' : '';
+    ?>
+    <tr class="<?= $clase_tr ?>">
         <td><?= htmlspecialchars($articulo['id_articulo']) ?></td>
         <td><?= htmlspecialchars($articulo['titulo']) ?></td>
+        <td>
+            <?= $articulo['topicos'] ? nl2br(htmlspecialchars(str_replace(', ', "\n", $articulo['topicos']))) : 'Sin tópicos'; ?>
+        </td>
         <td>
             <?php if (in_array($articulo['id_articulo'], $articulos_asignados)): ?>
                 <!-- Botón para quitar artículo -->

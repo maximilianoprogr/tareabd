@@ -1,3 +1,6 @@
+CREATE DATABASE base11;
+USE base11;
+
 CREATE TABLE Usuario (
     rut VARCHAR(10) PRIMARY KEY,
     nombre VARCHAR(64) NOT NULL,

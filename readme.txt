@@ -4,9 +4,13 @@
 - Fabian San Martin - 202304650-7
 - Maximiliano Yáñez - 202304626-4
 
-Compilaciión:
-
-Para correr el proyecto se necesita XAMPP instalado y configurado(con MYsql y Apache en admin), 
+Intrucciones:
+1. Para correr el proyecto se necesita XAMPP instalado y configurado (con MYsql y Apache en admin).
+2. En XAMPP, darle a "start" a los modulos Apache y MySQL.
+3. En la direccion donde se instalo XAMPP (generalmente en 'C:\xampp') ir a la carpeta 'htdocs' ('C:\xampp\htdocs').
+4. Dentro de la carpeta 'htdocs' extraer el archivo compimido. Deberia ahora haber una carpeta llamada 'tareabd'.
+5. Dirigirce a 'http://localhost/phpmyadmin/'. Ahi crearemos y poblaremos la Base de Datos.
+6. 
 y dentro de el buscar htdocs y guardar la carpeta `proyecto_php` dentro de el. Una vez terminado esto ir a xamps y darle a admin.
 Se abrira una pagina web, tendras que buscar donde dice phpmyadmin y darle a mysql. Luego tendras que poner los
 create table e insert y darle a ok. Con esto ya tienes la mitad. Para probar el proyecto luego tendras ir a google y 

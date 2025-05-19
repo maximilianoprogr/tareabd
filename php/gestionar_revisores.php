@@ -688,8 +688,8 @@ $topicos_disponibles = $stmt_topicos->fetchAll();
     <script>
     document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
         checkbox.addEventListener('change', function() {
-            const rutRevisor = this.dataset.rutRevisor;
-            const idTopico = this.dataset.idTopico;
+            const rutRevisor = this.closest('tr').querySelector('input[name="rut"]').value;
+            const idTopico = this.value;
             const action = this.checked ? 'add' : 'remove';
 
             fetch('procesar_quitar_revisores.php', {

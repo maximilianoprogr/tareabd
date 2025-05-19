@@ -39,7 +39,7 @@ CREATE TABLE Articulo (
         'En revisión',
         'Aprobado',
         'Rechazado'
-    ) NOT NULL,
+    ) NOT NULL
 );
 
 -- Tabla Articulo_Topico (relación muchos a muchos)

@@ -15,8 +15,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $topicos_seleccionados = $_POST['topicos'] ?? [];
 
     // Validaciones
-    if ($titulo === '' || $resumen === '') {
-        $message = "El título y el resumen son obligatorios.";
+    if ($titulo === '') {
+        $message = "El título es obligatorio.";
     } elseif (empty($ruts) || count(array_filter($ruts)) === 0) {
         $message = "Debe ingresar al menos un autor.";
     } elseif (empty($es_contacto) || count($es_contacto) === 0) {
@@ -116,7 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <input type="text" id="titulo" name="titulo" required>
 
         <label for="resumen">Resumen:</label>
-        <textarea id="resumen" name="resumen" required></textarea>
+        <textarea id="resumen" name="resumen"></textarea>
 
         <h2>Autores</h2>
         <div id="autores">

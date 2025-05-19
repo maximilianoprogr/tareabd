@@ -33,7 +33,7 @@ CREATE TABLE Topico (
 CREATE TABLE Articulo (
     id_articulo INT AUTO_INCREMENT PRIMARY KEY,
     titulo VARCHAR(128) NOT NULL,
-    resumen VARCHAR(128) NOT NULL,
+    resumen VARCHAR(128),
     fecha_envio DATE NOT NULL,
     rut_autor VARCHAR(10) NOT NULL,
     estado ENUM(

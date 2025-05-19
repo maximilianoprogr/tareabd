@@ -23,6 +23,13 @@ if (strcasecmp($rol, 'Jefe Comite de Programa') !== 0) {
     exit();
 }
 
+// Si se presionó el botón de asignación automática
+if (isset($_GET['autoasignar'])) {
+    include 'utilidades/asignar_auto.php';
+    $asignados = asignar_revisores_automaticamente($pdo);
+    $mensaje_auto = "Asignación automática completada. Total de asignaciones realizadas: <b>$asignados</b>.";
+}
+
 // Consulta para obtener artículos con autores, tópicos y revisores (como arrays)
 $sql = "
 SELECT 
@@ -81,6 +88,11 @@ $revisores = $stmt_revisores->fetchAll();
 </head>
 <body>
 <a href="dashboard.php">Volver al inicio</a>
+<br>
+<a href="asignar_articulos.php?autoasignar=1" class="btn-auto-asignar">Asignar automáticamente los artículos</a>
+<?php if (isset($mensaje_auto)): ?>
+    <p class="mensaje-exito"><?= $mensaje_auto ?></p>
+<?php endif; ?>
 <h2>Listado de Artículos</h2>
 <table border="1" cellpadding="6" style="border-collapse:collapse;width:100%">
     <tr style="background:#f2f2f2">

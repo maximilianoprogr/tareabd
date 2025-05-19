@@ -138,6 +138,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+// Depuración: Verificar si los datos se insertan correctamente en la tabla Revisor_Topico
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'create') {
+    $rut = $_POST['rut'] ?? null;
+    $topicos = $_POST['topicos'] ?? [];
+
+    if ($rut && !empty($topicos)) {
+        try {
+            $sql_check = "SELECT * FROM Revisor_Topico WHERE rut_revisor = ?";
+            $stmt_check = $pdo->prepare($sql_check);
+            $stmt_check->execute([$rut]);
+            $result = $stmt_check->fetchAll();
+
+            error_log("[Depuración] Datos actuales en Revisor_Topico para el RUT $rut:");
+            error_log(print_r($result, true));
+        } catch (Exception $e) {
+            error_log("[Error] No se pudo verificar los datos en Revisor_Topico: " . $e->getMessage());
+        }
+    }
+}
+
 // Leer revisores
 try {
     $sql = "SELECT Usuario.rut, Usuario.nombre, Usuario.email, 

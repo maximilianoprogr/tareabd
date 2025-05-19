@@ -1,0 +1,220 @@
+[19-May-2025 03:55:22 Europe/Berlin] [Depuración] Rol al inicio de gestionar_revisores.php: Jefe Comite de Programa
+[19-May-2025 03:55:22 Europe/Berlin] [Prueba] Este es un mensaje de prueba para verificar los logs.
+[19-May-2025 03:55:22 Europe/Berlin] [Depuración] Rol al final de gestionar_revisores.php: Jefe Comite de Programa
+[19-May-2025 03:55:33 Europe/Berlin] [Depuración] Rol al inicio de gestionar_revisores.php: Jefe Comite de Programa
+[19-May-2025 03:55:33 Europe/Berlin] [Prueba] Este es un mensaje de prueba para verificar los logs.
+[19-May-2025 03:55:33 Europe/Berlin] Mensaje de correo enviado generado correctamente.
+[19-May-2025 03:55:33 Europe/Berlin] Acción recibida: 'create'
+[19-May-2025 03:55:33 Europe/Berlin] [Depuración] Formulario enviado correctamente. Datos recibidos:
+[19-May-2025 03:55:33 Europe/Berlin] Array
+(
+    [action] => create
+    [nombre] => 312
+    [email] => 123dasdasd@cc.com
+    [rut] => 123
+    [userid] => 123
+    [password] => 123
+    [topicos] => Array
+        (
+            [0] => 7
+        )
+
+)
+
+[19-May-2025 03:55:33 Europe/Berlin] [Depuración] Procesando datos del formulario...
+[19-May-2025 03:55:33 Europe/Berlin] [Depuración] Acción recibida: create
+[19-May-2025 03:55:33 Europe/Berlin] [Depuración] Datos procesados: Nombre=312, Email=123dasdasd@cc.com, RUT=123
+[19-May-2025 03:56:48 Europe/Berlin] [Depuración] Rol al inicio de gestionar_revisores.php: Jefe Comite de Programa
+[19-May-2025 03:56:48 Europe/Berlin] [Prueba] Este es un mensaje de prueba para verificar los logs.
+[19-May-2025 03:56:48 Europe/Berlin] [Depuración] Rol al final de gestionar_revisores.php: Jefe Comite de Programa
+[19-May-2025 03:56:56 Europe/Berlin] [Depuración] Rol al inicio de gestionar_revisores.php: Jefe Comite de Programa
+[19-May-2025 03:56:56 Europe/Berlin] [Prueba] Este es un mensaje de prueba para verificar los logs.
+[19-May-2025 03:56:56 Europe/Berlin] Mensaje de correo enviado generado correctamente.
+[19-May-2025 03:56:56 Europe/Berlin] Acción recibida: 'create'
+[19-May-2025 03:56:56 Europe/Berlin] [Depuración] Formulario enviado correctamente. Datos recibidos:
+[19-May-2025 03:56:56 Europe/Berlin] Array
+(
+    [action] => create
+    [nombre] => 123
+    [email] => 123dasdasd@cc.com
+    [rut] => 123
+    [userid] => 312
+    [password] => 132
+    [topicos] => Array
+        (
+            [0] => 1
+        )
+
+)
+
+[19-May-2025 03:56:56 Europe/Berlin] [Depuración] Procesando datos del formulario...
+[19-May-2025 03:56:56 Europe/Berlin] [Depuración] Acción recibida: create
+[19-May-2025 03:56:56 Europe/Berlin] [Depuración] Datos procesados: Nombre=123, Email=123dasdasd@cc.com, RUT=123
+[19-May-2025 03:56:56 Europe/Berlin] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'base11.topicos' doesn't exist in C:\xampp\htdocs\proyecto_php\php\gestionar_revisores.php:361
+Stack trace:
+#0 C:\xampp\htdocs\proyecto_php\php\gestionar_revisores.php(361): PDO->prepare('SELECT COUNT(*)...')
+#1 {main}
+  thrown in C:\xampp\htdocs\proyecto_php\php\gestionar_revisores.php on line 361
+[19-May-2025 03:59:22 Europe/Berlin] [Depuración] Rol al inicio de gestionar_revisores.php: Jefe Comite de Programa
+[19-May-2025 03:59:22 Europe/Berlin] [Prueba] Este es un mensaje de prueba para verificar los logs.
+[19-May-2025 03:59:22 Europe/Berlin] Mensaje de correo enviado generado correctamente.
+[19-May-2025 03:59:22 Europe/Berlin] Acción recibida: 'create'
+[19-May-2025 03:59:22 Europe/Berlin] [Depuración] Formulario enviado correctamente. Datos recibidos:
+[19-May-2025 03:59:22 Europe/Berlin] Array
+(
+    [action] => create
+    [nombre] => 12321
+    [email] => sd12as@gmail.com
+    [rut] => 1233
+    [userid] => 3123
+    [password] => 13223
+    [topicos] => Array
+        (
+            [0] => 1
+            [1] => 5
+        )
+
+)
+
+[19-May-2025 03:59:22 Europe/Berlin] [Depuración] Procesando datos del formulario...
+[19-May-2025 03:59:22 Europe/Berlin] [Depuración] Acción recibida: create
+[19-May-2025 03:59:22 Europe/Berlin] [Depuración] Datos procesados: Nombre=12321, Email=sd12as@gmail.com, RUT=1233
+[19-May-2025 03:59:22 Europe/Berlin] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'base11.topicos' doesn't exist in C:\xampp\htdocs\proyecto_php\php\gestionar_revisores.php:361
+Stack trace:
+#0 C:\xampp\htdocs\proyecto_php\php\gestionar_revisores.php(361): PDO->prepare('SELECT COUNT(*)...')
+#1 {main}
+  thrown in C:\xampp\htdocs\proyecto_php\php\gestionar_revisores.php on line 361
+[19-May-2025 03:59:29 Europe/Berlin] [Depuración] Rol al inicio de gestionar_revisores.php: Jefe Comite de Programa
+[19-May-2025 03:59:29 Europe/Berlin] [Prueba] Este es un mensaje de prueba para verificar los logs.
+[19-May-2025 03:59:29 Europe/Berlin] [Depuración] Rol al final de gestionar_revisores.php: Jefe Comite de Programa
+[19-May-2025 04:01:29 Europe/Berlin] [Depuración] Rol al inicio de gestionar_revisores.php: Jefe Comite de Programa
+[19-May-2025 04:01:29 Europe/Berlin] [Prueba] Este es un mensaje de prueba para verificar los logs.
+[19-May-2025 04:01:29 Europe/Berlin] [Depuración] Rol al final de gestionar_revisores.php: Jefe Comite de Programa
+[19-May-2025 04:01:38 Europe/Berlin] [Depuración] Rol al inicio de gestionar_revisores.php: Jefe Comite de Programa
+[19-May-2025 04:01:38 Europe/Berlin] [Prueba] Este es un mensaje de prueba para verificar los logs.
+[19-May-2025 04:01:38 Europe/Berlin] Mensaje de correo enviado generado correctamente.
+[19-May-2025 04:01:38 Europe/Berlin] Acción recibida: 'create'
+[19-May-2025 04:01:38 Europe/Berlin] [Depuración] Formulario enviado correctamente. Datos recibidos:
+[19-May-2025 04:01:38 Europe/Berlin] Array
+(
+    [action] => create
+    [nombre] => 123
+    [email] => sd312as@gmail.com
+    [rut] => 132
+    [userid] => 231
+    [password] => 123
+    [topicos] => Array
+        (
+            [0] => 2
+        )
+
+)
+
+[19-May-2025 04:01:38 Europe/Berlin] [Depuración] Procesando datos del formulario...
+[19-May-2025 04:01:38 Europe/Berlin] [Depuración] Acción recibida: create
+[19-May-2025 04:01:38 Europe/Berlin] [Depuración] Datos procesados: Nombre=123, Email=sd312as@gmail.com, RUT=132
+[19-May-2025 04:03:38 Europe/Berlin] [Depuración] Rol al inicio de gestionar_revisores.php: Jefe Comite de Programa
+[19-May-2025 04:03:38 Europe/Berlin] [Prueba] Este es un mensaje de prueba para verificar los logs.
+[19-May-2025 04:03:38 Europe/Berlin] Mensaje de correo enviado generado correctamente.
+[19-May-2025 04:03:38 Europe/Berlin] Acción recibida: 'create'
+[19-May-2025 04:03:38 Europe/Berlin] [Depuración] Formulario enviado correctamente. Datos recibidos:
+[19-May-2025 04:03:38 Europe/Berlin] Array
+(
+    [action] => create
+    [nombre] => 12312
+    [email] => sd312a1s@gmail.com
+    [rut] => 1321
+    [userid] => 23112
+    [password] => 12312
+    [topicos] => Array
+        (
+            [0] => 2
+            [1] => 6
+            [2] => 9
+        )
+
+)
+
+[19-May-2025 04:03:38 Europe/Berlin] [Depuración] Procesando datos del formulario...
+[19-May-2025 04:03:38 Europe/Berlin] [Depuración] Acción recibida: create
+[19-May-2025 04:03:38 Europe/Berlin] [Depuración] Datos procesados: Nombre=12312, Email=sd312a1s@gmail.com, RUT=1321
+[19-May-2025 04:03:38 Europe/Berlin] [Debug] Preparing to insert topics into Revisor_Topico for RUT: 1321
+[19-May-2025 04:03:38 Europe/Berlin] [Debug] Attempting to insert topic ID: 2 for RUT: 1321
+[19-May-2025 04:03:38 Europe/Berlin] [Debug] Successfully inserted topic ID: 2 for RUT: 1321
+[19-May-2025 04:03:38 Europe/Berlin] [Debug] Attempting to insert topic ID: 6 for RUT: 1321
+[19-May-2025 04:03:38 Europe/Berlin] [Debug] Successfully inserted topic ID: 6 for RUT: 1321
+[19-May-2025 04:03:38 Europe/Berlin] [Debug] Attempting to insert topic ID: 9 for RUT: 1321
+[19-May-2025 04:03:38 Europe/Berlin] [Debug] Successfully inserted topic ID: 9 for RUT: 1321
+[19-May-2025 04:03:40 Europe/Berlin] PHP Warning:  mail(): Failed to connect to mailserver at &quot;localhost&quot; port 25, verify your &quot;SMTP&quot; and &quot;smtp_port&quot; setting in php.ini or use ini_set() in C:\xampp\htdocs\proyecto_php\php\gestionar_revisores.php on line 402
+[19-May-2025 04:03:40 Europe/Berlin] [Depuración] Rol al inicio de gestionar_revisores.php: Jefe Comite de Programa
+[19-May-2025 04:03:40 Europe/Berlin] [Prueba] Este es un mensaje de prueba para verificar los logs.
+[19-May-2025 04:03:40 Europe/Berlin] [Depuración] Rol al final de gestionar_revisores.php: Jefe Comite de Programa
+[19-May-2025 04:03:43 Europe/Berlin] [Depuración] Rol al inicio de gestionar_revisores.php: Jefe Comite de Programa
+[19-May-2025 04:03:43 Europe/Berlin] [Prueba] Este es un mensaje de prueba para verificar los logs.
+[19-May-2025 04:03:43 Europe/Berlin] [Depuración] Rol al final de gestionar_revisores.php: Jefe Comite de Programa
+[19-May-2025 04:05:11 Europe/Berlin] [Depuración] Rol al inicio de gestionar_revisores.php: Jefe Comite de Programa
+[19-May-2025 04:05:11 Europe/Berlin] [Prueba] Este es un mensaje de prueba para verificar los logs.
+[19-May-2025 04:05:11 Europe/Berlin] Mensaje de correo enviado generado correctamente.
+[19-May-2025 04:05:11 Europe/Berlin] Acción recibida: 'create'
+[19-May-2025 04:05:11 Europe/Berlin] [Depuración] Formulario enviado correctamente. Datos recibidos:
+[19-May-2025 04:05:11 Europe/Berlin] Array
+(
+    [action] => create
+    [nombre] => 1212
+    [email] => maximilianov.ya12nez@gmail.com
+    [rut] => 1212
+    [userid] => 2112
+    [password] => 1212
+    [topicos] => Array
+        (
+            [0] => 5
+            [1] => 6
+            [2] => 7
+            [3] => 8
+            [4] => 9
+            [5] => 10
+            [6] => 11
+            [7] => 12
+            [8] => 13
+        )
+
+)
+
+[19-May-2025 04:05:11 Europe/Berlin] [Depuración] Procesando datos del formulario...
+[19-May-2025 04:05:11 Europe/Berlin] [Depuración] Acción recibida: create
+[19-May-2025 04:05:11 Europe/Berlin] [Depuración] Datos procesados: Nombre=1212, Email=maximilianov.ya12nez@gmail.com, RUT=1212
+[19-May-2025 04:05:11 Europe/Berlin] [Debug] Preparing to insert topics into Revisor_Topico for RUT: 1212
+[19-May-2025 04:05:11 Europe/Berlin] [Debug] Attempting to insert topic ID: 5 for RUT: 1212
+[19-May-2025 04:05:11 Europe/Berlin] [Debug] Successfully inserted topic ID: 5 for RUT: 1212
+[19-May-2025 04:05:11 Europe/Berlin] [Debug] Attempting to insert topic ID: 6 for RUT: 1212
+[19-May-2025 04:05:11 Europe/Berlin] [Debug] Successfully inserted topic ID: 6 for RUT: 1212
+[19-May-2025 04:05:11 Europe/Berlin] [Debug] Attempting to insert topic ID: 7 for RUT: 1212
+[19-May-2025 04:05:11 Europe/Berlin] [Debug] Successfully inserted topic ID: 7 for RUT: 1212
+[19-May-2025 04:05:11 Europe/Berlin] [Debug] Attempting to insert topic ID: 8 for RUT: 1212
+[19-May-2025 04:05:11 Europe/Berlin] [Debug] Successfully inserted topic ID: 8 for RUT: 1212
+[19-May-2025 04:05:11 Europe/Berlin] [Debug] Attempting to insert topic ID: 9 for RUT: 1212
+[19-May-2025 04:05:11 Europe/Berlin] [Debug] Successfully inserted topic ID: 9 for RUT: 1212
+[19-May-2025 04:05:11 Europe/Berlin] [Debug] Attempting to insert topic ID: 10 for RUT: 1212
+[19-May-2025 04:05:11 Europe/Berlin] [Debug] Successfully inserted topic ID: 10 for RUT: 1212
+[19-May-2025 04:05:11 Europe/Berlin] [Debug] Attempting to insert topic ID: 11 for RUT: 1212
+[19-May-2025 04:05:11 Europe/Berlin] [Debug] Successfully inserted topic ID: 11 for RUT: 1212
+[19-May-2025 04:05:11 Europe/Berlin] [Debug] Attempting to insert topic ID: 12 for RUT: 1212
+[19-May-2025 04:05:11 Europe/Berlin] [Debug] Successfully inserted topic ID: 12 for RUT: 1212
+[19-May-2025 04:05:11 Europe/Berlin] [Debug] Attempting to insert topic ID: 13 for RUT: 1212
+[19-May-2025 04:05:11 Europe/Berlin] [Debug] Successfully inserted topic ID: 13 for RUT: 1212
+[19-May-2025 04:05:13 Europe/Berlin] PHP Warning:  mail(): Failed to connect to mailserver at &quot;localhost&quot; port 25, verify your &quot;SMTP&quot; and &quot;smtp_port&quot; setting in php.ini or use ini_set() in C:\xampp\htdocs\proyecto_php\php\gestionar_revisores.php on line 402
+[19-May-2025 04:05:13 Europe/Berlin] [Depuración] Rol al inicio de gestionar_revisores.php: Jefe Comite de Programa
+[19-May-2025 04:05:13 Europe/Berlin] [Prueba] Este es un mensaje de prueba para verificar los logs.
+[19-May-2025 04:05:13 Europe/Berlin] [Depuración] Rol al final de gestionar_revisores.php: Jefe Comite de Programa
+[19-May-2025 04:05:19 Europe/Berlin] [Depuración] Rol al inicio de gestionar_revisores.php: Jefe Comite de Programa
+[19-May-2025 04:05:19 Europe/Berlin] [Prueba] Este es un mensaje de prueba para verificar los logs.
+[19-May-2025 04:05:19 Europe/Berlin] [Depuración] Rol al final de gestionar_revisores.php: Jefe Comite de Programa
+[19-May-2025 04:06:13 Europe/Berlin] [Depuración] Rol al inicio de gestionar_revisores.php: Jefe Comite de Programa
+[19-May-2025 04:06:13 Europe/Berlin] [Prueba] Este es un mensaje de prueba para verificar los logs.
+[19-May-2025 04:06:13 Europe/Berlin] [Depuración] Rol al final de gestionar_revisores.php: Jefe Comite de Programa
+[19-May-2025 04:06:24 Europe/Berlin] [Depuración] Rol al inicio de gestionar_revisores.php: Jefe Comite de Programa
+[19-May-2025 04:06:24 Europe/Berlin] [Prueba] Este es un mensaje de prueba para verificar los logs.
+[19-May-2025 04:06:24 Europe/Berlin] [Depuración] Rol al final de gestionar_revisores.php: Jefe Comite de Programa
+[19-May-2025 04:08:53 Europe/Berlin] [Depuración] Rol al inicio de gestionar_revisores.php: Jefe Comite de Programa
+[19-May-2025 04:08:53 Europe/Berlin] [Prueba] Este es un mensaje de prueba para verificar los logs.
+[19-May-2025 04:08:53 Europe/Berlin] [Depuración] Rol al final de gestionar_revisores.php: Jefe Comite de Programa

@@ -159,6 +159,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Crear, leer, actualizar y eliminar revisores
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Verificar si se enviaron tópicos
+    if (empty($_POST['topicos']) || !is_array($_POST['topicos'])) {
+        echo "<p style='color: red;'>Error: Debe seleccionar al menos un tópico.</p>";
+        exit(); // Detener el procesamiento si no hay tópicos seleccionados
+    }
+
     $action = $_POST['action'];
     $rut = $_POST['rut'] ?? null;
     $nombre = $_POST['nombre'] ?? null;
@@ -701,6 +707,42 @@ $topicos_disponibles = $stmt_topicos->fetchAll();
             }
         });
     }
+    </script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('nuevoRevisorForm');
+
+        if (form) {
+            form.addEventListener('submit', function(event) {
+                console.log('Interceptando el evento submit del formulario.');
+
+                const topicos = document.querySelectorAll('input[name="topicos[]"]:checked');
+
+                if (topicos.length === 0) {
+                    event.preventDefault(); // Prevenir el envío del formulario
+                    alert('Debe seleccionar al menos un tópico.');
+                    console.log('Formulario no enviado. No se seleccionó ningún tópico.');
+                    return;
+                }
+
+                const nombre = document.getElementById('nombre').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const rut = document.getElementById('rut').value.trim();
+
+                if (!nombre || !email || !rut) {
+                    event.preventDefault(); // Prevenir el envío del formulario
+                    alert('Por favor, complete todos los campos obligatorios.');
+                    console.log('Formulario no enviado. Campos faltantes:', { nombre, email, rut });
+                    return;
+                }
+
+                console.log('Formulario validado correctamente. Datos:', { nombre, email, rut, topicos: Array.from(topicos).map(t => t.value) });
+            });
+        } else {
+            console.error('No se encontró el formulario con el ID "nuevoRevisorForm".');
+        }
+    });
     </script>
 
     <?php

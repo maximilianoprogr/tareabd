@@ -1,13 +1,11 @@
 <?php
 session_start();
 
-// Verificar si el usuario está autenticado
 if (!isset($_SESSION['usuario'])) {
     header("Location: login.php");
     exit();
 }
 
-// Verificar si se proporcionó un ID de artículo
 if (!isset($_GET['id_articulo'])) {
     echo "<p style='color: red;'>No se proporcionó un ID de artículo.</p>";
     exit();
@@ -15,15 +13,12 @@ if (!isset($_GET['id_articulo'])) {
 
 $id_articulo = $_GET['id_articulo'];
 
-// Obtener los datos del artículo desde la base de datos
 include('conexion.php');
-// Actualizar la consulta para incluir el contenido del artículo
 $sql_articulo = "SELECT titulo, resumen, contenido FROM Articulo WHERE id_articulo = ?";
 $stmt_articulo = $pdo->prepare($sql_articulo);
 $stmt_articulo->execute([$id_articulo]);
 $articulo = $stmt_articulo->fetch();
 
-// Depuración: Verificar si se recuperaron datos del artículo
 if (!$articulo) {
     echo "<p style='color: red;'>Error: No se encontró el artículo con ID: $id_articulo.</p>";
     exit();
@@ -33,25 +28,20 @@ if (!$articulo) {
 
 $titulo = htmlspecialchars($articulo['titulo']);
 $resumen = htmlspecialchars($articulo['resumen']);
-// Asignar el contenido del artículo a una variable
 $contenido = htmlspecialchars($articulo['contenido']);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Procesar los datos enviados por el formulario
     $titulo = $_POST['titulo'] ?? '';
     $resumen = $_POST['resumen'] ?? '';
     $contenido = $_POST['contenido'] ?? '';
 
-    // Validar los datos
     if (empty($titulo) || empty($resumen)) {
         echo "<p style='color: red;'>Error: Todos los campos son obligatorios.</p>";
     } else {
-        // Guardar los datos en la base de datos
         $sql_update = "UPDATE Articulo SET titulo = ?, resumen = ?, contenido = ? WHERE id_articulo = ?";
         $stmt_update = $pdo->prepare($sql_update);
         $stmt_update->execute([$titulo, $resumen, $contenido, $id_articulo]);
 
-        // Redirigir a la misma página con los datos actualizados
         header("Location: formulario_articulo.php?id_articulo=$id_articulo");
         exit();
     }

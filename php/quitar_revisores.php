@@ -1,23 +1,19 @@
 <?php
-// quitar_revisores.php
 
 session_start();
 include('conexion.php');
 
-// Verificar si el usuario tiene permisos de jefe del comité
 if (!isset($_SESSION['rol']) || ($_SESSION['rol'] !== 'admin' && $_SESSION['rol'] !== 'Jefe Comite de Programa')) {
     header("Location: dashboard.php");
     exit();
 }
 
-// Obtener el ID del artículo desde la solicitud
 if (!isset($_GET['id_articulo'])) {
     echo "<p style='color: red;'>Error: No se proporcionó un ID de artículo.</p>";
     exit();
 }
 $id_articulo = $_GET['id_articulo'];
 
-// Obtener información del artículo
 $sql_articulo = "SELECT titulo FROM Articulo WHERE id_articulo = ?";
 $stmt_articulo = $pdo->prepare($sql_articulo);
 $stmt_articulo->execute([$id_articulo]);
@@ -27,7 +23,6 @@ if (!$articulo) {
     exit();
 }
 
-// Obtener revisores asignados al artículo
 $sql_revisores = "SELECT ar.rut_revisor, u.nombre FROM Articulo_Revisor ar JOIN Usuario u ON ar.rut_revisor = u.rut WHERE ar.id_articulo = ?";
 $stmt_revisores = $pdo->prepare($sql_revisores);
 $stmt_revisores->execute([$id_articulo]);

@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user_id'])) {
-    header('Location: ../php/login.php'); // Redirigir al login si no está autenticado
+    header('Location: ../php/login.php'); 
     exit();
 }
 ?>
@@ -11,15 +11,15 @@ if (!isset($_SESSION['user_id'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Página de Artículos</title>
-    <link rel="stylesheet" href="../css/estilos.css"> <!-- Archivo CSS -->
+    <link rel="stylesheet" href="../css/estilos.css"> 
 </head>
 <body>
-    <?php include('../php/navegacion.php'); ?> <!-- Incluir la barra de navegación -->
+    <?php include('../php/navegacion.php'); ?> 
     <div id="content">
         <h1>Bienvenido a la Plataforma de Artículos</h1>
         <p>Selecciona una opción del menú para comenzar.</p>
         <a href="dashboard.php" style="font-family: Arial, sans-serif; font-size: 14px; color: #007BFF; text-decoration: none;">Volver al inicio</a>
     </div>
-    <script src="../js/scripts.js"></script> <!-- Archivo JavaScript -->
+    <script src="../js/scripts.js"></script> 
 </body>
 </html>

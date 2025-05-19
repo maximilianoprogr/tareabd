@@ -1,7 +1,6 @@
 <?php
 include('../php/conexion.php');
 
-// Consultar todos los artículos
 $sql = "SELECT * FROM Articulo";
 $stmt = $pdo->prepare($sql);
 $stmt->execute();

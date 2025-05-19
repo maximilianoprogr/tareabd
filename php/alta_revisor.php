@@ -4,12 +4,10 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 session_start();
-include('../php/conexion.php'); // Asegúrate de que este archivo define correctamente $pdo
+include('../php/conexion.php'); 
 
-// Mensaje de depuración para verificar si el archivo se carga correctamente
 echo "<p style='color: green;'>El archivo alta_revisor.php se ha cargado correctamente.</p>";
 
-// Mensaje de depuración antes de la redirección por permisos
 if (!isset($_SESSION['rol']) || ($_SESSION['rol'] !== 'admin' && $_SESSION['rol'] !== 'Jefe Comite de Programa')) {
     echo "<p style='color: red;'>Acceso denegado: Usuario no autorizado.</p>";
     header("Location: ../php/dashboard.php");

@@ -6,7 +6,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_articulo'], $_POST
     $rut_revisor = $_POST['rut_revisor'];
 
     try {
-        // Llamar al procedimiento almacenado
         $sql = "CALL AsignarArticuloRevisor(?, ?)";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$id_articulo, $rut_revisor]);
@@ -17,7 +16,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_articulo'], $_POST
     }
 }
 
-// Obtener artículos y revisores para la interfaz
 $sql_articulos = "SELECT id_articulo, titulo FROM Articulo";
 $articulos = $pdo->query($sql_articulos)->fetchAll();
 

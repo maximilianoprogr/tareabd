@@ -1,7 +1,6 @@
 <?php
 require_once 'conexion.php';
 
-// Obtener los datos de la tabla de asignaciones
 $sql_asignaciones = "SELECT a.id_articulo, a.titulo, 
                       GROUP_CONCAT(DISTINCT CONCAT(u.nombre, ' (', u.rut, ')') SEPARATOR ', ') AS autores,
                       GROUP_CONCAT(DISTINCT t.nombre SEPARATOR ', ') AS topicos,
@@ -16,7 +15,6 @@ $sql_asignaciones = "SELECT a.id_articulo, a.titulo,
                       GROUP BY a.id_articulo";
 $stmt_asignaciones = $pdo->query($sql_asignaciones);
 $asignaciones = $stmt_asignaciones->fetchAll();
-// Mostrar artículos con menos de dos revisores
 $query_articulos = "SELECT a.id, a.titulo, COUNT(asg.revisor_id) AS num_revisores
                     FROM articulos a
                     LEFT JOIN asignaciones asg ON a.id = asg.articulo_id
@@ -29,7 +27,6 @@ while ($articulo = $result_articulos->fetch_assoc()) {
     $articulos_menos_revisores[] = $articulo;
 }
 
-// Mostrar número de artículos asignados a cada revisor
 $query_revisores = "SELECT r.id, r.nombre, COUNT(asg.articulo_id) AS num_articulos
                     FROM revisores r
                     LEFT JOIN asignaciones asg ON r.id = asg.revisor_id

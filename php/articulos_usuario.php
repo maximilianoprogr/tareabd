@@ -2,7 +2,6 @@
 session_start();
 include('php/conexion.php');
 
-// Verificar si el usuario está autenticado
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
@@ -10,7 +9,6 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 
-// Agregar una columna para mostrar los revisores asignados
 $sql = "SELECT a.titulo, a.resumen, GROUP_CONCAT(t.nombre) AS topicos, GROUP_CONCAT(ar.rut_revisor) AS revisores
         FROM Articulo a
         LEFT JOIN Articulo_Topico at ON a.id_articulo = at.id_articulo

@@ -3,10 +3,10 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-include('../php/db_connection.php'); // Asegúrate de que este archivo define correctamente la variable $conn
+include('../php/db_connection.php'); 
 
-$message = ""; // Variable para almacenar mensajes
-$showLoginButton = false; // Variable para controlar la visibilidad del botón de login
+$message = ""; 
+$showLoginButton = false; 
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $rut = $_POST['rut'];
@@ -23,7 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } elseif (empty($usuario)) {
         $message = "El campo de nombre de usuario es obligatorio.";
     } else {
-        // Verificar si el correo ya existe en la base de datos
+        
         $sql_check = "SELECT COUNT(*) FROM Usuario WHERE email = ?";
         $stmt_check = $conn->prepare($sql_check);
         $stmt_check->bind_param("s", $email);
@@ -35,9 +35,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($count > 0) {
             $message = "El correo electrónico ya está registrado.";
         } else {
-            $hashed_password = $password; // Usar la contraseña directamente
+            $hashed_password = $password; 
 
-            // Insertar el nuevo usuario en la base de datos
             $sql = "INSERT INTO Usuario (rut, nombre, email, usuario, password, tipo) VALUES (?, ?, ?, ?, ?, ?)";
             $stmt = $conn->prepare($sql);
 
@@ -60,7 +59,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-$conn->close(); // Asegúrate de que $conn esté definido correctamente
+$conn->close(); 
 ?>
 
 <!DOCTYPE html>
@@ -69,7 +68,7 @@ $conn->close(); // Asegúrate de que $conn esté definido correctamente
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro</title>
-    <link rel="stylesheet" href="../css/register.css"> <!-- Archivo CSS externo -->
+    <link rel="stylesheet" href="../css/register.css"> 
 </head>
 <body>
     <div class="form-container">

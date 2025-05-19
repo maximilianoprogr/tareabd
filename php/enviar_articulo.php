@@ -2,7 +2,6 @@
 session_start();
 require_once 'conexion.php';
 
-// Obtener tópicos
 $topicos = $pdo->query("SELECT id_topico, nombre FROM Topico")->fetchAll();
 
 $message = "";
@@ -14,7 +13,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $es_contacto = $_POST['es_contacto'] ?? [];
     $topicos_seleccionados = $_POST['topicos'] ?? [];
 
-    // Validaciones
     if ($titulo === '') {
         $message = "El título es obligatorio.";
     } elseif (empty($ruts) || count(array_filter($ruts)) === 0) {
@@ -25,12 +23,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $message = "Debe seleccionar al menos un tópico.";
     } else {
         try {
-            // Validar que el RUT exista en la tabla Usuario antes de insertarlo en Autor
             foreach ($ruts as $rut) {
                 $rut = trim($rut);
                 if ($rut === '') continue;
 
-                // Verificar si el RUT existe en Usuario
                 $stmt = $pdo->prepare("SELECT COUNT(*) FROM Usuario WHERE rut = ?");
                 $stmt->execute([$rut]);
                 if ($stmt->fetchColumn() == 0) {
@@ -38,7 +34,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     break;
                 }
 
-                // Verificar si el RUT ya está en Autor
                 $stmt = $pdo->prepare("SELECT COUNT(*) FROM Autor WHERE rut = ?");
                 $stmt->execute([$rut]);
                 if ($stmt->fetchColumn() == 0) {
@@ -46,7 +41,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
 
-            // Validar que el título no exista para alguno de los autores
             $stmt = $pdo->prepare("SELECT COUNT(*) FROM Articulo a JOIN Autor_Articulo aa ON a.id_articulo = aa.id_articulo WHERE a.titulo = ? AND aa.rut_autor IN (" . implode(',', array_fill(0, count($ruts), '?')) . ")");
             $stmt->execute(array_merge([$titulo], $ruts));
             if ($stmt->fetchColumn() > 0) {
@@ -54,13 +48,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new Exception($message);
             }
 
-            // Validar que no se repitan nombres de autores
             if (count($ruts) !== count(array_unique($ruts))) {
                 $message = "No se pueden repetir nombres de autores.";
                 throw new Exception($message);
             }
 
-            // Validar que el RUT del autor principal exista en la tabla Autor antes de insertar el artículo
             $stmt = $pdo->prepare("SELECT COUNT(*) FROM Autor WHERE rut = ?");
             $stmt->execute([$ruts[0]]);
             if ($stmt->fetchColumn() == 0) {
@@ -68,12 +60,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new Exception($message);
             }
 
-            // Insertar artículo
             $stmt = $pdo->prepare("INSERT INTO Articulo (titulo, resumen, fecha_envio, rut_autor, estado) VALUES (?, ?, NOW(), ?, 'En revisión')");
             $stmt->execute([$titulo, $resumen, $ruts[0]]);
             $id_articulo = $pdo->lastInsertId();
 
-            // Insertar autores del artículo
             foreach ($ruts as $i => $rut) {
                 $rut = trim($rut);
                 if ($rut === '') continue;
@@ -82,7 +72,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ->execute([$id_articulo, $rut, $contacto]);
             }
 
-            // Insertar tópicos
             $stmt = $pdo->prepare("INSERT INTO Articulo_Topico (id_articulo, id_topico) VALUES (?, ?)");
             foreach ($topicos_seleccionados as $id_topico) {
                 $stmt->execute([$id_articulo, $id_topico]);
@@ -98,7 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $message = "Error al enviar el artículo: " . $e->getMessage();
             }
         } catch (Exception $e) {
-            $message = $e->getMessage(); // Solo muestra el mensaje amigable
+            $message = $e->getMessage(); 
         }
     }
 }

@@ -1,16 +1,13 @@
 <?php
-// Editar artículo
 if (isset($_GET['id'])) {
     $id_articulo = $_GET['id'];
 
-    // Obtener los datos del artículo
     $sql = "SELECT * FROM Articulo WHERE id_articulo = ?";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$id_articulo]);
     $articulo = $stmt->fetch();
 
     if ($articulo) {
-        // Verificar si el artículo está en revisión
         $sql_check = "SELECT COUNT(*) FROM Articulo_Revisor WHERE id_articulo = ?";
         $stmt_check = $pdo->prepare($sql_check);
         $stmt_check->execute([$id_articulo]);
@@ -26,7 +23,6 @@ if (isset($_GET['id'])) {
             $fecha_envio = trim($_POST['fecha_envio']);
             $resumen = trim($_POST['resumen']);
 
-            // Validaciones de entrada
             if (empty($titulo) || empty($fecha_envio) || empty($resumen)) {
                 echo "Todos los campos son obligatorios.";
                 exit();
@@ -47,7 +43,6 @@ if (isset($_GET['id'])) {
                 exit();
             }
 
-            // Actualizar el artículo
             $sql_update = "UPDATE Articulo SET titulo = ?, fecha_envio = ?, resumen = ? WHERE id_articulo = ?";
             $stmt_update = $pdo->prepare($sql_update);
             $stmt_update->execute([$titulo, $fecha_envio, $resumen, $id_articulo]);

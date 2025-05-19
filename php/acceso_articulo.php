@@ -1,30 +1,24 @@
 <?php
 session_start();
 
-// Verificar si el usuario está autenticado
 if (!isset($_SESSION['usuario'])) {
     header("Location: login.php");
     exit();
 }
 
-// Obtener el rol del usuario desde la base de datos
 include('conexion.php');
 $stmt_rol = $pdo->prepare("SELECT tipo FROM Usuario WHERE rut = ?");
 $stmt_rol->execute([$_SESSION['usuario']]);
 $rol = $stmt_rol->fetchColumn();
 
-// Actualizar el rol en la sesión con el valor obtenido de la base de datos
 $_SESSION['rol'] = $rol;
 
-// Ajustar las variables de rol basadas en el valor obtenido de la base de datos
 $es_revisor = strcasecmp($rol, 'revisor') === 0;
 $es_jefe_comite = strcasecmp($rol, 'Jefe Comite de Programa') === 0;
 $es_autor = strcasecmp($rol, 'autor') === 0;
 
-// Ajustar la lógica para permitir acceso al artículo pero bloquear la funcionalidad de opinar
 if ($es_autor) {
     echo '<p style="font-family: Arial, sans-serif; color: red;">No puedes opinar sobre este artículo porque no eres el revisor asignado.</p>';
-    // No terminar la ejecución, permitir acceso al artículo
 } elseif ($es_jefe_comite) {
     echo '<p style="font-family: Arial, sans-serif; color: blue;">Acceso como Jefe del Comité de Programa.</p>';
 } elseif ($es_revisor) {
@@ -33,45 +27,37 @@ if ($es_autor) {
     echo '<p style="font-family: Arial, sans-serif; color: orange;">Rol no reconocido.</p>';
 }
 
-// Obtener todos los artículos enviados
 include('conexion.php');
 $sql_articulos = "SELECT id_articulo, titulo FROM Articulo";
 $stmt_articulos = $pdo->query($sql_articulos);
 $articulos = $stmt_articulos->fetchAll();
 
-// Verificar si se seleccionó un artículo
 $articulo_seleccionado = isset($_GET['id_articulo']) ? $_GET['id_articulo'] : null;
 $detalles_articulo = null;
 $revisores = [];
 
 if ($articulo_seleccionado) {
-    // Obtener detalles del artículo seleccionado
     $sql_detalles = "SELECT titulo, resumen FROM Articulo WHERE id_articulo = ?";
     $stmt_detalles = $pdo->prepare($sql_detalles);
     $stmt_detalles->execute([$articulo_seleccionado]);
     $detalles_articulo = $stmt_detalles->fetch();
 
-    // Obtener revisores asignados al artículo
     $sql_revisores = "SELECT ar.rut_revisor FROM Articulo_Revisor ar WHERE ar.id_articulo = ?";
     $stmt_revisores = $pdo->prepare($sql_revisores);
     $stmt_revisores->execute([$articulo_seleccionado]);
     $revisores = $stmt_revisores->fetchAll(PDO::FETCH_COLUMN);
 }
 
-// Redirigir automáticamente si no se seleccionó un artículo
 if (!$articulo_seleccionado) {
     header("Location: dashboard.php?error=seleccione_articulo");
     exit();
 }
 
-// Eliminar el bloque que detiene la ejecución si no hay revisores
 if (empty($revisores)) {
     echo '<p style="font-family: Arial, sans-serif; color: red;">No hay revisores asignados a este artículo.</p>';
     echo '<a href="dashboard.php" style="font-family: Arial, sans-serif; font-size: 14px; color: #007BFF; text-decoration: none;">Volver al inicio</a>';
-    // exit(); // Comentado para permitir que la página continúe cargando
 }
 
-// Verificar si los resultados de la revisión han sido publicados
 $resultados_publicados = false;
 if ($articulo_seleccionado) {
     $sql_resultados = "SELECT COUNT(*) FROM Evaluacion_Articulo WHERE id_articulo = ?";
@@ -80,27 +66,15 @@ if ($articulo_seleccionado) {
     $resultados_publicados = $stmt_resultados->fetchColumn() > 0;
 }
 
-// Depuración: Mostrar el rol en la sesión
 echo "<p style='color: blue;'>Rol en la sesión: " . htmlspecialchars($_SESSION['rol']) . "</p>";
-
-// Depuración: Mostrar el valor de $es_autor para verificar si se evalúa correctamente
 echo "<p style='color: green;'>Valor de es_autor: " . (isset($es_autor) && $es_autor ? 'true' : 'false') . "</p>";
-
-// Depuración adicional: Verificar el valor de $_SESSION['rol'] y $_SESSION['usuario']
 echo "<p style='color: green;'>Depuración: Rol en la sesión: " . htmlspecialchars($_SESSION['rol']) . "</p>";
 echo "<p style='color: green;'>Depuración: Usuario en la sesión: " . htmlspecialchars($_SESSION['usuario']) . "</p>";
-
-// Depuración: Mostrar los revisores obtenidos de la base de datos
 echo "<p style='color: green;'>Revisores obtenidos: " . (empty($revisores) ? 'Ninguno' : implode(', ', $revisores)) . "</p>";
-
-// Depuración: Mostrar el rol obtenido de la base de datos
 echo "<p style='color: purple;'>Rol obtenido de la base de datos: " . htmlspecialchars($rol) . "</p>";
-
-// Depuración: Mostrar el estado de las variables de rol
 echo "<p style='color: orange;'>Es revisor: " . ($es_revisor ? 'true' : 'false') . "</p>";
 echo "<p style='color: orange;'>Es jefe de comité: " . ($es_jefe_comite ? 'true' : 'false') . "</p>";
 echo "<p style='color: orange;'>Es autor: " . ($es_autor ? 'true' : 'false') . "</p>";
-
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -139,7 +113,6 @@ echo "<p style='color: orange;'>Es autor: " . ($es_autor ? 'true' : 'false') . "
                     <?php foreach ($revisores as $revisor): ?>
                         <a href="revisiones.php?revision=<?php echo htmlspecialchars($revisor); ?>&id_articulo=<?php echo htmlspecialchars($articulo_seleccionado); ?>" class="button">R<?php echo htmlspecialchars($revisor); ?> Consultar</a>
                         <div style="margin-top: 5px;">
-                            <!-- Agregar validación para que el botón de "Opinar" no se muestre si el usuario es autor -->
                             <?php if (!$es_autor): ?>
                                 <a href="opinar.php?revision=<?php echo htmlspecialchars($articulo_seleccionado); ?>&revisor=<?php echo htmlspecialchars($revisor); ?>" class="button">R<?php echo htmlspecialchars($revisor); ?> Opinar</a>
                             <?php endif; ?>
@@ -152,13 +125,10 @@ echo "<p style='color: orange;'>Es autor: " . ($es_autor ? 'true' : 'false') . "
         <?php endif; ?>
     </div>
 
-    <!-- Mostrar el rol del usuario en la esquina superior izquierda -->
     <?php echo "<div style='position: fixed; top: 10px; left: 10px; font-weight: bold; background-color: #f0f0f0; padding: 5px; border: 1px solid #ccc;'>Rol: " . htmlspecialchars($_SESSION['rol']) . "</div>"; ?>
 
-    <!-- Formulario de Evaluación se muestra solo si se accede a una revisión -->
     <?php if (isset($_GET['revision'])): ?>
         <?php
-        // Depuración de valores
         echo "<p style='color: blue;'>Valor de revision: " . htmlspecialchars($_GET['revision']) . "</p>";
         echo "<p style='color: blue;'>Usuario actual: " . htmlspecialchars($_SESSION['usuario']) . "</p>";
         echo "<p style='color: blue;'>Rol actual: " . htmlspecialchars($_SESSION['rol']) . "</p>";

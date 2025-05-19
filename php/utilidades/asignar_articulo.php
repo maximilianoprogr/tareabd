@@ -8,7 +8,6 @@ if (!$rut_revisor) {
     exit;
 }
 
-// Obtener nombre y tópicos del revisor
 $stmt = $pdo->prepare("
     SELECT u.nombre, GROUP_CONCAT(DISTINCT t.nombre SEPARATOR ', ') AS topicos
     FROM Usuario u
@@ -26,7 +25,6 @@ if (!$revisor) {
 
 $msg = '';
 
-// --- Procesar quitar artículo primero ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_articulo']) && isset($_POST['quitar'])) {
     $id_articulo = $_POST['id_articulo'];
     $stmt = $pdo->prepare("DELETE FROM Articulo_Revisor WHERE id_articulo = ? AND rut_revisor = ?");
@@ -35,16 +33,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_articulo']) && iss
     exit;
 }
 
-// --- Procesar asignación si se envió el formulario ---
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_articulo']) && !isset($_POST['quitar'])) {
     $id_articulo = $_POST['id_articulo'];
-    // Verificar si ya está asignado
+   
     $stmt = $pdo->prepare("SELECT 1 FROM Articulo_Revisor WHERE id_articulo = ? AND rut_revisor = ?");
     $stmt->execute([$id_articulo, $rut_revisor]);
     if ($stmt->fetch()) {
         $msg = "El artículo ya está asignado a este revisor.";
     } else {
-        // Obtener tópicos del artículo
+       
         $stmt = $pdo->prepare("SELECT GROUP_CONCAT(DISTINCT t.nombre SEPARATOR ', ') AS topicos
                                FROM Articulo_Topico at
                                LEFT JOIN Topico t ON at.id_topico = t.id_topico
@@ -52,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_articulo']) && !is
         $stmt->execute([$id_articulo]);
         $row = $stmt->fetch();
         $topicos_articulo = array_filter(array_map('trim', preg_split('/,\s*/', $row['topicos'] ?? '')));
-        // Obtener tópicos del revisor
+        
         $topicos_revisor = array_filter(array_map('trim', preg_split('/,\s*/', $revisor['topicos'] ?? '')));
         $hay_coincidencia = false;
         foreach ($topicos_revisor as $topico) {
@@ -73,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_articulo']) && !is
     exit;
 }
 
-// Obtener todos los artículos con sus tópicos
+
 $stmt = $pdo->query("
     SELECT a.id_articulo, a.titulo, GROUP_CONCAT(DISTINCT t.nombre SEPARATOR ', ') AS topicos
     FROM Articulo a
@@ -84,7 +82,7 @@ $stmt = $pdo->query("
 ");
 $articulos = $stmt->fetchAll();
 
-// Obtener los IDs de los artículos ya asignados a este revisor
+
 $stmt = $pdo->prepare("SELECT id_articulo FROM Articulo_Revisor WHERE rut_revisor = ?");
 $stmt->execute([$rut_revisor]);
 $articulos_asignados = $stmt->fetchAll(PDO::FETCH_COLUMN);
@@ -128,7 +126,6 @@ if (isset($_GET['msg'])) {
         <th>Acción</th>
     </tr>
     <?php foreach ($articulos as $articulo): 
-        // Procesar los tópicos del artículo y del revisor
         $topicos_articulo = array_filter(array_map('trim', preg_split('/,\s*/', $articulo['topicos'] ?? '')));
         $topicos_revisor = array_filter(array_map('trim', preg_split('/,\s*/', $revisor['topicos'] ?? '')));
         $hay_coincidencia = false;
@@ -148,14 +145,12 @@ if (isset($_GET['msg'])) {
         </td>
         <td>
             <?php if (in_array($articulo['id_articulo'], $articulos_asignados)): ?>
-                <!-- Botón para quitar artículo -->
                 <form method="post" style="display:inline;">
                     <input type="hidden" name="id_articulo" value="<?= htmlspecialchars($articulo['id_articulo']) ?>">
                     <input type="hidden" name="quitar" value="1">
                     <button type="submit" style="background:#dc3545;color:#fff;">Quitar</button>
                 </form>
             <?php else: ?>
-                <!-- Botón para asignar artículo -->
                 <form method="post" style="display:inline;">
                     <input type="hidden" name="id_articulo" value="<?= htmlspecialchars($articulo['id_articulo']) ?>">
                     <button type="submit">Asignar</button>

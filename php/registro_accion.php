@@ -5,7 +5,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $rut = trim($_POST['rut']);
     $password = trim($_POST['password']);
 
-    // Validaciones de entrada
     if (empty($rut) || empty($password)) {
         echo "El RUT y la contraseña son obligatorios.";
         exit();
@@ -16,7 +15,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 
-    // Usar sentencia preparada para evitar inyecciones SQL
     $sql = "INSERT INTO Usuario (rut, password) VALUES (?, ?)";
     $stmt = $conn->prepare($sql);
 

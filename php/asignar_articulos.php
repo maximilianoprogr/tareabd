@@ -2,35 +2,29 @@
 session_start();
 include('../php/conexion.php');
 
-// Verificar si el usuario está autenticado
 if (!isset($_SESSION['usuario'])) {
     header("Location: login.php");
     exit();
 }
 
-// Obtener el rol del usuario desde la base de datos
 $stmt_rol = $pdo->prepare("SELECT tipo FROM Usuario WHERE rut = ?");
 $stmt_rol->execute([$_SESSION['usuario']]);
 $rol = $stmt_rol->fetchColumn();
 
-// Actualizar el rol en la sesión con el valor obtenido de la base de datos
 $_SESSION['rol'] = $rol;
 
-// Verificar si el usuario no es Jefe del Comité de Programa
 if (strcasecmp($rol, 'Jefe Comite de Programa') !== 0) {
     echo "<p style='color: red; font-weight: bold;'>Acceso denegado: Solo el Jefe del Comité de Programa puede acceder a esta página.</p>";
-    header("Refresh: 3; url=inicio.php"); // Redirigir al inicio después de 3 segundos
+    header("Refresh: 3; url=inicio.php"); 
     exit();
 }
 
-// Si se presionó el botón de asignación automática
 if (isset($_GET['autoasignar'])) {
     include 'utilidades/asignar_auto.php';
     $asignados = asignar_revisores_automaticamente($pdo);
     $mensaje_auto = "Asignación automática completada. Total de asignaciones realizadas: <b>$asignados</b>.";
 }
 
-// Consulta para obtener artículos con autores, tópicos y revisores (como arrays)
 $sql = "
 SELECT 
     a.id_articulo,
@@ -52,7 +46,6 @@ ORDER BY a.id_articulo ASC
 $stmt = $pdo->query($sql);
 $articulos = $stmt->fetchAll();
 
-// Obtener todos los revisores con sus tópicos y artículos asignados
 $sql_revisores = "
 SELECT 
     u.rut,
@@ -127,7 +120,6 @@ $revisores = $stmt_revisores->fetchAll();
             if ($revisores_art) {
                 foreach ($revisores_art as $revisor) {
                     echo htmlspecialchars($revisor);
-                    // Botón para quitar revisor (envía id_articulo y nombre del revisor)
                     echo ' <a href="utilidades/quitar_revizor.php?id_articulo=' . urlencode($articulo['id_articulo']) .
                         '&revisor=' . urlencode($revisor) . '" onclick="return confirm(\'¿Quitar este revisor del artículo?\')" style="color:#fff;background:#dc3545;padding:2px 8px;border-radius:3px;text-decoration:none;margin-left:6px;font-size:13px;">Quitar</a><br>';
                 }
@@ -143,7 +135,6 @@ $revisores = $stmt_revisores->fetchAll();
     <?php endforeach; ?>
 </table>
 
-<!-- Tabla de revisores al final -->
 <h2 style="margin-top:40px;">Listado de Revisores</h2>
 <table border="1" cellpadding="6" style="border-collapse:collapse;width:100%">
     <tr style="background:#f2f2f2">

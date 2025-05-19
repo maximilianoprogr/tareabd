@@ -91,8 +91,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['message'] = "Artículo enviado exitosamente.";
             header("Location: dashboard.php");
             exit();
+        } catch (PDOException $e) {
+            if ($e->getCode() === '23000' && strpos($e->getMessage(), 'titulo') !== false) {
+                $message = "Ya existe un artículo con ese título. Por favor, elige otro.";
+            } else {
+                $message = "Error al enviar el artículo: " . $e->getMessage();
+            }
         } catch (Exception $e) {
-            $message = "Error al enviar el artículo: " . $e->getMessage();
+            $message = $e->getMessage(); // Solo muestra el mensaje amigable
         }
     }
 }

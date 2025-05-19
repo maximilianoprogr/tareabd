@@ -32,8 +32,8 @@ CREATE TABLE Topico (
 -- Tabla Artículo (referencia directa al rut del Autor)
 CREATE TABLE Articulo (
     id_articulo INT AUTO_INCREMENT PRIMARY KEY,
-    titulo VARCHAR(128) NOT NULL,
-    resumen VARCHAR(128) NOT NULL,
+    titulo VARCHAR(128) NOT NULL UNIQUE,
+    resumen VARCHAR(128),
     fecha_envio DATE NOT NULL,
     rut_autor VARCHAR(10) NOT NULL,
     estado ENUM(
@@ -291,7 +291,8 @@ INSERT INTO Usuario (rut, nombre, email, usuario, password, tipo) VALUES
 ('13250832-5', 'Michele Reynolds', 'michele.reynolds@kramer.com', 'michele89', 'O09!YNs3n#PI', 'Revisor'),
 ('22922502-6', 'Emily Wong', 'emily.wong@griffith-ward.com', 'emily13', 'n0VsbFug$scB', 'Autor'),
 ('17485946-1', 'Dennis Pope', 'dennis.pope@brown-cruz.net', 'dennis92', 'A4eDarL@*RUj', 'Autor'),
-('40890323-1', 'Teresa Jackson', 'teresa.jackson@pena.com', 'teresa30', '#1LXV9fi$d8g', 'Autor');
+('40890323-1', 'Teresa Jackson', 'teresa.jackson@pena.com', 'teresa30', '#1LXV9fi$d8g', 'Autor'),
+('1', '1', '1@gmail.com', '1', '1', 'Jefe Comite de Programa');
 
 -- Inserts para la tabla Autor
 INSERT INTO Autor (rut) VALUES

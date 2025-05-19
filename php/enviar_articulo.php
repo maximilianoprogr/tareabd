@@ -15,8 +15,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $topicos_seleccionados = $_POST['topicos'] ?? [];
 
     // Validaciones
-    if ($titulo === '' || $resumen === '') {
-        $message = "El título y el resumen son obligatorios.";
+    if ($titulo === '') {
+        $message = "El título es obligatorio.";
     } elseif (empty($ruts) || count(array_filter($ruts)) === 0) {
         $message = "Debe ingresar al menos un autor.";
     } elseif (empty($es_contacto) || count($es_contacto) === 0) {
@@ -91,8 +91,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['message'] = "Artículo enviado exitosamente.";
             header("Location: dashboard.php");
             exit();
+        } catch (PDOException $e) {
+            if ($e->getCode() === '23000' && strpos($e->getMessage(), 'titulo') !== false) {
+                $message = "Ya existe un artículo con ese título. Por favor, elige otro.";
+            } else {
+                $message = "Error al enviar el artículo: " . $e->getMessage();
+            }
         } catch (Exception $e) {
-            $message = "Error al enviar el artículo: " . $e->getMessage();
+            $message = $e->getMessage(); // Solo muestra el mensaje amigable
         }
     }
 }
@@ -116,7 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <input type="text" id="titulo" name="titulo" required>
 
         <label for="resumen">Resumen:</label>
-        <textarea id="resumen" name="resumen" required></textarea>
+        <textarea id="resumen" name="resumen"></textarea>
 
         <h2>Autores</h2>
         <div id="autores">

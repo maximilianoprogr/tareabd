@@ -7,22 +7,28 @@
 Intrucciones:
 1. Para correr el proyecto se necesita XAMPP instalado y configurado (con MYsql y Apache en admin).
 2. En XAMPP, darle a "start" a los modulos Apache y MySQL.
-3. En la direccion donde se instalo XAMPP (generalmente en 'C:\xampp') ir a la carpeta 'htdocs' ('C:\xampp\htdocs').
+3. En la direccion donde se instalo XAMPP (generalmente en 'C:\xampp') ir a la carpeta 'htdocs' ('C:\xampp\htdocs'). Si no tienes XAMPP
+en el disco 'C:' ahi te las arreglas tu solo.
 4. Dentro de la carpeta 'htdocs' extraer el archivo compimido. Deberia ahora haber una carpeta llamada 'tareabd'.
 5. Dirigirce a 'http://localhost/phpmyadmin/'. Ahi crearemos y poblaremos la Base de Datos.
-6. 
-y dentro de el buscar htdocs y guardar la carpeta `proyecto_php` dentro de el. Una vez terminado esto ir a xamps y darle a admin.
-Se abrira una pagina web, tendras que buscar donde dice phpmyadmin y darle a mysql. Luego tendras que poner los
-create table e insert y darle a ok. Con esto ya tienes la mitad. Para probar el proyecto luego tendras ir a google y 
-buscar http://localhost/proyecto_php/php/login.php, de ahi estás listo con el proyecto y solo hay que usarlo.
+6. Dentro de 'C:\xampp\htdocs\tareabd\bd' hay una query llamada 'CREATE_LATERO.sql', copiar y pegar su contenido en la seccion de 'SQL'
+de PhpMyAdmin, luego darle a continuar. Esto deberia haber creado todos los elementos de la Base de Datos.
+7. Finalmente podemos dirigirnos a la pagina. Ir a la url 'http://localhost/tareabd'. (Si no funciona recuerda tener encendido Apache y
+MySQL Server en XAMPP)
+8. Enjoy
  
- Lenguajes usados
+Lenguajes usados
 
 - Bootstrap: 
 - CSS y HTML: 
 - JavaScript: 
 - MySQL y SQL: 
 - PHP: 
+
+IMPORTANTE:
+Hay un usuario default que es 'Jefe de Comite' donde todas las credenciales son 1 (nombre 1, rut 1, contraseña 1, etc.) para un uso
+mas conveniente. Con ese usuario puede ver las funciones bloqueadas por accesos.
+Todos los view, funtions, etc. estan dentro de la carpeta 'bd', ya fueron invocados por el query para crear la base de datos.
 
 ## Funciones
 Se uso un procedimiento almacenado en "gestionar_asignaciones.php", la funcion AsignarArticuloRevisor.sql,

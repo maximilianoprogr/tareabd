@@ -29,7 +29,20 @@ $stmt_rol->execute([$_SESSION['usuario']]);
 $rol = $stmt_rol->fetchColumn();
 
 echo "<div class='welcome'>Bienvenido, " . $_SESSION['usuario'] . "</div>";
-echo "<div class='user-role'><strong></strong> " . htmlspecialchars($rol) . "</div>";
+echo "<div class='user-role'><strong>Rol:</strong> " . htmlspecialchars($rol) . "</div>";
+
+// Mostrar totales según el rol
+if (strcasecmp($rol, 'autor') === 0) {
+    $stmt_func = $pdo->prepare("SELECT contar_articulos_usuario(?) AS total_articulos");
+    $stmt_func->execute([$_SESSION['usuario']]);
+    $total_articulos = $stmt_func->fetchColumn();
+    echo "<div class='user-role'><strong>Total de artículos enviados:</strong> " . htmlspecialchars($total_articulos) . "</div>";
+} elseif (strcasecmp($rol, 'revisor') === 0) {
+    $stmt_func = $pdo->prepare("SELECT contar_articulos_a_revisar(?) AS total_a_revisar");
+    $stmt_func->execute([$_SESSION['usuario']]);
+    $total_a_revisar = $stmt_func->fetchColumn();
+    echo "<div class='user-role'><strong>Total de artículos a revisar:</strong> " . htmlspecialchars($total_a_revisar) . "</div>";
+}
 
 // Obtener los últimos 10 artículos
 $sql_ultimos = "SELECT id_articulo, titulo, fecha_envio FROM Articulo ORDER BY fecha_envio DESC LIMIT 10";

@@ -38,13 +38,11 @@ CREATE TABLE Articulo (
     titulo VARCHAR(128) NOT NULL UNIQUE,
     resumen VARCHAR(128),
     fecha_envio DATE NOT NULL,
-    rut_autor VARCHAR(10) NOT NULL,
     estado ENUM(
         'En revisión',
         'Aprobado',
         'Rechazado'
     ) NOT NULL,
-    FOREIGN KEY (rut_autor) REFERENCES Autor (rut) ON DELETE CASCADE
 );
 
 -- Tabla Articulo_Topico (relación muchos a muchos)

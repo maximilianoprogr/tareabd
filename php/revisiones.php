@@ -1,13 +1,11 @@
 <?php
 session_start();
 
-// Verificar si el usuario está autenticado
 if (!isset($_SESSION['usuario'])) {
     header("Location: login.php");
     exit();
 }
 
-// Validar que id_articulo esté definido
 if (!isset($_GET['id_articulo']) || empty($_GET['id_articulo'])) {
     echo "<p>Error: No se especificó un artículo válido.</p>";
     echo '<a href="acceso_articulo.php">Volver</a>';
@@ -16,7 +14,6 @@ if (!isset($_GET['id_articulo']) || empty($_GET['id_articulo'])) {
 
 $revision = isset($_GET['revision']) ? htmlspecialchars($_GET['revision']) : 'Desconocida';
 
-// Verificar si los resultados de la revisión están publicados
 include('conexion.php');
 $resultados_publicados = false;
 if (isset($_GET['revision'])) {
@@ -26,29 +23,23 @@ if (isset($_GET['revision'])) {
     $resultados_publicados = $stmt_resultados->fetchColumn() > 0;
 }
 
-// Verificar si se seleccionó una revisión, de lo contrario redirigir al usuario
 if (!isset($_GET['revision'])) {
     header("Location: acceso_articulo.php?error=seleccione_revision");
     exit();
 }
 
-// Depurar los valores de entrada y la consulta SQL
 echo "<p>Depuración: rut_revisor = " . htmlspecialchars($_GET['revision']) . ", id_articulo = " . htmlspecialchars($_GET['id_articulo']) . "</p>";
 
-// Obtener las respuestas de la base de datos
 $sql_respuestas = "SELECT calidad_tecnica, originalidad, valoracion_global, argumentos_valoracion, comentarios_autores FROM Evaluacion_Articulo WHERE rut_revisor = ? AND id_articulo = ?";
 $stmt_respuestas = $pdo->prepare($sql_respuestas);
 $stmt_respuestas->execute([$_GET['revision'], $_GET['id_articulo']]);
-// Verificar si hay resultados en la consulta
 $respuestas = $stmt_respuestas->fetch(PDO::FETCH_ASSOC);
 
-// Redirigir a una página que indique que el revisor aún no ha completado la evaluación
 if (!$respuestas) {
     header("Location: evaluacion_incompleta.php?revisor=" . urlencode($_GET['revision']) . "&id_articulo=" . urlencode($_GET['id_articulo']));
     exit();
 }
 
-// Depurar los resultados de la consulta
 if ($respuestas) {
     echo "<pre>Datos recuperados: ";
     print_r($respuestas);
@@ -68,20 +59,16 @@ if ($respuestas) {
 <body>
     <h1 style="font-family: Arial, sans-serif; color: #333;">Revisión <?php echo $revision; ?></h1>
 
-    <!-- Mostrar el formulario solo si se seleccionó una revisión -->
     <?php if (isset($_GET['revision'])): ?>
         <?php if ($resultados_publicados): ?>
-            <!-- Validar si $respuestas tiene datos antes de usarla -->
             <?php if (isset($respuestas) && $respuestas): ?>
                 <?php
-                // Manejar valores vacíos o nulos en los datos recuperados
                 $calidad_tecnica = $respuestas['calidad_tecnica'] ?? 'No especificado';
                 $originalidad = $respuestas['originalidad'] ?? 'No especificado';
                 $valoracion_global = $respuestas['valoracion_global'] ?? 'No especificado';
                 $argumentos_valoracion = $respuestas['argumentos_valoracion'] ?? 'No especificado';
                 $comentarios_autores = $respuestas['comentarios_autores'] ?? 'No especificado';
 
-                // Ajustar los checkboxes para que se marquen correctamente si el valor es '1'
                 echo "<h2 style=\"font-family: Arial, sans-serif; color: #555;\">Formulario de Evaluación (Modo Consulta)</h2>";
                 echo "<form style=\"border: 1px solid #ccc; padding: 15px;\">";
                 echo "<div style=\"margin-bottom: 15px;\">";
@@ -111,12 +98,10 @@ if ($respuestas) {
                 echo "</form>";
                 ?>
             <?php else: ?>
-                <!-- Mostrar un mensaje si no hay datos -->
                 <p>No se encontraron datos válidos para este artículo y revisor.</p>
             <?php endif; ?>
 
         <?php else: ?>
-            <!-- Formulario editable si los resultados no están publicados -->
             <h2 style="font-family: Arial, sans-serif; color: #555;">Formulario de Evaluación</h2>
             <form style="border: 1px solid #ccc; padding: 15px;">
                 <div style="margin-bottom: 15px;">

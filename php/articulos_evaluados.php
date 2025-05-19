@@ -1,7 +1,6 @@
 <?php
 include('../php/conexion.php');
 
-// Consultar los artículos evaluados
 $sql = "SELECT * FROM ArticulosEvaluados";
 $stmt = $pdo->prepare($sql);
 $stmt->execute();

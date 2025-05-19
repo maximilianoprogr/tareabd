@@ -35,7 +35,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = $_POST['email'] ?? null;
     $topicos = $_POST['topicos'] ?? [];
 
-    // Validaciones básicas
     if (in_array($action, ['create', 'update'])) {
         if (empty($nombre) || empty($email) || empty($rut)) {
             $mensaje = "<p style='color: red;'>Faltan campos obligatorios en el formulario.</p>";
@@ -76,7 +75,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
         } elseif ($action === 'create') {
-            // Validar duplicados
             $sql_duplicate = "SELECT COUNT(*) FROM Usuario WHERE nombre = ? OR email = ?";
             $stmt_duplicate = $pdo->prepare($sql_duplicate);
             $stmt_duplicate->execute([$nombre, $email]);
@@ -92,7 +90,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $pdo->prepare("INSERT INTO Usuario (rut, nombre, email, usuario, password, tipo) VALUES (?, ?, ?, ?, ?, 'Revisor')")
                             ->execute([$rut, $nombre, $email, $userid, $password]);
                         $pdo->prepare("INSERT INTO Revisor (rut) VALUES (?)")->execute([$rut]);
-                        // Tópicos
                         if (count($topicos) !== count(array_unique($topicos))) {
                             $mensaje = "<p style='color: red;'>No se permiten tópicos duplicados para un revisor.</p>";
                         } else {
@@ -110,7 +107,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 foreach ($topicos as $id_topico) {
                                     $stmt_topicos->execute([$rut, $id_topico]);
                                 }
-                                // mail($email, "Bienvenido como Revisor", "Hola $nombre, has sido registrado como revisor en el sistema.");
                                 $mensaje = "<p style='color: green;'>Revisor creado exitosamente.</p>";
                             }
                         }
@@ -138,7 +134,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Depuración: Verificar si los datos se insertan correctamente en la tabla Revisor_Topico
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'create') {
     $rut = $_POST['rut'] ?? null;
     $topicos = $_POST['topicos'] ?? [];
@@ -158,7 +153,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
-// Leer revisores
 try {
     $sql = "SELECT Usuario.rut, Usuario.nombre, Usuario.email, 
                GROUP_CONCAT(Topico.nombre SEPARATOR ', ') AS topicos
@@ -192,7 +186,6 @@ $topicos_disponibles = $stmt_topicos->fetchAll();
     <?php if ($mensaje) echo $mensaje; ?>
 
     <?php
-    // Mostrar revisores en una tabla con opciones para eliminar
     echo '<table style="width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 20px;">';
     echo '<thead>';
     echo '<tr style="background-color: #f2f2f2;">';
@@ -214,7 +207,6 @@ $topicos_disponibles = $stmt_topicos->fetchAll();
         echo '<td style="border: 1px solid #ccc; padding: 8px;">' . htmlspecialchars($email) . '</td>';
         echo '<td style="border: 1px solid #ccc; padding: 8px;">';
 
-        // Mostrar casillas de verificación para los tópicos
         foreach ($topicos_disponibles as $topico) {
             $checked = strpos($topicos, $topico['nombre']) !== false ? 'checked' : '';
             echo '<label style="display: block;">';
@@ -268,7 +260,6 @@ $topicos_disponibles = $stmt_topicos->fetchAll();
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Mensaje al guardar (crear revisor)
         const form = document.getElementById('nuevoRevisorForm');
         if (form) {
             form.addEventListener('submit', function(event) {
@@ -286,14 +277,12 @@ $topicos_disponibles = $stmt_topicos->fetchAll();
                     alert('Debe seleccionar al menos un tópico.');
                     return;
                 }
-                // Mostrar mensaje de correo enviado (solo mensaje, no envía nada)
                 setTimeout(function() {
                     alert('Correo enviado.');
-                }, 100); // pequeño retraso para que el submit funcione normalmente
+                }, 100); 
             });
         }
 
-        // AJAX para eliminar revisor sin recargar la página
         document.querySelectorAll('form[action="gestionar_revisores.php"]').forEach(form => {
             form.addEventListener('submit', function(event) {
                 event.preventDefault();
@@ -311,7 +300,6 @@ $topicos_disponibles = $stmt_topicos->fetchAll();
             });
         });
 
-        // AJAX para actualizar tópicos de revisor (sin cambios)
         document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
             checkbox.addEventListener('change', function() {
                 const rutRevisor = this.dataset.rutRevisor;
@@ -330,7 +318,6 @@ $topicos_disponibles = $stmt_topicos->fetchAll();
                 })
                 .then(response => response.json())
                 .then(data => {
-                    // Opcional: mostrar mensaje de éxito o error
                 })
                 .catch(error => console.error('Error en la solicitud:', error));
             });

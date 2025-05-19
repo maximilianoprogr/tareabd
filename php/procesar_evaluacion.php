@@ -1,20 +1,16 @@
 <?php
 session_start();
 
-// Verificar si el usuario está autenticado
 if (!isset($_SESSION['usuario']) || empty($_SESSION['usuario'])) {
     echo "<p style='font-family: Arial, sans-serif; color: red;'>Error: Usuario no autenticado.</p>";
     exit();
 }
 
-// Verificar si se recibieron los datos del formulario
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     include('conexion.php');
 
-    // Depuración temporal para verificar el valor de 'revision'
     var_dump($_GET['revision']); 
 
-    // Obtener los datos del formulario
     $calidad_tecnica = isset($_POST['calidad_tecnica']) ? 1 : 0;
     $originalidad = isset($_POST['originalidad']) ? 1 : 0;
     $valoracion_global = isset($_POST['valoracion_global']) ? 1 : 0;
@@ -22,7 +18,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $comentarios_autores = htmlspecialchars($_POST['comentarios_autores']);
     $revision = isset($_GET['revision']) ? htmlspecialchars($_GET['revision']) : null;
 
-    // Validar datos en el servidor
     if (empty($argumentos_valoracion)) {
         echo json_encode(["success" => false, "message" => "Los argumentos de valoración global son obligatorios."]);
         exit();
@@ -38,12 +33,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
-    // Cambiar la salida a JSON para manejar con AJAX
     header('Content-Type: application/json');
 
     if ($revision) {
         try {
-            // Insertar los datos en la base de datos
             $sql = "INSERT INTO Evaluacion_Articulo (id_articulo, rut_revisor, resena, calificacion) VALUES (?, ?, ?, ?)";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$revision, $_SESSION['usuario'], $argumentos_valoracion, $valoracion_global]);

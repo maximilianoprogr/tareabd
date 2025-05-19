@@ -2,14 +2,14 @@
 session_start();
 include('../conexion.php');
 
-// Obtener el id del artículo
+
 $id_articulo = $_GET['id_articulo'] ?? null;
 if (!$id_articulo) {
     echo "Falta el ID del artículo.";
     exit;
 }
 
-// Obtener información del artículo y sus tópicos
+
 $stmt = $pdo->prepare("SELECT a.titulo, GROUP_CONCAT(DISTINCT t.nombre SEPARATOR ', ') AS topicos
                       FROM Articulo a
                       LEFT JOIN Articulo_Topico at ON a.id_articulo = at.id_articulo
@@ -23,7 +23,7 @@ if (!$articulo) {
     exit;
 }
 
-// Procesar quitar revisor si se envió el formulario
+
 $msg = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rut_revisor']) && isset($_POST['quitar'])) {
     $rut_revisor = $_POST['rut_revisor'];
@@ -32,16 +32,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rut_revisor']) && iss
     $msg = "Revisor quitado correctamente.";
 }
 
-// Procesar asignación si se envió el formulario (y no es quitar)
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rut_revisor']) && !isset($_POST['quitar'])) {
     $rut_revisor = $_POST['rut_revisor'];
-    // Verificar si ya está asignado
+    
     $stmt = $pdo->prepare("SELECT 1 FROM Articulo_Revisor WHERE id_articulo = ? AND rut_revisor = ?");
     $stmt->execute([$id_articulo, $rut_revisor]);
     if ($stmt->fetch()) {
         $msg = "El revisor ya está asignado a este artículo.";
     } else {
-        // Obtener tópicos del artículo y del revisor
+        
         $topicos_articulo = array_filter(array_map('trim', preg_split('/,\s*/', $articulo['topicos'] ?? '')));
         $stmt = $pdo->prepare("SELECT GROUP_CONCAT(DISTINCT t.nombre SEPARATOR ', ') AS topicos
                                FROM Revisor_Topico rt
@@ -68,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rut_revisor']) && !is
     }
 }
 
-// Obtener todos los revisores con sus tópicos y artículos asignados
+
 $sql = "
 SELECT 
     u.rut,
@@ -88,7 +88,6 @@ ORDER BY u.nombre
 $stmt = $pdo->query($sql);
 $revisores = $stmt->fetchAll();
 
-// Obtener los revisores ya asignados a este artículo
 $stmt_asignados = $pdo->prepare("SELECT rut_revisor FROM Articulo_Revisor WHERE id_articulo = ?");
 $stmt_asignados->execute([$id_articulo]);
 $revisores_asignados = $stmt_asignados->fetchAll(PDO::FETCH_COLUMN);
@@ -142,7 +141,6 @@ $revisores_asignados = $stmt_asignados->fetchAll(PDO::FETCH_COLUMN);
         $clase_td = $hay_coincidencia ? 'coincide-topico-celda' : '';
         $ya_asignado = in_array($revisor['rut'], $revisores_asignados);
 
-        // Resalta en verde si está asignado y hay coincidencia, en amarillo si está asignado y NO hay coincidencia
         if ($ya_asignado && $hay_coincidencia) {
             $clase_tr = 'revisor-ya-asignado';
         } elseif ($ya_asignado && !$hay_coincidencia) {

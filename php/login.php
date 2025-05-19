@@ -1,20 +1,19 @@
 <?php
 session_start();
 if (isset($_SESSION['user_id'])) {
-    header('Location: ../php/index.php'); // Redirigir al index si ya está autenticado
+    header('Location: ../php/index.php');
     exit();
 }
 
-include('../php/conexion.php'); // Asegúrate de que este archivo define correctamente la conexión PDO
+include('../php/conexion.php');
 
-$message = ""; // Variable para almacenar mensajes
+$message = ""; 
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $rut = $_POST['rut'] ?? null;
     $password = $_POST['password'] ?? null;
 
     if ($rut && $password) {
-        // Usar la vista en vez de la consulta con CASE
         $sql = "SELECT * FROM vista_usuarios_login WHERE rut = ?";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$rut]);

@@ -7,7 +7,6 @@ $fecha_envio = $_GET['fecha_envio'] ?? '';
 $topico = $_GET['topico'] ?? '';
 $revisor = $_GET['revisor'] ?? '';
 
-// Validar los filtros de búsqueda
 if (!empty($fecha_envio) && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha_envio)) {
     echo "<p style='color: red;'>La fecha de envío debe tener el formato AAAA-MM-DD.</p>";
     exit();
@@ -28,13 +27,11 @@ if (!empty($revisor) && strlen($revisor) > 255) {
     exit();
 }
 
-// Validar que los filtros no excedan los límites permitidos
 if (strlen($query) > 255 || strlen($autor) > 255 || strlen($topico) > 255 || strlen($revisor) > 255) {
     echo "<p style='color: red;'>Los campos de búsqueda no pueden exceder los 255 caracteres.</p>";
     exit();
 }
 
-// Usar sentencias preparadas para la consulta
 $sql = "SELECT a.titulo, a.resumen, GROUP_CONCAT(DISTINCT t.nombre) AS topicos
         FROM Articulo a
         LEFT JOIN Articulo_Topico at ON a.id_articulo = at.id_articulo

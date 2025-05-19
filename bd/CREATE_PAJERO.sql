@@ -97,7 +97,6 @@ CREATE TABLE Articulo_Revisor (
     FOREIGN KEY (rut_revisor) REFERENCES Revisor (rut) ON DELETE CASCADE
 );
 
-
 DELIMITER $$
 CREATE FUNCTION contar_articulos_a_revisar(rut VARCHAR(20))
 RETURNS INT
@@ -723,4 +722,3 @@ INSERT INTO Articulo_Revisor (id_articulo, rut_revisor) VALUES
 (49, '40175100-9'),
 (49, '06963999-0'),
 (50, '67622506-1');
-

@@ -667,8 +667,9 @@ $topicos_disponibles = $stmt_topicos->fetchAll();
                 alert('Por favor, complete todos los campos obligatorios.');
                 console.log('Formulario no enviado. Campos faltantes:', { nombre, email, rut });
             } else {
-                alert('Formulario enviado correctamente. Redirigiendo...');
+                alert('Formulario enviado correctamente. Redirigiendo a la parte superior de la página...');
                 console.log('Formulario enviado con los siguientes datos:', { nombre, email, rut });
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         });
     }

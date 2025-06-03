@@ -47,6 +47,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt->bind_param("ssssss", $rut, $nombre, $email, $usuario, $hashed_password, $tipo);
 
             if ($stmt->execute()) {
+                // Si el usuario es Revisor, agregarlo también a la tabla Revisor
+                if ($tipo === 'Revisor') {
+                    $sql_revisor = "INSERT INTO Revisor (rut) VALUES (?)";
+                    $stmt_revisor = $conn->prepare($sql_revisor);
+                    $stmt_revisor->bind_param("s", $rut);
+                    $stmt_revisor->execute();
+                    $stmt_revisor->close();
+                }
                 $message = "Usuario registrado exitosamente.";
                 $showLoginButton = true;
             } else {

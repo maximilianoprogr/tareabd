@@ -1,96 +1,99 @@
+-- Este script crea las tablas necesarias para el sistema.
+
+-- Tabla Usuario: almacena información básica de los usuarios.
 CREATE TABLE Usuario (
-    rut VARCHAR(10) PRIMARY KEY,
-    nombre VARCHAR(64) NOT NULL,
-    email VARCHAR(64) NOT NULL UNIQUE,
-    usuario VARCHAR(24) NOT NULL,
-    password VARCHAR(12) NOT NULL,
+    rut VARCHAR(10) PRIMARY KEY, -- Identificador único del usuario.
+    nombre VARCHAR(64) NOT NULL, -- Nombre del usuario.
+    email VARCHAR(64) NOT NULL UNIQUE, -- Correo electrónico único.
+    usuario VARCHAR(24) NOT NULL, -- Nombre de usuario.
+    password VARCHAR(12) NOT NULL, -- Contraseña del usuario.
     tipo ENUM(
         'Autor',
         'Revisor',
         'Jefe Comite de Programa'
-    ) NOT NULL
+    ) NOT NULL -- Tipo de usuario.
 );
 
--- Tabla Autor (relacionada directamente por rut)
+-- Tabla Autor: almacena información de los autores.
 CREATE TABLE Autor (
-    rut VARCHAR(10) PRIMARY KEY,
-    FOREIGN KEY (rut) REFERENCES Usuario (rut) ON DELETE CASCADE
+    rut VARCHAR(10) PRIMARY KEY, -- Identificador único del autor.
+    FOREIGN KEY (rut) REFERENCES Usuario (rut) ON DELETE CASCADE -- Relación con la tabla Usuario.
 );
 
--- Tabla Revisor (relacionada directamente por rut)
+-- Tabla Revisor: almacena información de los revisores.
 CREATE TABLE Revisor (
-    rut VARCHAR(10) PRIMARY KEY,
-    FOREIGN KEY (rut) REFERENCES Usuario (rut) ON DELETE CASCADE
+    rut VARCHAR(10) PRIMARY KEY, -- Identificador único del revisor.
+    FOREIGN KEY (rut) REFERENCES Usuario (rut) ON DELETE CASCADE -- Relación con la tabla Usuario.
 );
 
--- Tabla Tópico
+-- Tabla Tópico: almacena los diferentes tópicos disponibles.
 CREATE TABLE Topico (
-    id_topico INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(64) NOT NULL
+    id_topico INT AUTO_INCREMENT PRIMARY KEY, -- Identificador único del tópico.
+    nombre VARCHAR(64) NOT NULL -- Nombre del tópico.
 );
 
--- Tabla Artículo (referencia directa al rut del Autor)
+-- Tabla Artículo: almacena información básica de los artículos.
 CREATE TABLE Articulo (
-    id_articulo INT AUTO_INCREMENT PRIMARY KEY,
-    titulo VARCHAR(128) NOT NULL UNIQUE,
-    resumen VARCHAR(128),
-    fecha_envio DATE NOT NULL,
+    id_articulo INT AUTO_INCREMENT PRIMARY KEY, -- Identificador único del artículo.
+    titulo VARCHAR(128) NOT NULL UNIQUE, -- Título del artículo.
+    resumen VARCHAR(128), -- Resumen del artículo.
+    fecha_envio DATE NOT NULL, -- Fecha de envío del artículo.
     estado ENUM(
         'En revisión',
         'Aprobado',
         'Rechazado'
-    ) NOT NULL
+    ) NOT NULL -- Estado del artículo.
 );
 
--- Tabla Articulo_Topico (relación muchos a muchos)
+-- Tabla Articulo_Topico: relaciona artículos con tópicos.
 CREATE TABLE Articulo_Topico (
-    id_articulo INT,
-    id_topico INT,
-    PRIMARY KEY (id_articulo, id_topico),
-    FOREIGN KEY (id_articulo) REFERENCES Articulo (id_articulo) ON DELETE CASCADE,
-    FOREIGN KEY (id_topico) REFERENCES Topico (id_topico) ON DELETE CASCADE
+    id_articulo INT, -- Identificador del artículo.
+    id_topico INT, -- Identificador del tópico.
+    PRIMARY KEY (id_articulo, id_topico), -- Clave primaria compuesta.
+    FOREIGN KEY (id_articulo) REFERENCES Articulo (id_articulo) ON DELETE CASCADE, -- Relación con la tabla Articulo.
+    FOREIGN KEY (id_topico) REFERENCES Topico (id_topico) ON DELETE CASCADE -- Relación con la tabla Topico.
 );
 
--- Tabla Evaluacion_Articulo (revisión por revisor con reseña y calificación)
+-- Tabla Evaluacion_Articulo: almacena las evaluaciones de los artículos.
 CREATE TABLE Evaluacion_Articulo (
-    id_articulo INT,
-    rut_revisor VARCHAR(10),
-    resena VARCHAR(128),
-    calificacion INT,
-    calidad_tecnica BOOLEAN,
-    originalidad BOOLEAN,
-    valoracion_global BOOLEAN,
-    argumentos_valoracion VARCHAR(128),
-    comentarios_autores VARCHAR(128),
-    PRIMARY KEY (id_articulo, rut_revisor),
-    FOREIGN KEY (id_articulo) REFERENCES Articulo (id_articulo) ON DELETE CASCADE,
-    FOREIGN KEY (rut_revisor) REFERENCES Revisor (rut) ON DELETE CASCADE
+    id_articulo INT, -- Identificador del artículo evaluado.
+    rut_revisor VARCHAR(10), -- Identificador del revisor que evalúa.
+    resena VARCHAR(128), -- Reseña del artículo.
+    calificacion INT, -- Calificación otorgada.
+    calidad_tecnica BOOLEAN, -- Evaluación de la calidad técnica.
+    originalidad BOOLEAN, -- Evaluación de la originalidad.
+    valoracion_global BOOLEAN, -- Valoración global de la evaluación.
+    argumentos_valoracion VARCHAR(128), -- Argumentos de la valoración.
+    comentarios_autores VARCHAR(128), -- Comentarios para los autores.
+    PRIMARY KEY (id_articulo, rut_revisor), -- Clave primaria compuesta.
+    FOREIGN KEY (id_articulo) REFERENCES Articulo (id_articulo) ON DELETE CASCADE, -- Relación con la tabla Articulo.
+    FOREIGN KEY (rut_revisor) REFERENCES Revisor (rut) ON DELETE CASCADE -- Relación con la tabla Revisor.
 );
 
--- Tabla Autor_Articulo (relación entre autores y artículos con contacto principal)
+-- Tabla Autor_Articulo: relaciona autores con artículos.
 CREATE TABLE Autor_Articulo (
-    id_articulo INT NOT NULL,
-    rut_autor VARCHAR(10) NOT NULL,
-    es_contacto BOOLEAN NOT NULL DEFAULT FALSE,
-    PRIMARY KEY (id_articulo, rut_autor),
-    FOREIGN KEY (id_articulo) REFERENCES Articulo (id_articulo) ON DELETE CASCADE,
-    FOREIGN KEY (rut_autor) REFERENCES Autor (rut) ON DELETE CASCADE
+    id_articulo INT NOT NULL, -- Identificador del artículo.
+    rut_autor VARCHAR(10) NOT NULL, -- Identificador del autor.
+    es_contacto BOOLEAN NOT NULL DEFAULT FALSE, -- Indica si es el contacto principal.
+    PRIMARY KEY (id_articulo, rut_autor), -- Clave primaria compuesta.
+    FOREIGN KEY (id_articulo) REFERENCES Articulo (id_articulo) ON DELETE CASCADE, -- Relación con la tabla Articulo.
+    FOREIGN KEY (rut_autor) REFERENCES Autor (rut) ON DELETE CASCADE -- Relación con la tabla Autor.
 );
 
--- Tabla Revisor_Topico (relación muchos a muchos)
+-- Tabla Revisor_Topico: relaciona revisores con tópicos.
 CREATE TABLE Revisor_Topico (
-    rut_revisor VARCHAR(10) NOT NULL,
-    id_topico INT NOT NULL,
-    PRIMARY KEY (rut_revisor, id_topico),
-    FOREIGN KEY (rut_revisor) REFERENCES Revisor (rut) ON DELETE CASCADE,
-    FOREIGN KEY (id_topico) REFERENCES Topico (id_topico) ON DELETE CASCADE
+    rut_revisor VARCHAR(10) NOT NULL, -- Identificador del revisor.
+    id_topico INT NOT NULL, -- Identificador del tópico.
+    PRIMARY KEY (rut_revisor, id_topico), -- Clave primaria compuesta.
+    FOREIGN KEY (rut_revisor) REFERENCES Revisor (rut) ON DELETE CASCADE, -- Relación con la tabla Revisor.
+    FOREIGN KEY (id_topico) REFERENCES Topico (id_topico) ON DELETE CASCADE -- Relación con la tabla Topico.
 );
 
--- Tabla Articulo_Revisor (relación muchos a muchos)
+-- Tabla Articulo_Revisor: relaciona artículos con revisores.
 CREATE TABLE Articulo_Revisor (
-    id_articulo INT NOT NULL,
-    rut_revisor VARCHAR(10) NOT NULL,
-    PRIMARY KEY (id_articulo, rut_revisor),
-    FOREIGN KEY (id_articulo) REFERENCES Articulo (id_articulo) ON DELETE CASCADE,
-    FOREIGN KEY (rut_revisor) REFERENCES Revisor (rut) ON DELETE CASCADE
+    id_articulo INT NOT NULL, -- Identificador del artículo.
+    rut_revisor VARCHAR(10) NOT NULL, -- Identificador del revisor.
+    PRIMARY KEY (id_articulo, rut_revisor), -- Clave primaria compuesta.
+    FOREIGN KEY (id_articulo) REFERENCES Articulo (id_articulo) ON DELETE CASCADE, -- Relación con la tabla Articulo.
+    FOREIGN KEY (rut_revisor) REFERENCES Revisor (rut) ON DELETE CASCADE -- Relación con la tabla Revisor.
 );

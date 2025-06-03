@@ -1,33 +1,43 @@
 <?php
+// Habilitar la visualización de errores para depuración
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+// Iniciar sesión para manejar autenticación de usuarios
 session_start();
 
+// Verificar si el usuario ha iniciado sesión, de lo contrario redirigir a la página de login
 if (!isset($_SESSION['usuario'])) {
     header("Location: login.php");
     exit();
 }
 
+// Incluir archivo de conexión a la base de datos
 include('../php/conexion.php');
+
+// Obtener el rol del usuario actual desde la base de datos
 $stmt_rol = $pdo->prepare("SELECT tipo FROM Usuario WHERE rut = ?");
 $stmt_rol->execute([$_SESSION['usuario']]);
 $rol = $stmt_rol->fetchColumn();
 $_SESSION['rol'] = $rol;
 
+// Verificar si el usuario tiene el rol adecuado para acceder a esta página
 if (strcasecmp($rol, 'Jefe Comite de Programa') !== 0) {
     header("Location: inicio.php");
     exit();
 }
 
+// Redirigir si el rol no está configurado correctamente
 if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'Jefe Comite de Programa') {
     header("Location: ../php/inicio.php");
     exit();
 }
 
+// Variable para almacenar mensajes de error o éxito
 $mensaje = "";
 
+// Manejar solicitudes POST para crear, actualizar o eliminar revisores
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     $rut = $_POST['rut'] ?? null;
@@ -35,6 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = $_POST['email'] ?? null;
     $topicos = $_POST['topicos'] ?? [];
 
+    // Validaciones comunes para las acciones de creación y actualización
     if (in_array($action, ['create', 'update'])) {
         if (empty($nombre) || empty($email) || empty($rut)) {
             $mensaje = "<p style='color: red;'>Faltan campos obligatorios en el formulario.</p>";
@@ -51,8 +62,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    // Procesar acciones específicas si no hay errores
     if ($mensaje === "") {
         if ($action === 'delete') {
+            // Eliminar un revisor si no tiene artículos asignados
             if (!$rut) {
                 $mensaje = "<p style='color: red;'>No se recibió un RUT válido para eliminar.</p>";
             } else {
@@ -65,6 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if ($tiene_articulos) {
                         $mensaje = "<p style='color: red;'>No se puede eliminar el revisor porque tiene artículos asignados.</p>";
                     } else {
+                        // Eliminar registros relacionados en varias tablas
                         $pdo->prepare("DELETE FROM Revisor_Topico WHERE rut_revisor = ?")->execute([$rut]);
                         $pdo->prepare("DELETE FROM Revisor WHERE rut = ?")->execute([$rut]);
                         $pdo->prepare("DELETE FROM Usuario WHERE rut = ?")->execute([$rut]);
@@ -75,6 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
         } elseif ($action === 'create') {
+            // Crear un nuevo revisor
             $sql_duplicate = "SELECT COUNT(*) FROM Usuario WHERE nombre = ? OR email = ?";
             $stmt_duplicate = $pdo->prepare($sql_duplicate);
             $stmt_duplicate->execute([$nombre, $email]);
@@ -87,6 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if (!$userid || !$password) {
                         $mensaje = "<p style='color: red;'>Usuario ID y contraseña son obligatorios.</p>";
                     } else {
+                        // Insertar datos del nuevo usuario y revisor
                         $pdo->prepare("INSERT INTO Usuario (rut, nombre, email, usuario, password, tipo) VALUES (?, ?, ?, ?, ?, 'Revisor')")
                             ->execute([$rut, $nombre, $email, $userid, $password]);
                         $pdo->prepare("INSERT INTO Revisor (rut) VALUES (?)")->execute([$rut]);
@@ -116,6 +132,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
         } elseif ($action === 'update') {
+            // Actualizar datos de un revisor existente
             $sql_duplicate = "SELECT COUNT(*) FROM Usuario WHERE (nombre = ? OR email = ?) AND rut != ?";
             $stmt_duplicate = $pdo->prepare($sql_duplicate);
             $stmt_duplicate->execute([$nombre, $email, $rut]);
@@ -134,25 +151,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'create') {
-    $rut = $_POST['rut'] ?? null;
-    $topicos = $_POST['topicos'] ?? [];
-
-    if ($rut && !empty($topicos)) {
-        try {
-            $sql_check = "SELECT * FROM Revisor_Topico WHERE rut_revisor = ?";
-            $stmt_check = $pdo->prepare($sql_check);
-            $stmt_check->execute([$rut]);
-            $result = $stmt_check->fetchAll();
-
-            error_log("[Depuración] Datos actuales en Revisor_Topico para el RUT $rut:");
-            error_log(print_r($result, true));
-        } catch (Exception $e) {
-            error_log("[Error] No se pudo verificar los datos en Revisor_Topico: " . $e->getMessage());
-        }
-    }
-}
-
+// Consultar revisores y sus tópicos asociados para mostrarlos en la tabla
 try {
     $sql = "SELECT Usuario.rut, Usuario.nombre, Usuario.email, 
                GROUP_CONCAT(Topico.nombre SEPARATOR ', ') AS topicos
@@ -167,6 +166,7 @@ try {
     $revisores = [];
 }
 
+// Consultar tópicos disponibles para asignar a revisores
 $sql_topicos = "SELECT id_topico, nombre FROM Topico";
 $stmt_topicos = $pdo->query($sql_topicos);
 $topicos_disponibles = $stmt_topicos->fetchAll();

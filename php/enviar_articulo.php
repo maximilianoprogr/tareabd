@@ -53,15 +53,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new Exception($message);
             }
 
-            $stmt = $pdo->prepare("SELECT COUNT(*) FROM Autor WHERE rut = ?");
-            $stmt->execute([$ruts[0]]);
-            if ($stmt->fetchColumn() == 0) {
-                $message = "El RUT del autor principal ($ruts[0]) no está registrado como Autor. Por favor, regístrelo primero.";
-                throw new Exception($message);
-            }
+            // Elimina la verificación de autor principal en Articulo, ya no es necesario
 
-            $stmt = $pdo->prepare("INSERT INTO Articulo (titulo, resumen, fecha_envio, rut_autor, estado) VALUES (?, ?, NOW(), ?, 'En revisión')");
-            $stmt->execute([$titulo, $resumen, $ruts[0]]);
+            // Insertar el artículo SIN rut_autor
+            $stmt = $pdo->prepare("INSERT INTO Articulo (titulo, resumen, fecha_envio, estado) VALUES (?, ?, NOW(), 'En revisión')");
+            $stmt->execute([$titulo, $resumen]);
             $id_articulo = $pdo->lastInsertId();
 
             foreach ($ruts as $i => $rut) {

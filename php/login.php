@@ -14,7 +14,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = $_POST['password'] ?? null;
 
     if ($rut && $password) {
-        $sql = "SELECT * FROM vista_usuarios_login WHERE rut = ?";
+        $sql = "SELECT * FROM vista_usuarios_login WHERE rut = ?";  ## <------ Vista de usuarios para login
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$rut]);
         $user = $stmt->fetch();

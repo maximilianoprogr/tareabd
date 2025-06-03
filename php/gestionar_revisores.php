@@ -155,7 +155,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 try {
     $sql = "SELECT Usuario.rut, Usuario.nombre, Usuario.email, 
-               GROUP_CONCAT(Topico.nombre SEPARATOR ', ') AS topicos
+               COALESCE(GROUP_CONCAT(Topico.nombre SEPARATOR ', '), 'Sin tópicos') AS topicos
         FROM Revisor
         INNER JOIN Usuario ON Revisor.rut = Usuario.rut
         LEFT JOIN Revisor_Topico ON Revisor.rut = Revisor_Topico.rut_revisor

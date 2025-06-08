@@ -1,14 +1,20 @@
 <?php
+// Iniciar sesión para manejar autenticación de usuarios
 session_start();
+
+// Incluir archivo de conexión a la base de datos
 include('php/conexion.php');
 
+// Verificar si el usuario ha iniciado sesión, de lo contrario redirigir a la página de login
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
 
+// Obtener el ID del usuario desde la sesión
 $user_id = $_SESSION['user_id'];
 
+// Consulta SQL para obtener los artículos relacionados con el usuario
 $sql = "SELECT a.titulo, a.resumen, GROUP_CONCAT(t.nombre) AS topicos, GROUP_CONCAT(ar.rut_revisor) AS revisores
         FROM Articulo a
         LEFT JOIN Articulo_Topico at ON a.id_articulo = at.id_articulo

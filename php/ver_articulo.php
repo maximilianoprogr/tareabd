@@ -1,31 +1,36 @@
 <?php
+// Iniciar sesión para manejar autenticación de usuarios
 session_start();
 
+// Verificar si el usuario está autenticado
 if (!isset($_SESSION['usuario'])) {
-    header("Location: login.php");
+    header("Location: login.php"); // Redirigir al login si no está autenticado
     exit();
 }
 
+// Validar que se haya proporcionado un ID de artículo
 if (!isset($_GET['id_articulo'])) {
-    echo "<p style='color: red;'>No se proporcionó un ID de artículo.</p>";
+    echo "<p style='color: red;'>No se proporcionó un ID de artículo.</p>"; // Mostrar mensaje de error si no se especifica un ID
     exit();
 }
 
+// Obtener el ID del artículo desde los parámetros GET
 $id_articulo = $_GET['id_articulo'];
 
-$articulo_listo = false; 
+// Inicializar variable para verificar si el artículo está listo
+$articulo_listo = false; // Variable para verificar si el artículo está listo
 
 if (!$articulo_listo) {
-    echo "<p style='font-size: 18px; color: #555;'>Estamos trabajando para usted. El artículo no está listo.</p>";
+    echo "<p style='font-size: 18px; color: #555;'>Estamos trabajando para usted. El artículo no está listo.</p>"; // Mensaje si el artículo no está listo
 }
 
-
-$revisado = false;
+$revisado = false; // Variable para verificar si el artículo ha sido revisado
 
 if (!$revisado) {
-    echo "<p style='font-size: 18px; color: #555;'>El artículo no ha sido revisado aún.</p>";
+    echo "<p style='font-size: 18px; color: #555;'>El artículo no ha sido revisado aún.</p>"; // Mensaje si el artículo no ha sido revisado
 }
 
+// Mostrar formulario de evaluación si el artículo no está listo o no ha sido revisado
 if (!$articulo_listo || !$revisado) {
     echo '<h2 style="font-size: 16px; color: #555;">Formulario de Evaluación</h2>';
     echo '<form id="form-evaluacion" action="" method="post" style="border: 1px solid #ccc; padding: 15px;">';
@@ -58,12 +63,16 @@ if (!$articulo_listo || !$revisado) {
     echo '</form>';
 }
 
+// Incluir archivo de conexión a la base de datos
 include('conexion.php');
+
+// Consultar la evaluación del artículo
 $sql = "SELECT * FROM Evaluacion_Articulo WHERE id_articulo = ?";
 $stmt = $pdo->prepare($sql);
 $stmt->execute([$id_articulo]);
 $evaluacion = $stmt->fetch(PDO::FETCH_ASSOC);
 
+// Mostrar la evaluación si existe
 if ($evaluacion) {
     echo '<h2>Formulario de Evaluación (Modo Consulta)</h2>';
     echo '<form>';
@@ -74,9 +83,10 @@ if ($evaluacion) {
     echo '<div>Comentarios a Autores: ' . htmlspecialchars($evaluacion['comentarios_autores']) . '</div>';
     echo '</form>';
 } else {
-    echo '<p>No se encontró evaluación para este artículo.</p>';
+    echo '<p>No se encontró evaluación para este artículo.</p>'; // Mensaje si no se encuentra evaluación
 }
 
+// Botón para volver al inicio
 echo '<button onclick="window.location.href=\'inicio.php\'">Volver al inicio</button>';
 
 

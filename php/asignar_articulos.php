@@ -1,18 +1,25 @@
 <?php
+// Iniciar sesión para manejar autenticación de usuarios
 session_start();
+
+// Incluir archivo de conexión a la base de datos
 include('../php/conexion.php');
 
+// Verificar si el usuario ha iniciado sesión, de lo contrario redirigir a la página de login
 if (!isset($_SESSION['usuario'])) {
     header("Location: login.php");
     exit();
 }
 
+// Obtener el rol del usuario actual desde la base de datos
 $stmt_rol = $pdo->prepare("SELECT tipo FROM Usuario WHERE rut = ?");
 $stmt_rol->execute([$_SESSION['usuario']]);
 $rol = $stmt_rol->fetchColumn();
 
+// Guardar el rol en la sesión
 $_SESSION['rol'] = $rol;
 
+// Verificar si el usuario tiene el rol adecuado para acceder a esta página
 if (strcasecmp($rol, 'Jefe Comite de Programa') !== 0) {
     echo "<p style='color: red; font-weight: bold;'>Acceso denegado: Solo el Jefe del Comité de Programa puede acceder a esta página.</p>";
     header("Refresh: 3; url=inicio.php"); 

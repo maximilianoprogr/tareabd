@@ -1,6 +1,8 @@
 <?php
+// Incluir archivo de conexión a la base de datos
 require_once 'conexion.php';
 
+// Consultar las asignaciones de artículos, autores, tópicos y revisores
 $sql_asignaciones = "SELECT a.id_articulo, a.titulo, 
                       GROUP_CONCAT(DISTINCT CONCAT(u.nombre, ' (', u.rut, ')') SEPARATOR ', ') AS autores,
                       GROUP_CONCAT(DISTINCT t.nombre SEPARATOR ', ') AS topicos,
@@ -14,7 +16,9 @@ $sql_asignaciones = "SELECT a.id_articulo, a.titulo,
                       LEFT JOIN Usuario r ON ar.rut_revisor = r.rut
                       GROUP BY a.id_articulo";
 $stmt_asignaciones = $pdo->query($sql_asignaciones);
-$asignaciones = $stmt_asignaciones->fetchAll();
+$asignaciones = $stmt_asignaciones->fetchAll(); // Obtener todas las asignaciones
+
+// Consultar artículos con menos de 2 revisores asignados
 $query_articulos = "SELECT a.id, a.titulo, COUNT(asg.revisor_id) AS num_revisores
                     FROM articulos a
                     LEFT JOIN asignaciones asg ON a.id = asg.articulo_id
@@ -22,18 +26,19 @@ $query_articulos = "SELECT a.id, a.titulo, COUNT(asg.revisor_id) AS num_revisore
                     HAVING num_revisores < 2";
 $result_articulos = $conn->query($query_articulos);
 
-$articulos_menos_revisores = [];
+$articulos_menos_revisores = []; // Lista de artículos con menos de 2 revisores
 while ($articulo = $result_articulos->fetch_assoc()) {
     $articulos_menos_revisores[] = $articulo;
 }
 
+// Consultar revisores y el número de artículos asignados a cada uno
 $query_revisores = "SELECT r.id, r.nombre, COUNT(asg.articulo_id) AS num_articulos
                     FROM revisores r
                     LEFT JOIN asignaciones asg ON r.id = asg.revisor_id
                     GROUP BY r.id";
 $result_revisores = $conn->query($query_revisores);
 
-$revisores_asignaciones = [];
+$revisores_asignaciones = []; // Lista de revisores y sus asignaciones
 while ($revisor = $result_revisores->fetch_assoc()) {
     $revisores_asignaciones[] = $revisor;
 }

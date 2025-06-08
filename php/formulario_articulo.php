@@ -1,24 +1,31 @@
 <?php
+// Inicia la sesión para manejar autenticación de usuarios
 session_start();
 
+// Verificar si el usuario está autenticado
 if (!isset($_SESSION['usuario'])) {
-    header("Location: login.php");
-    exit();
+    header("Location: login.php"); // Redirigir al login si no está autenticado
+    exit(); // Finalizar la ejecución del script
 }
 
+// Verificar si se proporcionó un ID de artículo en la URL
 if (!isset($_GET['id_articulo'])) {
-    echo "<p style='color: red;'>No se proporcionó un ID de artículo.</p>";
-    exit();
+    echo "<p style='color: red;'>No se proporcionó un ID de artículo.</p>"; // Mostrar mensaje de error
+    exit(); // Finalizar la ejecución del script
 }
 
-$id_articulo = $_GET['id_articulo'];
+$id_articulo = $_GET['id_articulo']; // Obtener el ID del artículo desde los parámetros GET
 
+// Incluir el archivo de conexión a la base de datos
 include('conexion.php');
+
+// Consulta para obtener los datos del artículo por su ID
 $sql_articulo = "SELECT titulo, resumen, contenido FROM Articulo WHERE id_articulo = ?";
 $stmt_articulo = $pdo->prepare($sql_articulo);
 $stmt_articulo->execute([$id_articulo]);
-$articulo = $stmt_articulo->fetch();
+$articulo = $stmt_articulo->fetch(); // Obtener los datos del artículo
 
+// Verificar si se encontraron datos del artículo
 if (!$articulo) {
     echo "<p style='color: red;'>Error: No se encontró el artículo con ID: $id_articulo.</p>";
     exit();
@@ -26,22 +33,28 @@ if (!$articulo) {
     echo "<p style='color: green;'>Datos del artículo recuperados correctamente.</p>";
 }
 
+// Escapar los datos del artículo para prevenir XSS
 $titulo = htmlspecialchars($articulo['titulo']);
 $resumen = htmlspecialchars($articulo['resumen']);
 $contenido = htmlspecialchars($articulo['contenido']);
 
+// Procesar el formulario cuando se envía
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Obtener los valores del formulario
     $titulo = $_POST['titulo'] ?? '';
     $resumen = $_POST['resumen'] ?? '';
     $contenido = $_POST['contenido'] ?? '';
 
+    // Validar que los campos obligatorios no estén vacíos
     if (empty($titulo) || empty($resumen)) {
         echo "<p style='color: red;'>Error: Todos los campos son obligatorios.</p>";
     } else {
+        // Actualizar los datos del artículo en la base de datos
         $sql_update = "UPDATE Articulo SET titulo = ?, resumen = ?, contenido = ? WHERE id_articulo = ?";
         $stmt_update = $pdo->prepare($sql_update);
         $stmt_update->execute([$titulo, $resumen, $contenido, $id_articulo]);
 
+        // Redirigir a la misma página para mostrar los datos actualizados
         header("Location: formulario_articulo.php?id_articulo=$id_articulo");
         exit();
     }

@@ -2,8 +2,12 @@ import faker
 import random
 from datetime import datetime, timedelta
 
-# Inicializar Faker
+# Inicializar Faker para generar datos ficticios
 fake = faker.Faker()
+
+# Generar usuarios ficticios
+# Cada usuario tiene un RUT único, nombre, email, usuario, contraseña y tipo (Autor, Revisor, Jefe de Comité)
+
 
 def generate_users():
     users = []
@@ -18,10 +22,14 @@ def generate_users():
         email = f"{nombre.split()[0].lower()}.{nombre.split()[1].lower()}@{fake.domain_name()}"
         usuario = f"{nombre.split()[0].lower()}{random.randint(10, 99)}"
         password = fake.password(
-            length=12, special_chars=True, digits=True, upper_case=True, lower_case=True)
+            length=12, special_chars=True, digits=True, upper_case=True, lower_case=True
+        )
         tipo = random.choice(['Autor', 'Revisor', 'Jefe Comite de Programa'])
         users.append((rut, nombre, email, usuario, password, tipo))
     return users
+
+# Generar una lista de tópicos ficticios relacionados con tecnología
+
 
 def generate_topics():
     topics = [
@@ -38,6 +46,9 @@ def generate_topics():
     ]
     return topics
 
+# Generar artículos ficticios con título, resumen, fecha de envío y estado
+
+
 def generate_articles(num_articles):
     articles = []
     for _ in range(num_articles):
@@ -48,12 +59,18 @@ def generate_articles(num_articles):
         articles.append((titulo, resumen, fecha_envio, estado))
     return articles
 
+# Asignar tópicos a los artículos de forma aleatoria
+
+
 def generate_article_topics(articles, topics):
     article_topics = []
     for i, _ in enumerate(articles, start=1):
         topic_id = random.randint(1, len(topics))
         article_topics.append((i, topic_id))
     return article_topics
+
+# Generar evaluaciones ficticias para los artículos
+
 
 def generate_article_reviews(articles, reviewers):
     reviews = []
@@ -63,6 +80,9 @@ def generate_article_reviews(articles, reviewers):
         calificacion = random.randint(1, 10)
         reviews.append((article_id, rut_revisor, resena, calificacion))
     return reviews
+
+# Asignar tópicos a los revisores de forma aleatoria
+
 
 def generate_reviewer_topics(reviewers, topics):
     reviewer_topics = []
@@ -74,6 +94,9 @@ def generate_reviewer_topics(reviewers, topics):
             reviewer_topics.append((reviewer[0], topic_id))
     return reviewer_topics
 
+# Asignar autores a los artículos de forma aleatoria
+
+
 def generate_author_articles(articles, authors):
     author_articles = []
     for article_id, _ in enumerate(articles, start=1):
@@ -83,6 +106,9 @@ def generate_author_articles(articles, authors):
             es_contacto = i == 0
             author_articles.append((article_id, author, int(es_contacto)))
     return author_articles
+
+# Asignar revisores a los artículos basándose en los tópicos asignados
+
 
 def generate_article_reviewers(articles, reviewers, article_topics, reviewer_topics):
     article_reviewers = []
@@ -105,8 +131,14 @@ def generate_article_reviewers(articles, reviewers, article_topics, reviewer_top
                 article_reviewers.append((article_id, rut))
     return article_reviewers
 
+# Escapar caracteres especiales en cadenas para SQL
+
+
 def escape_sql_string(s):
     return s.replace("'", "''")
+
+# Escribir los datos generados en un archivo SQL
+
 
 def write_to_sql(users, topics, articles, article_topics, reviews, reviewer_topics, author_articles, article_reviewers):
     with open("FAKER_INSERT.sql", "w", encoding="utf-8") as f:
@@ -124,16 +156,17 @@ def write_to_sql(users, topics, articles, article_topics, reviews, reviewer_topi
         f.write("ALTER TABLE Topico AUTO_INCREMENT = 1;\n")
         f.write("SET FOREIGN_KEY_CHECKS = 1;\n\n")
 
-        # Usuarios
+        # Insertar usuarios
         f.write("-- Inserts para la tabla Usuario\n")
-        f.write("INSERT INTO Usuario (rut, nombre, email, usuario, password, tipo) VALUES\n")
+        f.write(
+            "INSERT INTO Usuario (rut, nombre, email, usuario, password, tipo) VALUES\n")
         f.write(",\n".join([
             f"('{rut}', '{nombre}', '{email}', '{usuario}', '{password}', '{tipo}')"
             for rut, nombre, email, usuario, password, tipo in users
         ]))
         f.write(";\n\n")
 
-        # Autores
+        # Insertar autores
         f.write("-- Inserts para la tabla Autor\n")
         f.write("INSERT INTO Autor (rut) VALUES\n")
         f.write(",\n".join([
@@ -142,7 +175,7 @@ def write_to_sql(users, topics, articles, article_topics, reviews, reviewer_topi
         ]))
         f.write(";\n\n")
 
-        # Revisores
+        # Insertar revisores
         f.write("-- Inserts para la tabla Revisor\n")
         f.write("INSERT INTO Revisor (rut) VALUES\n")
         f.write(",\n".join([
@@ -151,54 +184,57 @@ def write_to_sql(users, topics, articles, article_topics, reviews, reviewer_topi
         ]))
         f.write(";\n\n")
 
-        # Tópicos
+        # Insertar tópicos
         f.write("-- Inserts para la tabla Topico\n")
         f.write("INSERT INTO Topico (nombre) VALUES\n")
         f.write(",\n".join([f"('{topic}')" for topic in topics]))
         f.write(";\n\n")
 
-        # Artículos (sin rut_autor)
+        # Insertar artículos
         f.write("-- Inserts para la tabla Articulo\n")
-        f.write("INSERT INTO Articulo (id_articulo, titulo, resumen, fecha_envio, estado) VALUES\n")
+        f.write(
+            "INSERT INTO Articulo (id_articulo, titulo, resumen, fecha_envio, estado) VALUES\n")
         f.write(",\n".join([
             f"({i+1}, '{escape_sql_string(titulo)}', '{escape_sql_string(resumen)}', '{fecha_envio}', '{estado}')"
             for i, (titulo, resumen, fecha_envio, estado) in enumerate(articles)
         ]))
         f.write(";\n\n")
 
-        # Artículo-Tópico
+        # Insertar relaciones artículo-tópico
         f.write("-- Inserts para la tabla Articulo_Topico\n")
         f.write("INSERT INTO Articulo_Topico (id_articulo, id_topico) VALUES\n")
         f.write(",\n".join(
             [f"({id_articulo}, {id_topico})" for id_articulo, id_topico in article_topics]))
         f.write(";\n\n")
 
-        # Evaluaciones de Artículos
+        # Insertar evaluaciones de artículos
         f.write("-- Inserts para la tabla Evaluacion_Articulo\n")
-        f.write("INSERT INTO Evaluacion_Articulo (id_articulo, rut_revisor, resena, calificacion) VALUES\n")
+        f.write(
+            "INSERT INTO Evaluacion_Articulo (id_articulo, rut_revisor, resena, calificacion) VALUES\n")
         f.write(",\n".join([
             f"({id_articulo}, '{rut_revisor}', '{resena}', {calificacion})"
             for id_articulo, rut_revisor, resena, calificacion in reviews
         ]))
         f.write(";\n\n")
 
-        # Revisor-Tópico
+        # Insertar relaciones revisor-tópico
         f.write("-- Inserts para la tabla Revisor_Topico\n")
         f.write("INSERT INTO Revisor_Topico (rut_revisor, id_topico) VALUES\n")
         f.write(",\n".join(
             [f"('{rut_revisor}', {id_topico})" for rut_revisor, id_topico in reviewer_topics]))
         f.write(";\n\n")
 
-        # Autor-Artículo
+        # Insertar relaciones autor-artículo
         f.write("-- Inserts para la tabla Autor_Articulo\n")
-        f.write("INSERT INTO Autor_Articulo (id_articulo, rut_autor, es_contacto) VALUES\n")
+        f.write(
+            "INSERT INTO Autor_Articulo (id_articulo, rut_autor, es_contacto) VALUES\n")
         f.write(",\n".join([
             f"({id_articulo}, '{rut_autor}', {es_contacto})"
             for id_articulo, rut_autor, es_contacto in author_articles
         ]))
         f.write(";\n\n")
 
-        # Artículo-Revisor
+        # Insertar relaciones artículo-revisor
         f.write("-- Inserts para la tabla Articulo_Revisor\n")
         f.write("INSERT INTO Articulo_Revisor (id_articulo, rut_revisor) VALUES\n")
         f.write(",\n".join([
@@ -207,6 +243,8 @@ def write_to_sql(users, topics, articles, article_topics, reviews, reviewer_topi
         ]))
         f.write(";\n\n")
 
+
+# Generar y guardar los datos ficticios
 if __name__ == "__main__":
     users = generate_users()
     topics = generate_topics()
@@ -217,6 +255,8 @@ if __name__ == "__main__":
     reviews = generate_article_reviews(articles, reviewers)
     reviewer_topics = generate_reviewer_topics(reviewers, topics)
     author_articles = generate_author_articles(articles, authors)
-    article_reviewers = generate_article_reviewers(articles, reviewers, article_topics, reviewer_topics)
-    write_to_sql(users, topics, articles, article_topics, reviews, reviewer_topics, author_articles, article_reviewers)
+    article_reviewers = generate_article_reviewers(
+        articles, reviewers, article_topics, reviewer_topics)
+    write_to_sql(users, topics, articles, article_topics, reviews,
+                 reviewer_topics, author_articles, article_reviewers)
     print("Datos generados y guardados en FAKER_INSERT.sql")

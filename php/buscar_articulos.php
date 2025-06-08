@@ -1,37 +1,45 @@
 <?php
+// Incluir el archivo de conexión a la base de datos
 include('../php/conexion.php');
 
-$query = $_GET['query'] ?? '';
-$autor = $_GET['autor'] ?? '';
-$fecha_envio = $_GET['fecha_envio'] ?? '';
-$topico = $_GET['topico'] ?? '';
-$revisor = $_GET['revisor'] ?? '';
+// Obtener los parámetros de búsqueda desde la URL o asignar valores predeterminados
+$query = $_GET['query'] ?? ''; // Título del artículo
+$autor = $_GET['autor'] ?? ''; // Autor del artículo
+$fecha_envio = $_GET['fecha_envio'] ?? ''; // Fecha de envío del artículo
+$topico = $_GET['topico'] ?? ''; // Tópico del artículo
+$revisor = $_GET['revisor'] ?? ''; // Revisor del artículo
 
+// Validar que la fecha de envío tenga el formato correcto
 if (!empty($fecha_envio) && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha_envio)) {
     echo "<p style='color: red;'>La fecha de envío debe tener el formato AAAA-MM-DD.</p>";
-    exit();
+    exit(); // Finalizar la ejecución del script
 }
 
+// Validar que el título no exceda los 255 caracteres
 if (!empty($query) && strlen($query) > 255) {
     echo "<p style='color: red;'>El título no puede exceder los 255 caracteres.</p>";
-    exit();
+    exit(); // Finalizar la ejecución del script
 }
 
+// Validar que el tópico no exceda los 255 caracteres
 if (!empty($topico) && strlen($topico) > 255) {
     echo "<p style='color: red;'>El tópico no puede exceder los 255 caracteres.</p>";
-    exit();
+    exit(); // Finalizar la ejecución del script
 }
 
+// Validar que el revisor no exceda los 255 caracteres
 if (!empty($revisor) && strlen($revisor) > 255) {
     echo "<p style='color: red;'>El nombre del revisor no puede exceder los 255 caracteres.</p>";
-    exit();
+    exit(); // Finalizar la ejecución del script
 }
 
+// Validar que ninguno de los campos de búsqueda exceda los 255 caracteres
 if (strlen($query) > 255 || strlen($autor) > 255 || strlen($topico) > 255 || strlen($revisor) > 255) {
     echo "<p style='color: red;'>Los campos de búsqueda no pueden exceder los 255 caracteres.</p>";
-    exit();
+    exit(); // Finalizar la ejecución del script
 }
 
+// Consulta SQL para buscar artículos según los parámetros proporcionados
 $sql = "SELECT a.titulo, a.resumen, GROUP_CONCAT(DISTINCT t.nombre) AS topicos
         FROM Articulo a
         LEFT JOIN Articulo_Topico at ON a.id_articulo = at.id_articulo
@@ -47,6 +55,7 @@ $sql = "SELECT a.titulo, a.resumen, GROUP_CONCAT(DISTINCT t.nombre) AS topicos
           AND (r.nombre LIKE ? OR ? = '')
         GROUP BY a.id_articulo";
 
+// Preparar y ejecutar la consulta SQL
 $stmt = $pdo->prepare($sql);
 $stmt->execute([
     "%$query%", $query,

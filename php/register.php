@@ -1,21 +1,25 @@
 <?php
+// Configurar la visualización de errores para depuración
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-include('../php/db_connection.php'); 
+// Incluir el archivo de conexión a la base de datos
+include('../php/db_connection.php');
 
-$message = ""; 
-$showLoginButton = false; 
+$message = ""; // Inicializar mensaje vacío para mostrar errores o confirmaciones
+$showLoginButton = false; // Variable para controlar la visualización del botón de login
 
+// Verificar si el formulario fue enviado mediante POST
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $rut = $_POST['rut'];
-    $nombre = $_POST['nombre'] ?? null;
-    $usuario = $_POST['usuario'] ?? null;
-    $email = $_POST['email'] ?? null;
-    $password = $_POST['password'];
-    $tipo = $_POST['rol'];
+    $rut = $_POST['rut']; // Obtener el RUT del formulario
+    $nombre = $_POST['nombre'] ?? null; // Obtener el nombre del formulario
+    $usuario = $_POST['usuario'] ?? null; // Obtener el nombre de usuario del formulario
+    $email = $_POST['email'] ?? null; // Obtener el email del formulario
+    $password = $_POST['password']; // Obtener la contraseña del formulario
+    $tipo = $_POST['rol']; // Obtener el rol del formulario
 
+    // Validar que el campo de nombre no esté vacío
     if (empty($nombre)) {
         $message = "El campo de nombre es obligatorio.";
     } elseif (empty($email)) {

@@ -1,25 +1,35 @@
 <?php
+// Inicia la sesión para manejar autenticación de usuarios
 session_start();
+
+// Incluir el archivo de conexión a la base de datos
 require_once 'conexion.php';
 
+// Obtener todos los tópicos disponibles desde la base de datos
 $topicos = $pdo->query("SELECT id_topico, nombre FROM Topico")->fetchAll();
 
+// Inicializar mensaje vacío para mostrar errores o confirmaciones
 $message = "";
 
+// Verificar si el formulario fue enviado mediante POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $titulo = trim($_POST['titulo'] ?? '');
-    $resumen = trim($_POST['resumen'] ?? '');
-    $ruts = $_POST['rut_autor'] ?? [];
-    $es_contacto = $_POST['es_contacto'] ?? [];
-    $topicos_seleccionados = $_POST['topicos'] ?? [];
+    $titulo = trim($_POST['titulo'] ?? ''); // Obtener y limpiar el título del artículo
+    $resumen = trim($_POST['resumen'] ?? ''); // Obtener y limpiar el resumen del artículo
+    $ruts = $_POST['rut_autor'] ?? []; // Obtener los RUTs de los autores
+    $es_contacto = $_POST['es_contacto'] ?? []; // Obtener los autores marcados como contacto
+    $topicos_seleccionados = $_POST['topicos'] ?? []; // Obtener los tópicos seleccionados
 
+    // Validar que el título no esté vacío
     if ($titulo === '') {
         $message = "El título es obligatorio.";
     } elseif (empty($ruts) || count(array_filter($ruts)) === 0) {
+        // Validar que al menos un autor haya sido ingresado
         $message = "Debe ingresar al menos un autor.";
     } elseif (empty($es_contacto) || count($es_contacto) === 0) {
+        // Validar que al menos un autor haya sido marcado como contacto
         $message = "Debe marcar al menos un autor como contacto.";
     } elseif (empty($topicos_seleccionados)) {
+        // Validar que al menos un tópico haya sido seleccionado
         $message = "Debe seleccionar al menos un tópico.";
     } else {
         try {
@@ -27,6 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $rut = trim($rut);
                 if ($rut === '') continue;
 
+                // Verificar si el RUT está registrado en la tabla Usuario
                 $stmt = $pdo->prepare("SELECT COUNT(*) FROM Usuario WHERE rut = ?");
                 $stmt->execute([$rut]);
                 if ($stmt->fetchColumn() == 0) {
@@ -34,13 +45,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     break;
                 }
 
+                // Verificar si el RUT está registrado en la tabla Autor
                 $stmt = $pdo->prepare("SELECT COUNT(*) FROM Autor WHERE rut = ?");
                 $stmt->execute([$rut]);
                 if ($stmt->fetchColumn() == 0) {
+                    // Si no está registrado, agregarlo a la tabla Autor
                     $pdo->prepare("INSERT INTO Autor (rut) VALUES (?)")->execute([$rut]);
                 }
             }
 
+            // Verificar si ya existe un artículo con el mismo título para los mismos autores
             $stmt = $pdo->prepare("SELECT COUNT(*) FROM Articulo a JOIN Autor_Articulo aa ON a.id_articulo = aa.id_articulo WHERE a.titulo = ? AND aa.rut_autor IN (" . implode(',', array_fill(0, count($ruts), '?')) . ")");
             $stmt->execute(array_merge([$titulo], $ruts));
             if ($stmt->fetchColumn() > 0) {
@@ -48,6 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new Exception($message);
             }
 
+            // Verificar si hay RUTs de autores duplicados
             if (count($ruts) !== count(array_unique($ruts))) {
                 $message = "No se pueden repetir nombres de autores.";
                 throw new Exception($message);
@@ -64,25 +79,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $rut = trim($rut);
                 if ($rut === '') continue;
                 $contacto = in_array($i, $es_contacto) ? 1 : 0;
+                // Asociar autores al artículo en la tabla Autor_Articulo
                 $pdo->prepare("INSERT INTO Autor_Articulo (id_articulo, rut_autor, es_contacto) VALUES (?, ?, ?)")
                     ->execute([$id_articulo, $rut, $contacto]);
             }
 
+            // Asociar tópicos al artículo en la tabla Articulo_Topico
             $stmt = $pdo->prepare("INSERT INTO Articulo_Topico (id_articulo, id_topico) VALUES (?, ?)");
             foreach ($topicos_seleccionados as $id_topico) {
                 $stmt->execute([$id_articulo, $id_topico]);
             }
 
+            // Redirigir a la página del dashboard con un mensaje de éxito
             $_SESSION['message'] = "Artículo enviado exitosamente.";
             header("Location: dashboard.php");
             exit();
         } catch (PDOException $e) {
+            // Manejo de errores de base de datos
             if ($e->getCode() === '23000' && strpos($e->getMessage(), 'titulo') !== false) {
                 $message = "Ya existe un artículo con ese título. Por favor, elige otro.";
             } else {
                 $message = "Error al enviar el artículo: " . $e->getMessage();
             }
         } catch (Exception $e) {
+            // Manejo de excepciones generales
             $message = $e->getMessage(); 
         }
     }

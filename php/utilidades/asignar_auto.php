@@ -1,7 +1,9 @@
 <?php
+// Función para asignar revisores automáticamente a los artículos
 function asignar_revisores_automaticamente($pdo) {
-    $asignados = 0;
+    $asignados = 0; // Contador de revisores asignados
 
+    // Consultar los artículos con menos de 2 revisores asignados
     $sql_articulos = "
         SELECT a.id_articulo, GROUP_CONCAT(DISTINCT at.id_topico) AS topicos
         FROM Articulo a
@@ -11,17 +13,19 @@ function asignar_revisores_automaticamente($pdo) {
         HAVING COUNT(DISTINCT ar.rut_revisor) < 2
     ";
     $stmt = $pdo->query($sql_articulos);
-    $articulos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $articulos = $stmt->fetchAll(PDO::FETCH_ASSOC); // Obtener los artículos
 
     foreach ($articulos as $articulo) {
-        $id_articulo = $articulo['id_articulo'];
-        $topicos_articulo = array_filter(array_map('intval', explode(',', $articulo['topicos'])));
+        $id_articulo = $articulo['id_articulo']; // ID del artículo
+        $topicos_articulo = array_filter(array_map('intval', explode(',', $articulo['topicos']))); // Tópicos del artículo
 
+        // Consultar los revisores ya asignados al artículo
         $stmt = $pdo->prepare("SELECT rut_revisor FROM Articulo_Revisor WHERE id_articulo = ?");
         $stmt->execute([$id_articulo]);
         $revisores_asignados = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
         if ($topicos_articulo) {
+            // Consultar revisores con coincidencia de tópicos
             $in = implode(',', array_fill(0, count($topicos_articulo), '?'));
             $sql_revisores = "
                 SELECT DISTINCT r.rut
@@ -36,9 +40,10 @@ function asignar_revisores_automaticamente($pdo) {
             $stmt->execute($params);
             $revisores = $stmt->fetchAll(PDO::FETCH_COLUMN);
         } else {
-            $revisores = [];
+            $revisores = []; // Si no hay tópicos, no hay coincidencias
         }
 
+        // Consultar revisores adicionales si faltan para completar 2
         if (count($revisores_asignados) + count($revisores) < 2) {
             $faltan = 2 - (count($revisores_asignados) + count($revisores));
             $sql_revisores_extra = "
@@ -54,13 +59,14 @@ function asignar_revisores_automaticamente($pdo) {
             $revisores = array_merge($revisores, $revisores_extra);
         }
 
+        // Asignar revisores al artículo
         foreach ($revisores as $rut_revisor) {
             $stmt = $pdo->prepare("INSERT IGNORE INTO Articulo_Revisor (id_articulo, rut_revisor) VALUES (?, ?)");
             $stmt->execute([$id_articulo, $rut_revisor]);
-            $asignados++;
+            $asignados++; // Incrementar el contador de asignaciones
         }
     }
 
-    return $asignados;
+    return $asignados; // Retornar el número total de asignaciones realizadas
 }
 ?>

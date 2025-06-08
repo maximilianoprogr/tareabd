@@ -1,22 +1,30 @@
 <?php
+// Inicia la sesión para verificar si el usuario está autenticado.
 session_start();
 
+// Redirige al usuario al login si no está autenticado.
 if (!isset($_SESSION['usuario'])) {
     header("Location: login.php");
     exit();
 }
 
+// Incluye la conexión a la base de datos.
 include('conexion.php');
+
+// Obtiene el rol del usuario autenticado desde la base de datos.
 $stmt_rol = $pdo->prepare("SELECT tipo FROM Usuario WHERE rut = ?");
 $stmt_rol->execute([$_SESSION['usuario']]);
 $rol = $stmt_rol->fetchColumn();
 
+// Almacena el rol en la sesión para su uso posterior.
 $_SESSION['rol'] = $rol;
 
+// Determina el rol del usuario.
 $es_revisor = strcasecmp($rol, 'revisor') === 0;
 $es_jefe_comite = strcasecmp($rol, 'Jefe Comite de Programa') === 0;
 $es_autor = strcasecmp($rol, 'autor') === 0;
 
+// Muestra mensajes según el rol del usuario.
 if ($es_autor) {
     echo '<p style="font-family: Arial, sans-serif; color: red;">No puedes opinar sobre este artículo porque no eres el revisor asignado.</p>';
 } elseif ($es_jefe_comite) {
@@ -27,37 +35,43 @@ if ($es_autor) {
     echo '<p style="font-family: Arial, sans-serif; color: orange;">Rol no reconocido.</p>';
 }
 
-include('conexion.php');
+// Obtiene la lista de artículos disponibles.
 $sql_articulos = "SELECT id_articulo, titulo FROM Articulo";
 $stmt_articulos = $pdo->query($sql_articulos);
 $articulos = $stmt_articulos->fetchAll();
 
+// Verifica si se seleccionó un artículo y obtiene sus detalles.
 $articulo_seleccionado = isset($_GET['id_articulo']) ? $_GET['id_articulo'] : null;
 $detalles_articulo = null;
 $revisores = [];
 
 if ($articulo_seleccionado) {
+    // Obtiene los detalles del artículo seleccionado.
     $sql_detalles = "SELECT titulo, resumen FROM Articulo WHERE id_articulo = ?";
     $stmt_detalles = $pdo->prepare($sql_detalles);
     $stmt_detalles->execute([$articulo_seleccionado]);
     $detalles_articulo = $stmt_detalles->fetch();
 
+    // Obtiene los revisores asignados al artículo.
     $sql_revisores = "SELECT ar.rut_revisor FROM Articulo_Revisor ar WHERE ar.id_articulo = ?";
     $stmt_revisores = $pdo->prepare($sql_revisores);
     $stmt_revisores->execute([$articulo_seleccionado]);
     $revisores = $stmt_revisores->fetchAll(PDO::FETCH_COLUMN);
 }
 
+// Redirige al usuario si no se seleccionó un artículo.
 if (!$articulo_seleccionado) {
     header("Location: dashboard.php?error=seleccione_articulo");
     exit();
 }
 
+// Muestra un mensaje si no hay revisores asignados al artículo.
 if (empty($revisores)) {
     echo '<p style="font-family: Arial, sans-serif; color: red;">No hay revisores asignados a este artículo.</p>';
     echo '<a href="dashboard.php" style="font-family: Arial, sans-serif; font-size: 14px; color: #007BFF; text-decoration: none;">Volver al inicio</a>';
 }
 
+// Verifica si los resultados del artículo han sido publicados.
 $resultados_publicados = false;
 if ($articulo_seleccionado) {
     $sql_resultados = "SELECT COUNT(*) FROM Evaluacion_Articulo WHERE id_articulo = ?";
@@ -66,6 +80,7 @@ if ($articulo_seleccionado) {
     $resultados_publicados = $stmt_resultados->fetchColumn() > 0;
 }
 
+// Muestra información de depuración sobre el usuario y su rol.
 echo "<p style='color: blue;'>Rol en la sesión: " . htmlspecialchars($_SESSION['rol']) . "</p>";
 echo "<p style='color: green;'>Valor de es_autor: " . (isset($es_autor) && $es_autor ? 'true' : 'false') . "</p>";
 echo "<p style='color: green;'>Depuración: Rol en la sesión: " . htmlspecialchars($_SESSION['rol']) . "</p>";
@@ -79,19 +94,23 @@ echo "<p style='color: orange;'>Es autor: " . ($es_autor ? 'true' : 'false') . "
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <!-- Configuración básica del documento HTML -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Acceso al Artículo</title>
+    <!-- Enlaces a hojas de estilo -->
     <link rel="stylesheet" href="css/estilos.css">
     <link rel="stylesheet" href="../css/dashboard.css">
 </head>
 <body style="font-family: Arial, sans-serif; margin: 20px;">
     <div class="container">
+        <!-- Mensaje si no hay revisores asignados -->
         <?php if (empty($revisores)) { ?>
             <p class="message">No hay revisores asignados a este artículo.</p>
             <a href="dashboard.php" class="button">Volver al inicio</a>
         <?php } ?>
 
+        <!-- Lista de artículos enviados -->
         <h1>Artículos Enviados</h1>
         <ul>
             <?php foreach ($articulos as $articulo): ?>

@@ -1,18 +1,27 @@
 <?php
+// Este archivo permite registrar un nuevo revisor en el sistema.
+// Incluye validaciones para asegurar que el usuario tenga los permisos adecuados.
+// Muestra un formulario para ingresar los datos del nuevo revisor.
+// Al enviar el formulario, los datos se procesan en gestionar_revisores.php para su almacenamiento.
+
+// Inicia la sesión y configura la visualización de errores
+session_start();
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-session_start();
-include('../php/conexion.php'); 
+// Incluye el archivo de conexión a la base de datos
+include('../php/conexion.php');
 
-echo "<p style='color: green;'>El archivo alta_revisor.php se ha cargado correctamente.</p>";
-
+// Verifica si el usuario tiene permisos para acceder a esta página
 if (!isset($_SESSION['rol']) || ($_SESSION['rol'] !== 'admin' && $_SESSION['rol'] !== 'Jefe Comite de Programa')) {
     echo "<p style='color: red;'>Acceso denegado: Usuario no autorizado.</p>";
     header("Location: ../php/dashboard.php");
     exit();
 }
+
+// Muestra un mensaje de carga exitosa
+echo "<p style='color: green;'>El archivo alta_revisor.php se ha cargado correctamente.</p>";
 ?>
 
 <!DOCTYPE html>
@@ -26,6 +35,7 @@ if (!isset($_SESSION['rol']) || ($_SESSION['rol'] !== 'admin' && $_SESSION['rol'
 <body style="font-family: Arial, sans-serif; margin: 20px;">
     <h1 style="font-size: 18px; color: #333;">Alta de Revisor</h1>
 
+    <!-- Formulario para registrar un nuevo revisor -->
     <form method="POST" action="gestionar_revisores.php" style="margin-top: 20px; border: 1px solid #ccc; padding: 15px;">
         <input type="hidden" name="action" value="create">
         <label for="nombre" style="font-size: 14px; display: block; margin-bottom: 5px;">Nombre:</label>

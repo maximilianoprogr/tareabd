@@ -1,6 +1,8 @@
 <?php
+// Incluye la conexión a la base de datos.
 include('../php/conexion.php');
 
+// Consulta para obtener todos los artículos evaluados.
 $sql = "SELECT * FROM ArticulosEvaluados";
 $stmt = $pdo->prepare($sql);
 $stmt->execute();
@@ -15,6 +17,7 @@ $articulos = $stmt->fetchAll();
 </head>
 <body>
     <h1>Artículos Evaluados</h1>
+    <!-- Tabla para mostrar los artículos evaluados -->
     <table border="1">
         <tr>
             <th>Título</th>
@@ -22,6 +25,7 @@ $articulos = $stmt->fetchAll();
             <th>Tópicos</th>
             <th>Autores</th>
         </tr>
+        <!-- Itera sobre los artículos y los muestra en la tabla -->
         <?php foreach ($articulos as $articulo): ?>
         <tr>
             <td><?php echo htmlspecialchars($articulo['titulo']); ?></td>
@@ -31,6 +35,7 @@ $articulos = $stmt->fetchAll();
         </tr>
         <?php endforeach; ?>
     </table>
+    <!-- Enlace para volver al inicio -->
     <a href="dashboard.php" style="font-family: Arial, sans-serif; font-size: 14px; color: #007BFF; text-decoration: none;">Volver al inicio</a>
 </body>
 </html>
